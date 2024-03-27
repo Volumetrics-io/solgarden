@@ -8,7 +8,7 @@ class MRTile extends MREntity {
         let model = document.createElement("mr-model");
         model.setAttribute("src", this.dataset.model);
         Object.assign(model.style, {
-            scale: 0.1
+            scale: this.dataset.scale
         })
         model.dataset.rotation = this.dataset.rotation;
         model.dataset.position = this.dataset.position;

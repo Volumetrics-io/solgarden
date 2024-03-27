@@ -26,13 +26,18 @@ class MRBoard extends MREntity {
     generateGridElements(n, m) {
         const models = ["/tiles/0.glb", "/tiles/1.glb", "/tiles/2.glb"];
         const rotations = [0, 90, 180, 270];
+        const scale = 0.1;
 
         for (let x = 0; x < n; x++) {
             for (let y = 0; y < m; y++) {
+                const offsetX = x * scale;
+                const offsetY = y * scale;
+
                 let tile = document.createElement("mr-tile");
                 tile.dataset.model = models[Math.floor(Math.random() * models.length)];
+                tile.dataset.scale = scale;
                 tile.dataset.rotation = "0 0 " + rotations[Math.floor(Math.random() * rotations.length)];
-                tile.dataset.position = "0 " + x * 0.1 + " " + y * 0.1 + " 0";
+                tile.dataset.position = `${offsetX} 0 ${offsetY}`;
                 this.append(tile);
             }
         }
