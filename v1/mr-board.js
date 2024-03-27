@@ -4,7 +4,7 @@ class MRBoard extends MREntity {
         super()
     }
 
-    connectedCallback() {
+    connected() {
         const models = ["tiles/0.glb", "tiles/1.glb", "tiles/2.glb"];
         const rotations = [0, 90, 180, 270];
         const scale = 0.1;
@@ -18,10 +18,10 @@ class MRBoard extends MREntity {
                 let randomModel = models[Math.floor(Math.random() * models.length)];
                 let randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
 
-                let tile = document.createElement("mr-model");
+                let tile = document.createElement("mr-tile");
                 tile.dataset.rotation = `0 ${randomRotation} 0`;
                 tile.dataset.position = `${offsetRow} 0 ${offsetCol}`;
-                tile.src = randomModel;
+                tile.dataset.model = randomModel;
                 this.parentElement.appendChild(tile);
 
                 Object.assign(tile.style, {

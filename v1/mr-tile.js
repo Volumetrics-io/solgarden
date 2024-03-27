@@ -5,7 +5,7 @@ class MRTile extends MREntity {
         this.model = document.createElement("mr-model");
     }
 
-    connectedCallback() {
+    connected() {
         this.model.src = this.dataset.model;
         this.appendChild(this.model);
     }

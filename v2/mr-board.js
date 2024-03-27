@@ -1,17 +1,36 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
+
+        this.grid = [];
+        this.timer = 0;
     }
 
     update(deltaTime, frame) {
+        
+        this.timer += deltaTime;
+        
         for (const entity of this.registry) {
             entity.childNodes.forEach(child => {
                 // console.log(deltaTime, child);
             });
         }
+
+        for (let i = 0; i < this.grid.length; i++) {
+            for (let j = 0; j < this.grid[i].length; j++) {
+                const tile = this.grid[i][j];
+
+                // Should improve this in MRjs
+                const tempPosition = tile.dataset.position.split(" ");
+                const positionY = Math.sin(this.timer + i / 5 + j / 5) / 20;
+
+                // console.log(positionY)
+
+                tile.dataset.position = `${tempPosition[0]} ${positionY} ${tempPosition[2]}`;
+            }
+        }
     }
 
-    // Called when an orbit component is attached
     attachedComponent(entity) {
         let comp = entity.components.get('board') // entity.dataset.compBoard == ""
         const models = ["tiles/0.glb", "tiles/1.glb", "tiles/2.glb"];
@@ -19,6 +38,8 @@ class BoardSystem extends MRSystem {
         const scale = 0.1;
 
         for (let r = 0; r < comp.rows; r++) {
+            const row = [];
+
             for (let c = 0; c < comp.cols; c++) {
                 let offsetRow = r * scale;
                 let offsetCol = c * scale;
@@ -36,8 +57,13 @@ class BoardSystem extends MRSystem {
                     opacity: 1
                 })
 
+                row.push(tile);
             }
+
+            this.grid.push(row);
         }
+
+        console.log(this.grid);
     }
 
 
