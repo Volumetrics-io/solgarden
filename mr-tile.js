@@ -2,17 +2,16 @@ class MRTile extends MREntity {
 
     constructor() {
         super()
+        this.model = document.createElement("mr-model");
+
     }
 
     connectedCallback() {
-        let model = document.createElement("mr-model");
-        model.setAttribute("src", this.dataset.model);
-        Object.assign(model.style, {
-            scale: this.dataset.scale
-        })
-        model.dataset.rotation = this.dataset.rotation;
-        model.dataset.position = this.dataset.position;
-        this.append(model);
+        this.model.src = this.dataset.model;
+        this.appendChild(this.model);
+
+
+
     }
 
 }
