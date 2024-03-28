@@ -6,14 +6,14 @@ class MRTile extends MREntity {
 
         this.prop = document.createElement("mr-model");
 
-        // this.model.onLoad = () => {
-        //     this.model.object3D.traverse(child => {
-        //         if (child.isMesh) {
-        //             child.material.transparent = true;
-        //             child.material.depthWrite = false;
-        //         }
-        //     })
-        // }
+        this.model.onLoad = () => {
+            this.model.object3D.traverse(child => {
+                if (child.isMesh) {
+                    child.material.transparent = true;
+                    child.material.depthWrite = false;
+                }
+            })
+        }
     }
 
     connected() {

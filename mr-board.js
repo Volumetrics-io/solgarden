@@ -36,7 +36,7 @@ class BoardSystem extends MRSystem {
             for (let c = 0; c < comp.cols; c++) {
 
                 // fix a bug that scale in headset is twice the scale in 2d
-                let ratio = (true) ? 2 : 1;
+                let ratio = (false) ? 2 : 1;
                 let offsetRow = r * scale / ratio - comp.rows * scale / (ratio * 2);
                 let offsetCol = c * scale / ratio - comp.cols * scale / (ratio * 2);
 
