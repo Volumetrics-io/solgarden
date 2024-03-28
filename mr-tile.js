@@ -3,14 +3,12 @@ class MRTile extends MREntity {
     constructor() {
         super()
         this.model = document.createElement("mr-model");
-
         this.prop = document.createElement("mr-model");
 
         this.model.onLoad = () => {
-            this.model.object3D.traverse(child => {
-                if (child.isMesh) {
-                    child.material.transparent = true;
-                    // child.material.depthWrite = false;
+            this.model.object3D.traverse(object => {
+                if (object.isMesh) {
+                    object.material.alphaTest = 0.5;
                 }
             })
         }
