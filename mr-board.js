@@ -7,13 +7,13 @@ class BoardSystem extends MRSystem {
     }
 
     update(deltaTime, frame) {
-        this.timer += deltaTime;
+        this.timer += deltaTime / 3;
 
         for (let i = 0; i < this.grid.length; i++) {
             for (let j = 0; j < this.grid[i].length; j++) {
                 const tile = this.grid[i][j];
                 const tempPosition = tile.dataset.position.split(" ");
-                const positionY = Math.sin(this.timer + i / 5 + j / 5) / 40;
+                const positionY = Math.sin(this.timer + i / 1.5 + j / 1.5) / 20;
                 tile.dataset.position = `${tempPosition[0]} ${positionY} ${tempPosition[2]}`;
             }
         }
@@ -35,8 +35,11 @@ class BoardSystem extends MRSystem {
 
             for (let c = 0; c < comp.cols; c++) {
 
+
+                const desktopFix = true;
+
                 // fix a bug that scale in headset is twice the scale in 2d
-                let ratio = (false) ? 2 : 1;
+                let ratio = (desktopFix) ? 2 : 1;
                 let offsetRow = r * scale / ratio - comp.rows * scale / (ratio * 2);
                 let offsetCol = c * scale / ratio - comp.cols * scale / (ratio * 2);
 

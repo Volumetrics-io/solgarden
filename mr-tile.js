@@ -18,11 +18,21 @@ class MRTile extends MREntity {
         this.model.src = this.dataset.model;
         this.appendChild(this.model);
 
-        const props = ["tiles/plant_01.glb", "tiles/plant_02.glb"];
-        if(Math.random() > 0.95) {
+
+        // There is a prop above the tile
+        if (Math.random() > 0.75) {
+            const props = ["tiles/plant_01.glb", "tiles/plant_02.glb"];
+            const randomRotation = Math.random() * 360;
+            const randomScale = Math.random() * 0.3 + 0.5;
+            const randomYOffset =  Math.random() * 0.2;
+            const randomXJitter = Math.random() * 0.2 - 0.1;
+            const randomZJitter = Math.random() * 0.2 - 0.1;
+
             this.prop.src = props[Math.floor(Math.random() * props.length)];
+            this.prop.dataset.rotation = `0 ${randomRotation} 0`;
+            this.prop.dataset.position = `${randomXJitter} -${randomYOffset} ${randomZJitter}`;
             Object.assign(this.prop.style, {
-                scale: 0.85,
+                scale: randomScale,
             })
             this.appendChild(this.prop);
         }
