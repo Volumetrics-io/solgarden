@@ -10,7 +10,7 @@ class MRTile extends MREntity {
             this.model.object3D.traverse(child => {
                 if (child.isMesh) {
                     child.material.transparent = true;
-                    child.material.depthWrite = false;
+                    // child.material.depthWrite = false;
                 }
             })
         }
@@ -20,14 +20,14 @@ class MRTile extends MREntity {
         this.model.src = this.dataset.model;
         this.appendChild(this.model);
 
-        // const props = ["tiles/plant_01.glb", "tiles/plant_02.glb"];
-        // if(Math.random() > 0.95) {
-        //     this.prop.src = props[Math.floor(Math.random() * props.length)];
-        //     Object.assign(this.prop.style, {
-        //         scale: 0.2,
-        //     })
-        //     this.appendChild(this.prop);
-        // }
+        const props = ["tiles/plant_01.glb", "tiles/plant_02.glb"];
+        if(Math.random() > 0.95) {
+            this.prop.src = props[Math.floor(Math.random() * props.length)];
+            Object.assign(this.prop.style, {
+                scale: 0.85,
+            })
+            this.appendChild(this.prop);
+        }
 
     }
 
