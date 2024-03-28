@@ -23,7 +23,6 @@ class BoardSystem extends MRSystem {
         let comp = entity.components.get('board')
         const models = ["tiles/tile_grass_01.glb", "tiles/tile_grass_02.glb", "tiles/tile_grass_03.glb"];
         // const models = ["tiles/0.glb", "tiles/1.glb", "tiles/2.glb"];
-        const props = ["tiles/plant_01.glb", "tiles/plant_02.glb"];
         const rotations = [0, 90, 180, 270];
         const scale = 0.1;
 
@@ -37,7 +36,7 @@ class BoardSystem extends MRSystem {
             for (let c = 0; c < comp.cols; c++) {
 
                 // fix a bug that scale in headset is twice the scale in 2d
-                let ratio = (false) ? 2 : 1;
+                let ratio = (true) ? 2 : 1;
                 let offsetRow = r * scale / ratio - comp.rows * scale / (ratio * 2);
                 let offsetCol = c * scale / ratio - comp.cols * scale / (ratio * 2);
 
