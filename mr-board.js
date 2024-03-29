@@ -48,7 +48,7 @@ class BoardSystem extends MRSystem {
                     let ratio = (desktopFix) ? 2 : 1;
                     let offsetRow = r * scale / ratio - comp.rows * scale / (ratio * 2);
                     let offsetCol = c * scale / ratio - comp.cols * scale / (ratio * 2);
-                    let offsetFloor = f * scale / ratio / 2;
+                    let offsetFloor = f * scale / ratio / 1.35;
 
                     let randomModel = models[Math.floor(Math.random() * models.length)];
                     let randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
@@ -56,6 +56,8 @@ class BoardSystem extends MRSystem {
                     if(f <= heightMap[r][c]) {
                     // if (f <= perlin.get(r, c)) {
                         let tile = document.createElement("mr-tile");
+                        // Is the tile at the top of the column?
+                        // We only want to add plant at the top
                         tile.dataset.isTop = (f == heightMap[r][c]) ? true : false;
                         tile.dataset.rotation = `0 ${randomRotation} 0`;
                         tile.dataset.position = `${offsetRow} ${offsetFloor} ${offsetCol}`;

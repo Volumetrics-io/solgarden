@@ -12,6 +12,8 @@ class MRTile extends MREntity {
             this.model.object3D.traverse(object => {
                 if (object.isMesh) {
                     object.material.alphaTest = 0.5;
+                    object.receiveShadow = true;
+                    object.castShadow = true;
                 }
             })
         }
@@ -21,8 +23,8 @@ class MRTile extends MREntity {
         this.model.src = this.dataset.model;
         this.appendChild(this.model);
 
-        console.log(this.dataset.isTop)
-        
+        // console.log(this.dataset.isTop)
+
         if (Math.random() > 0.7 && this.dataset.isTop) {
             // There is a plant above the tile
 
@@ -41,6 +43,10 @@ class MRTile extends MREntity {
             })
             this.appendChild(this.prop);
         }
+
+        this.addEventListener('hoverstart', (event) => {
+            console.log(event);
+        })
     }
 }
 
