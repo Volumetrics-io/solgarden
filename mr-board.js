@@ -25,18 +25,14 @@ class BoardSystem extends MRSystem {
         const rotations = [0, 90, 180, 270];
         const scale = 0.1;
 
-        entity.addEventListener("anchored", () => {
-            console.log(entity.plane)
-        })
+        // entity.addEventListener("anchored", () => {
+        //     console.log(entity.plane)
+        // })
 
         // Generate the height map using smoothNoise
         let heightMap = Array.from({ length: comp.rows }, (_, x) =>
             Array.from({ length: comp.cols }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * comp.floors))
         );
-
-        // console.log(heightMap);
-        // add perlin heigh map here
-
 
         for (let f = 0; f < comp.floors; f++) {
             const floor = [];
@@ -46,33 +42,35 @@ class BoardSystem extends MRSystem {
 
                 for (let c = 0; c < comp.cols; c++) {
 
-                    const desktopFix = false;
+                    const desktopFix = true;
 
                     // fix a bug that scale in headset is twice the scale in 2d
                     let ratio = (desktopFix) ? 2 : 1;
                     let offsetRow = r * scale / ratio - comp.rows * scale / (ratio * 2);
                     let offsetCol = c * scale / ratio - comp.cols * scale / (ratio * 2);
-                    let offsetFloor = f * scale / ratio;
+                    let offsetFloor = f * scale / ratio / 2;
 
                     let randomModel = models[Math.floor(Math.random() * models.length)];
                     let randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
 
                     if(f <= heightMap[r][c]) {
+                    // if (f <= perlin.get(r, c)) {
                         let tile = document.createElement("mr-tile");
+                        tile.dataset.isTop = (f == heightMap[r][c]) ? true : false;
                         tile.dataset.rotation = `0 ${randomRotation} 0`;
                         tile.dataset.position = `${offsetRow} ${offsetFloor} ${offsetCol}`;
                         tile.dataset.scale = scale;
                         tile.dataset.model = randomModel;
                         entity.appendChild(tile);
-    
+
                         Object.assign(tile.style, {
                             scale: scale,
                             opacity: 1
                         })
-    
+
                         row.push(tile);
                     }
-                    
+
                 }
 
                 floor.push(row);

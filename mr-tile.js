@@ -21,14 +21,15 @@ class MRTile extends MREntity {
         this.model.src = this.dataset.model;
         this.appendChild(this.model);
 
+        console.log(this.dataset.isTop)
         
-        if (Math.random() > 0.7) {
+        if (Math.random() > 0.7 && this.dataset.isTop) {
             // There is a plant above the tile
 
             const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
             const randomRotation = Math.random() * 360;
-            const randomScale = Math.random() * 0.3 + 0.6;
-            const YOffset = Math.random() * 0.4;
+            const randomScale = Math.random() * 0.3 + 0.7;
+            const YOffset = Math.random() * 0.1;
             const XJitter = Math.random() * 0.2 - 0.1;
             const ZJitter = Math.random() * 0.2 - 0.1;
 
