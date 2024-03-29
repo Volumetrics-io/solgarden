@@ -8,7 +8,7 @@ class MRTile extends MREntity {
         // This is necessary for the
         // single-faced grass texture
         // to appear correctly
-        this.model.onLoad = () => {
+        this.model.onLoad = this.prop.onLoad = () => {
             this.model.object3D.traverse(object => {
                 if (object.isMesh) {
                     object.material.alphaTest = 0.5;
