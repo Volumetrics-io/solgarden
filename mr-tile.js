@@ -5,6 +5,19 @@ class MRTile extends MREntity {
         this.model = document.createElement("mr-model");
         this.prop = document.createElement("mr-model");
 
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshPhongMaterial({
+            color: 'white',
+            side: 2,
+            transparent: true,
+            opacity: 0.2,
+            specular: '#7989c4',
+            clipping: true
+        })
+
+        this.mesh = new THREE.Mesh(geometry, material)
+        this.object3D.add(this.mesh)
+
         // This is necessary for the
         // single-faced grass texture
         // to appear correctly
@@ -12,8 +25,8 @@ class MRTile extends MREntity {
             this.model.object3D.traverse(object => {
                 if (object.isMesh) {
                     object.material.alphaTest = 0.5;
-                    object.receiveShadow = true;
-                    object.castShadow = true;
+                    // object.receiveShadow = true;
+                    // object.castShadow = true;
                 }
             })
         }
@@ -44,9 +57,14 @@ class MRTile extends MREntity {
             this.appendChild(this.prop);
         }
 
-        this.addEventListener('hoverstart', (event) => {
+        this.addEventListener('click', event => {
             console.log(event);
         })
+
+        this.addEventListener('hoverstart', event => {
+            console.log(event);
+        })
+
     }
 }
 
