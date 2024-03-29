@@ -21,7 +21,9 @@ class BoardSystem extends MRSystem {
 
     attachedComponent(entity) {
         let comp = entity.components.get('board')
-        const models = ["tiles/tile_grass_01.glb", "tiles/tile_grass_02.glb", "tiles/tile_grass_03.glb"];
+        // const models = ["tiles/tile_grass_01.glb", "tiles/tile_grass_02.glb", "tiles/tile_grass_03.glb"];
+        const models = ["tiles/tile_grass_01.glb"];
+        // const models = ["tiles/0.glb", "tiles/1.glb", "tiles/2.glb"];
         const rotations = [0, 90, 180, 270];
         const scale = 0.1;
 
@@ -30,9 +32,15 @@ class BoardSystem extends MRSystem {
         // })
 
         // Generate the height map using smoothNoise
-        let heightMap = Array.from({ length: comp.rows }, (_, x) =>
-            Array.from({ length: comp.cols }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * comp.floors))
-        );
+        // let heightMap = Array.from({ length: comp.rows }, (_, x) =>
+        //     Array.from({ length: comp.cols }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * comp.floors))
+        // );
+
+        const heightMap = [
+            [1, 1, 0, 0],
+            [2, 1, 0, 1],
+            [2, 1, 0, 0],
+            [1, 1, 0, 0]];
 
         for (let f = 0; f < comp.floors; f++) {
             const floor = [];
@@ -42,19 +50,19 @@ class BoardSystem extends MRSystem {
 
                 for (let c = 0; c < comp.cols; c++) {
 
-                    const desktopFix = true;
+                    const desktopFix = false;
 
                     // fix a bug that scale in headset is twice the scale in 2d
                     let ratio = (desktopFix) ? 2 : 1;
                     let offsetRow = r * scale / ratio - comp.rows * scale / (ratio * 2);
                     let offsetCol = c * scale / ratio - comp.cols * scale / (ratio * 2);
-                    let offsetFloor = f * scale / ratio / 1.35;
+                    let offsetFloor = f * scale / ratio;
 
                     let randomModel = models[Math.floor(Math.random() * models.length)];
                     let randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
 
-                    if(f <= heightMap[r][c]) {
-                    // if (f <= perlin.get(r, c)) {
+                    if (f <= heightMap[r][c]) {
+                        // if (f <= perlin.get(r, c)) {
                         let tile = document.createElement("mr-tile");
                         // Is the tile at the top of the column?
                         // We only want to add plant at the top

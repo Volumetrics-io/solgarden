@@ -11,8 +11,7 @@ class MRTile extends MREntity {
             side: 2,
             transparent: true,
             opacity: 0.2,
-            specular: '#7989c4',
-            clipping: true
+            specular: '#7989c4'
         })
 
         this.mesh = new THREE.Mesh(geometry, material)
@@ -25,8 +24,8 @@ class MRTile extends MREntity {
             this.model.object3D.traverse(object => {
                 if (object.isMesh) {
                     object.material.alphaTest = 0.5;
-                    // object.receiveShadow = true;
-                    // object.castShadow = true;
+                    object.receiveShadow = true;
+                    object.castShadow = true;
                 }
             })
         }
@@ -36,12 +35,11 @@ class MRTile extends MREntity {
         this.model.src = this.dataset.model;
         this.appendChild(this.model);
 
-        // console.log(this.dataset.isTop)
-
         if (Math.random() > 0.7 && this.dataset.isTop) {
             // There is a plant above the tile
 
-            const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
+            // const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
+            const props = ["tiles/plant_01.glb"];
             const randomRotation = Math.random() * 360;
             const randomScale = Math.random() * 0.3 + 0.7;
             const YOffset = Math.random() * 0.1;
@@ -57,14 +55,23 @@ class MRTile extends MREntity {
             this.appendChild(this.prop);
         }
 
-        this.addEventListener('click', event => {
-            console.log(event);
+        this.move = () => {
+
+        }
+
+        this.model.addEventListener('mouseover', event => {
+            // this.model.position.y = 0.4;
+            this.model.traverseObjects(object => {
+                if (object.isMesh) {
+                    console.log("here")
+                    object.material.opacity = 0.3;
+                }
+            });
         })
 
-        this.addEventListener('hoverstart', event => {
-            console.log(event);
+        this.model.addEventListener('mouseout', event => {
+            console.log("mouseout");
         })
-
     }
 }
 
