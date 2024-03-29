@@ -34,7 +34,9 @@ class BoardSystem extends MRSystem {
             Array.from({ length: comp.cols }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * comp.floors))
         );
 
-        console.log(heightMap);
+        // console.log(heightMap);
+        // add perlin heigh map here
+
 
         for (let f = 0; f < comp.floors; f++) {
             const floor = [];
