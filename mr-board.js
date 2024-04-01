@@ -24,21 +24,22 @@ class BoardSystem extends MRSystem {
 
     attachedComponent(entity) {
         let comp = entity.components.get('board')
-        // const models = [
-        //     "tiles/tile_grass_01.glb",
-        //     "tiles/tile_grass_02.glb",
-        //     "tiles/tile_grass_03.glb"];
         const models = [
-            "tiles/tile_grass_01.glb"];
-        // const models = ["tiles/tile_grass_01.glb"];
-        // const models = ["tiles/0.glb", "tiles/1.glb", "tiles/2.glb"];
+            "tilegrass001",
+            "tilegrass002",
+            "tilegrass003"];
         const rotations = [0, 90, 180, 270];
-        const scale = 0.07;
+        const scale = 0.1;
 
         // Generate the height map using smoothNoise
         let heightMap = Array.from({ length: comp.rows }, (_, x) =>
             Array.from({ length: comp.cols }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * comp.floors))
         );
+
+        let goal = {
+            x: Math.floor(Math.random() * comp.rows),
+            y: Math.floor(Math.random() * comp.cols)
+        }
 
         let spawnX = Math.floor(Math.random() * comp.rows);
         let spawnY = Math.floor(Math.random() * comp.cols);
@@ -77,11 +78,12 @@ class BoardSystem extends MRSystem {
                         tile.dataset.position = `${offsetRow} ${offsetFloor} ${offsetCol}`;
                         tile.dataset.scale = scale;
 
-                        if (isTop) {
-                            tile.dataset.model = randomModel;
-                        } else {
-                            tile.dataset.model = models[0];
-                        }
+                        // if (isTop) {
+                        tile.dataset.model = randomModel;
+
+                        // } else {
+                        //     tile.dataset.model = models[0];
+                        // }
 
 
                         // player position

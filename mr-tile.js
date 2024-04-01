@@ -11,13 +11,6 @@ class MRTile extends MREntity {
         this.model.onLoad = () => {
             this.model.object3D.traverse(object => {
                 if (object.isMesh) {
-                    // if (object.name === 'cube029') {
-                    //     console.log('here')
-                    //     const index = object.morphTargetDictionary['bottomHeight'];
-                    //     if (index !== undefined) {
-                    //         object.morphTargetInfluences[index] = 0.5;
-                    //     }
-                    // }
                     // Necessary for the single-faced
                     // grass texture to appear correctly
                     object.material.alphaTest = 0.5;
@@ -29,24 +22,24 @@ class MRTile extends MREntity {
 
             // console.log(this.model.object3D.getObjectByName('cube029'));
 
-            this.model.object3D.getObjectByName('tile_grass_01').morphTargetInfluences[0] = Math.random() * 0.5;
+            this.model.object3D.getObjectByName(this.modelId).morphTargetInfluences[0] = Math.random();
             // this.model.object3D.loadedMeshes.forEach(m => m.name = ("house_3_" + m.name))
 
             // this.model.mesh.morphTargetManager.getTarget(16).influence = 1;
             // this.model.mesh.morphTargetInfluences[ 0 ] = 1;
 
             // Add a transparent box around the tile
-            // let geometry = new THREE.BoxGeometry(1, 0.75, 1);
-            // let material = new THREE.MeshPhongMaterial({
-            //     color: 'orange',
-            //     side: 2,
-            //     transparent: true,
-            //     opacity: 0.1,
-            //     specular: '#fff'
-            // })
+            let geometry = new THREE.BoxGeometry(1, 0.75, 1);
+            let material = new THREE.MeshPhongMaterial({
+                color: 'turquoise',
+                side: 2,
+                transparent: true,
+                opacity: 0.2,
+                specular: '#fff'
+            })
 
-            // let mesh = new THREE.Mesh(geometry, material)
-            // this.model.object3D.add(mesh);
+            let mesh = new THREE.Mesh(geometry, material)
+            this.model.object3D.add(mesh);
 
             this.model.addEventListener('touchstart', event => {
                 console.log("touched")
@@ -59,7 +52,9 @@ class MRTile extends MREntity {
     }
 
     connected() {
-        this.model.src = this.dataset.model;
+        this.model.src = `tiles/${this.dataset.model}.glb`;
+        this.modelId = this.dataset.model;
+
         this.appendChild(this.model);
 
 
@@ -83,16 +78,18 @@ class MRTile extends MREntity {
 
         var isPlayer = this.dataset.isPlayer == "true" ? true : false
         if (isPlayer) {
-            this.player.src = "tiles/chess_castle_01.glb";
-            Object.assign(this.player.style, {
-                scale: 1,
-            })
+            // this.player.src = "tiles/chess_castle_01.glb";
+            this.player.src = "tiles/goal1.glb";
+            this.player.dataset.compAnimation = "clip: 0; action: play;";
+            // Object.assign(this.player.style, {
+            //     scale: 1,
+            // })
             this.appendChild(this.player);
         }
 
-        this.prop.addEventListener("click", () => {
-            console.log()
-        });
+        // this.prop.addEventListener("click", () => {
+        //     console.log()
+        // });
 
         // if (isTop) {
         //     this.floorTile.dataset.position = "0 0.07 0";
