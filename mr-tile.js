@@ -11,6 +11,13 @@ class MRTile extends MREntity {
         this.model.onLoad = () => {
             this.model.object3D.traverse(object => {
                 if (object.isMesh) {
+                    // if (object.name === 'cube029') {
+                    //     console.log('here')
+                    //     const index = object.morphTargetDictionary['bottomHeight'];
+                    //     if (index !== undefined) {
+                    //         object.morphTargetInfluences[index] = 0.5;
+                    //     }
+                    // }
                     // Necessary for the single-faced
                     // grass texture to appear correctly
                     object.material.alphaTest = 0.5;
@@ -19,6 +26,14 @@ class MRTile extends MREntity {
                     object.morphTargets = true;
                 }
             })
+
+            // console.log(this.model.object3D.getObjectByName('cube029'));
+
+            this.model.object3D.getObjectByName('tile_grass_01').morphTargetInfluences[0] = Math.random() * 0.5;
+            // this.model.object3D.loadedMeshes.forEach(m => m.name = ("house_3_" + m.name))
+
+            // this.model.mesh.morphTargetManager.getTarget(16).influence = 1;
+            // this.model.mesh.morphTargetInfluences[ 0 ] = 1;
 
             // Add a transparent box around the tile
             // let geometry = new THREE.BoxGeometry(1, 0.75, 1);
