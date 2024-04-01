@@ -2,17 +2,17 @@ class BoardSystem extends MRSystem {
     constructor() {
         super()
 
-        this.grid = [];
+        this.tilemap = [];
         this.timer = 0;
     }
 
     update(deltaTime, frame) {
         this.timer += deltaTime * 2;
 
-        for (let f = 0; f < this.grid.length; f++) {
-            for (let r = 0; r < this.grid[f].length; r++) {
-                for (let c = 0; c < this.grid[f][r].length; c++) {
-                    const tile = this.grid[f][r][c];
+        for (let f = 0; f < this.tilemap.length; f++) {
+            for (let r = 0; r < this.tilemap[f].length; r++) {
+                for (let c = 0; c < this.tilemap[f][r].length; c++) {
+                    const tile = this.tilemap[f][r][c];
                     const tempPosition = tile.dataset.position.split(" ");
                     const deltaY = Math.sin(this.timer + f / 1.5 + r / 1.5 + c / 1.5) / 100;
                     const positionY = parseFloat(tile.dataset.offsetFloor) + deltaY;
@@ -41,10 +41,6 @@ class BoardSystem extends MRSystem {
         let spawnX = Math.floor(Math.random() * comp.rows);
         let spawnY = Math.floor(Math.random() * comp.cols);
 
-        // console.log(spawnX, spawnY);
-
-        // console.log(heightMap);
-
         // const heightMap = [
         //     [1, 1, 0, 0],
         //     [2, 1, 0, 1],
@@ -59,14 +55,9 @@ class BoardSystem extends MRSystem {
 
                 for (let c = 0; c < comp.cols; c++) {
 
-                    // fix a bug that scale in headset is twice the scale in 2d
-                    const desktopFix = false;
-                    const ratio = (desktopFix) ? 2 : 1;
-
-
-                    let offsetRow = r * scale / ratio - (comp.rows * scale) / 2 / ratio;
-                    let offsetCol = c * scale / ratio - (comp.cols * scale) / 2 / ratio;
-                    let offsetFloor = f * scale / ratio * 0.75;
+                    let offsetRow = r * scale - (comp.rows * scale) / 2;
+                    let offsetCol = c * scale - (comp.cols * scale) / 2;
+                    let offsetFloor = f * scale * 0.75 + 0.1;
 
                     let randomModel = models[Math.floor(Math.random() * models.length)];
                     let randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
@@ -119,10 +110,8 @@ class BoardSystem extends MRSystem {
                 floor.push(row);
             }
 
-            this.grid.push(floor);
+            this.tilemap.push(floor);
         }
-
-        // console.log(this.grid)
     }
 }
 

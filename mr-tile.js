@@ -33,6 +33,10 @@ class MRTile extends MREntity {
             // let mesh = new THREE.Mesh(geometry, material)
             // this.model.object3D.add(mesh);
 
+            this.model.addEventListener('touchstart', event => {
+                console.log("touched")
+            })
+
             this.model.addEventListener('click', event => {
                 console.log("clicked")
             })
@@ -70,6 +74,10 @@ class MRTile extends MREntity {
             })
             this.appendChild(this.player);
         }
+
+        this.prop.addEventListener("click", () => {
+            console.log()
+        });
 
         // if (isTop) {
         //     this.floorTile.dataset.position = "0 0.07 0";
