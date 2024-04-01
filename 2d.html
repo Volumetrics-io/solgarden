@@ -15,8 +15,14 @@
         #root {
             position: relative;
             border: 1px solid red;
-            width: 800;
-            height: 800;
+            width: 800px;
+            height: 800px;
+        }
+
+        .tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -29,10 +35,28 @@
 
         window.onload = () => {
 
+            const scale = 120;
+
+
+
             const comp = {
                 rows: 5,
                 cols: 5,
                 floors: 5
+            }
+
+            // player
+            window.goal = window.player = {
+                x: Math.floor(Math.random() * comp.rows),
+                y: Math.floor(Math.random() * comp.cols)
+            }
+
+            // goal
+            while (window.goal == window.player) {
+                window.goal = {
+                    x: Math.floor(Math.random() * comp.rows),
+                    y: Math.floor(Math.random() * comp.cols)
+                }
             }
 
             const heightMap = Array.from({ length: comp.rows }, (_, x) =>
@@ -40,8 +64,9 @@
             );
 
             const root = document.querySelector('#root');
-            const tilemap = [];
 
+            // tiles
+            const tilemap = [];
             for (let f = 0; f < comp.floors; f++) {
                 const floor = [];
 
@@ -50,20 +75,39 @@
 
                     for (let c = 0; c < comp.cols; c++) {
 
-                        // let offsetRow = r - (comp.rows * scale) / 2;
-                        // let offsetCol = c - (comp.cols * scale) / 2;
-                        // let offsetFloor = f;
-
                         let isTop = (f === heightMap[r][c]);
-
                         if (f <= heightMap[r][c]) {
 
                             let tile = document.createElement("div");
+                            tile.className = 'tile';
+                            let bgColor = (f / comp.floors) * 0.8 + 0.2;
                             Object.assign(tile.style, {
-                                top: r + "px",
-                                left: c + "px",
-                                backgroundColor: 'rebeccaPurple',
-                                content: 'foo'
+                                position: 'absolute',
+                                top: (r * scale + f * 10) + "px",
+                                left: (c * scale + f * 10) + "px",
+                                height: scale + "px",
+                                width: scale + "px",
+                                border: `1px solid rgba(255, 255, 255, ${f / comp.floors})`,
+                                backgroundColor: `rgba(0, 0, 0, ${bgColor})`,
+                                color: `hsl(0, 100%, 100%)`,
+                            });
+                            tile.dataset.floor = f;
+                            tile.innerHTML = f;
+
+                            tile.addEventListener('mouseover', () => {
+                                // addMove(x + 1, y + 2, level);
+                                // addMove(x + 2, y + 1, level);
+                                // addMove(x + 2, y - 1, level);
+                                // addMove(x + 1, y - 2, level);
+                                // addMove(x - 1, y - 2, level);
+                                // addMove(x - 2, y - 1, level);
+                                // addMove(x - 2, y + 1, level);
+                                // addMove(x - 1, y + 2, level);
+                                console.log(r, c);
+                            })
+
+                            tile.addEventListener('click', () => {
+                                console.log(r, c);
                             })
 
                             root.append(tile);
@@ -79,6 +123,38 @@
                 tilemap.push(floor);
 
             }
+
+            let playerTile = document.createElement("div");
+            playerTile.className = 'tile';
+            Object.assign(playerTile.style, {
+                position: 'absolute',
+                top: (window.player.x * scale + heightMap[window.player.x][window.player.y] * 10 + 10) + "px",
+                left: (window.player.y * scale + heightMap[window.player.x][window.player.y] * 10 + 10) + "px",
+                height: scale + "px",
+                width: scale + "px",
+                border: `1px solid red`,
+                backgroundColor: `yellow`,
+                borderRadius: '20px',
+                color: `black`
+            });
+            playerTile.innerHTML = "Player";
+            root.append(playerTile);
+
+            let goalTile = document.createElement("div");
+            goalTile.className = 'tile';
+            Object.assign(goalTile.style, {
+                position: 'absolute',
+                top: (window.goal.x * scale + heightMap[window.goal.x][window.goal.y] * 10 + 10) + "px",
+                left: (window.goal.y * scale + heightMap[window.goal.x][window.goal.y] * 10 + 10) + "px",
+                height: scale + "px",
+                width: scale + "px",
+                border: `1px solid red`,
+                backgroundColor: `green`,
+                borderRadius: '20px',
+                color: `black`
+            });
+            goalTile.innerHTML = "Goal";
+            root.append(goalTile);
         }
 
     </script>
