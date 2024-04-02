@@ -74,12 +74,12 @@ class MRTile extends MREntity {
 
         if (isTop) {
             this.floorTile.dataset.position = "0 0.07 0";
-            let geometry = new THREE.BoxGeometry(0.92, 0.5, 0.92);
+            let geometry = new THREE.BoxGeometry(0.92, 0.25, 0.92);
             let material = new THREE.MeshPhongMaterial({
                 color: "#d3ceba",
                 side: 2,
                 transparent: true,
-                opacity: 0.5,
+                opacity: 0,
                 specular: '#fff'
             })
             
@@ -91,10 +91,16 @@ class MRTile extends MREntity {
 
             this.floorTile.addEventListener("mouseover", () => {
                 console.log('mouseover');
+                this.floorTile.object3D.children[0].material.opacity = 1;
             })
 
             this.floorTile.addEventListener("mouseout", () => {
                 console.log('mouseout');
+            })
+
+            this.floorTile.addEventListener("mouseleave", () => {
+                this.floorTile.object3D.children[0].material.opacity = 0;
+                console.log('mouseleave');
             })
 
             this.floorTile.addEventListener("hoverend", () => {

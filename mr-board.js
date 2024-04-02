@@ -154,9 +154,14 @@ class BoardSystem extends MRSystem {
     }
 
     projectCoordinates(r, c, f) {
+        // return {
+        //     offsetRow: r * this.scale - (this.comp.rows * this.scale) / 2,
+        //     offsetCol: c * this.scale - (this.comp.cols * this.scale) / 2,
+        //     offsetFloor: f * this.scale + 0.1
+        // }
         return {
-            offsetRow: r * this.scale - (this.comp.rows * this.scale) / 2,
-            offsetCol: c * this.scale - (this.comp.cols * this.scale) / 2,
+            offsetRow: r * this.scale,
+            offsetCol: c * this.scale,
             offsetFloor: f * this.scale + 0.1
         }
     }
