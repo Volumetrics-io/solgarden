@@ -55,22 +55,22 @@ class MRTile extends MREntity {
 
 
         var isTop = this.dataset.isTop == "true" ? true : false
-        if (isTop && Math.random() > 0.4) {
-            const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
-            const randomRotation = Math.random() * 360;
-            const randomScale = Math.random() * 0.3 + 0.7;
-            const YOffset = Math.random() * 0.1;
-            const XJitter = Math.random() * 0.2 - 0.1;
-            const ZJitter = Math.random() * 0.2 - 0.1;
+        // if (isTop && Math.random() > 0.4) {
+        //     const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
+        //     const randomRotation = Math.random() * 360;
+        //     const randomScale = Math.random() * 0.3 + 0.7;
+        //     const YOffset = Math.random() * 0.1;
+        //     const XJitter = Math.random() * 0.2 - 0.1;
+        //     const ZJitter = Math.random() * 0.2 - 0.1;
 
-            this.prop.src = props[Math.floor(Math.random() * props.length)];
-            this.prop.dataset.rotation = `0 ${randomRotation} 0`;
-            this.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
-            Object.assign(this.prop.style, {
-                scale: randomScale,
-            })
-            this.appendChild(this.prop);
-        }
+        //     this.prop.src = props[Math.floor(Math.random() * props.length)];
+        //     this.prop.dataset.rotation = `0 ${randomRotation} 0`;
+        //     this.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
+        //     Object.assign(this.prop.style, {
+        //         scale: randomScale,
+        //     })
+        //     this.appendChild(this.prop);
+        // }
 
         if (isTop) {
             this.floorTile.dataset.position = "0 0.07 0";
@@ -79,7 +79,7 @@ class MRTile extends MREntity {
                 color: "#d3ceba",
                 side: 2,
                 transparent: true,
-                opacity: 0,
+                opacity: 0.2,
                 specular: '#fff'
             })
             
@@ -90,16 +90,23 @@ class MRTile extends MREntity {
             // this.floorTile.object3D.children[0].material.opacity = 1;
 
             this.floorTile.addEventListener("mouseover", () => {
+                // works
                 console.log('mouseover');
                 this.floorTile.object3D.children[0].material.opacity = 1;
             })
 
+            this.floorTile.addEventListener("mouseenter", () => {
+                // doesn't works
+                console.log('mouseenter');
+            })
+
             this.floorTile.addEventListener("mouseout", () => {
+                // doesn't work
                 console.log('mouseout');
             })
 
             this.floorTile.addEventListener("mouseleave", () => {
-                this.floorTile.object3D.children[0].material.opacity = 0;
+                this.floorTile.object3D.children[0].material.opacity = 0.2;
                 console.log('mouseleave');
             })
 
