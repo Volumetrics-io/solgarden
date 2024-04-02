@@ -6,7 +6,9 @@ class MRTile extends MREntity {
         this.model = document.createElement("mr-model");
         this.prop = document.createElement("mr-model");
         this.floorTile = document.createElement("mr-model");
-        this.player = document.createElement("mr-model");
+
+        // console.log(this.rowID);
+        // this.player = document.createElement("mr-model");
 
         this.model.onLoad = () => {
             this.model.object3D.traverse(object => {
@@ -20,41 +22,35 @@ class MRTile extends MREntity {
                 }
             })
 
-            // console.log(this.model.object3D.getObjectByName('cube029'));
-
             this.model.object3D.getObjectByName(this.modelId).morphTargetInfluences[0] = Math.random();
-            // this.model.object3D.loadedMeshes.forEach(m => m.name = ("house_3_" + m.name))
-
-            // this.model.mesh.morphTargetManager.getTarget(16).influence = 1;
-            // this.model.mesh.morphTargetInfluences[ 0 ] = 1;
 
             // Add a transparent box around the tile
-            let geometry = new THREE.BoxGeometry(1, 0.75, 1);
-            let material = new THREE.MeshPhongMaterial({
-                color: 'turquoise',
-                side: 2,
-                transparent: true,
-                opacity: 0.2,
-                specular: '#fff'
-            })
+            // let geometry = new THREE.BoxGeometry(1, 0.75, 1);
+            // let material = new THREE.MeshPhongMaterial({
+            //     color: 'turquoise',
+            //     side: 2,
+            //     transparent: true,
+            //     opacity: 0.2,
+            //     specular: '#fff'
+            // })
 
-            let mesh = new THREE.Mesh(geometry, material)
-            this.model.object3D.add(mesh);
+            // let mesh = new THREE.Mesh(geometry, material)
+            // this.model.object3D.add(mesh);
 
-            this.model.addEventListener('touchstart', event => {
-                console.log("touched")
-            })
+            // this.model.addEventListener('hoverstart', event => {
+            //     console.log("touched")
+            // })
 
-            this.model.addEventListener('click', event => {
-                console.log("clicked")
-            })
+            // this.model.addEventListener('click', event => {
+            //     // console.log("clicked")
+            //     this.parent.movePlayer(this.position);
+            // })
         }
     }
 
     connected() {
         this.model.src = `tiles/${this.dataset.model}.glb`;
         this.modelId = this.dataset.model;
-
         this.appendChild(this.model);
 
 
@@ -76,38 +72,48 @@ class MRTile extends MREntity {
             this.appendChild(this.prop);
         }
 
-        var isPlayer = this.dataset.isPlayer == "true" ? true : false
-        if (isPlayer) {
-            // this.player.src = "tiles/chess_castle_01.glb";
-            this.player.src = "tiles/goal1.glb";
-            this.player.dataset.compAnimation = "clip: 0; action: play;";
-            // Object.assign(this.player.style, {
-            //     scale: 1,
-            // })
-            this.appendChild(this.player);
+        if (isTop) {
+            this.floorTile.dataset.position = "0 0.07 0";
+            let geometry = new THREE.BoxGeometry(0.92, 0.5, 0.92);
+            let material = new THREE.MeshPhongMaterial({
+                color: "#d3ceba",
+                side: 2,
+                transparent: true,
+                opacity: 0.5,
+                specular: '#fff'
+            })
+            
+
+            let mesh = new THREE.Mesh(geometry, material)
+            this.floorTile.object3D.add(mesh);
+            this.appendChild(this.floorTile);
+            // this.floorTile.object3D.children[0].material.opacity = 1;
+
+            this.floorTile.addEventListener("mouseover", () => {
+                console.log('mouseover');
+            })
+
+            this.floorTile.addEventListener("mouseout", () => {
+                console.log('mouseout');
+            })
+
+            this.floorTile.addEventListener("hoverend", () => {
+                console.log('hoverend');
+            })
+
+            this.floorTile.addEventListener("touchend", () => {
+                console.log('touchend');
+            })
+
+            this.floorTile.addEventListener("selectend", () => {
+                console.log('selectend');
+            })
+
+            this.floorTile.addEventListener("click", () => {
+                console.log('click');
+                this.parent.movePlayer(parseInt(this.dataset.rowId), parseInt(this.dataset.columnId));
+            })
         }
-
-        // this.prop.addEventListener("click", () => {
-        //     console.log()
-        // });
-
-        // if (isTop) {
-        //     this.floorTile.dataset.position = "0 0.07 0";
-        //     var isBlack = this.dataset.isBlack == "true" ? true : false
-        //     let tileColor = (isBlack) ? "white" : "black";
-        //     let geometry = new THREE.BoxGeometry(0.92, 0.04, 0.92);
-        //     let material = new THREE.MeshPhongMaterial({
-        //         color: tileColor,
-        //         side: 2,
-        //         transparent: true,
-        //         opacity: 0.8,
-        //         specular: '#fff'
-        //     })
-
-        //     let mesh = new THREE.Mesh(geometry, material)
-        //     this.floorTile.object3D.add(mesh);
-        //     this.appendChild(this.floorTile);
-        // }
 
     }
 }
