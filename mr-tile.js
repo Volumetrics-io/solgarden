@@ -49,9 +49,10 @@ class MRTile extends MREntity {
     }
 
     connected() {
-        this.model.src = `tiles/${this.dataset.model}.glb`;
         this.modelId = this.dataset.model;
         this.appendChild(this.model);
+
+        this.model.src = `tiles/${this.dataset.model}.glb`;
 
 
         var isTop = this.dataset.isTop == "true" ? true : false
@@ -77,12 +78,12 @@ class MRTile extends MREntity {
             let geometry = new THREE.BoxGeometry(0.92, 0.25, 0.92);
             let material = new THREE.MeshPhongMaterial({
                 color: "#d3ceba",
-                side: 2,
+                // side: 2,
                 transparent: true,
                 opacity: 0.2,
-                specular: '#fff'
+                // specular: '#fff'
             })
-            
+
 
             let mesh = new THREE.Mesh(geometry, material)
             this.floorTile.object3D.add(mesh);
@@ -92,7 +93,40 @@ class MRTile extends MREntity {
             this.floorTile.addEventListener("mouseover", () => {
                 // works
                 console.log('mouseover');
-                this.floorTile.object3D.children[0].material.opacity = 1;
+
+                const r = parseInt(this.dataset.rowId);
+                const c = parseInt(this.dataset.columnId);
+
+                const px = this.parent.playerPos.x;
+                const py = this.parent.playerPos.y;
+
+                let canMove = false;
+                if (r + 1 == px && c + 2 == py ||
+                    r + 2 == px && c + 1 == py ||
+                    r + 2 == px && c - 1 == py ||
+                    r + 1 == px && c - 2 == py ||
+                    r - 1 == px && c - 2 == py ||
+                    r - 2 == px && c - 1 == py ||
+                    r - 2 == px && c + 1 == py ||
+                    r - 1 == px && c + 2 == py
+                ) {
+                    canMove = true;
+                }
+
+                if (canMove) {
+                    this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                        color: "#00ff00",
+                        transparent: true,
+                        opacity: 0.75
+                    });
+                } else {
+                    this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                        color: "#ff0000",
+                        transparent: true,
+                        opacity: 0.75,
+                    });
+                }
+
             })
 
             this.floorTile.addEventListener("mouseenter", () => {
@@ -106,7 +140,12 @@ class MRTile extends MREntity {
             })
 
             this.floorTile.addEventListener("mouseleave", () => {
-                this.floorTile.object3D.children[0].material.opacity = 0.2;
+                this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                    color: "#d3ceba",
+                    transparent: true,
+                    opacity: 0.2,
+                });
+
                 console.log('mouseleave');
             })
 
@@ -124,7 +163,35 @@ class MRTile extends MREntity {
 
             this.floorTile.addEventListener("click", () => {
                 console.log('click');
-                this.parent.movePlayer(parseInt(this.dataset.rowId), parseInt(this.dataset.columnId));
+
+                const r = parseInt(this.dataset.rowId);
+                const c = parseInt(this.dataset.columnId);
+
+                const px = this.parent.playerPos.x;
+                const py = this.parent.playerPos.y;
+
+                let canMove = false;
+                if (r + 1 == px && c + 2 == py ||
+                    r + 2 == px && c + 1 == py ||
+                    r + 2 == px && c - 1 == py ||
+                    r + 1 == px && c - 2 == py ||
+                    r - 1 == px && c - 2 == py ||
+                    r - 2 == px && c - 1 == py ||
+                    r - 2 == px && c + 1 == py ||
+                    r - 1 == px && c + 2 == py
+                ) {
+                    canMove = true;
+                }
+
+                if (canMove) {
+                    this.parent.movePlayer(parseInt(this.dataset.rowId), parseInt(this.dataset.columnId));
+
+                    this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                        color: "#d3ceba",
+                        transparent: true,
+                        opacity: 0.2
+                    });
+                }
             })
         }
 

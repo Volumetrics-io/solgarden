@@ -20,9 +20,9 @@ class MRGoal extends MREntity {
     }
 
     connected() {
+        this.appendChild(this.model);
         this.model.src = "tiles/goal1.glb";
         this.model.dataset.compAnimation = "clip: 0; action: play;";
-        this.appendChild(this.model);
     }
 
 }

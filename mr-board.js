@@ -46,7 +46,7 @@ class BoardSystem extends MRSystem {
             "tilegrass002",
             "tilegrass003"];
         const rotations = [0, 90, 180, 270];
-        this.scale = 0.1;
+        this.scale = 0.05;
 
         // Generate the height map using smoothNoise
         this.heightMap = Array.from({ length: this.comp.rows }, (_, x) =>
@@ -160,8 +160,8 @@ class BoardSystem extends MRSystem {
         //     offsetFloor: f * this.scale + 0.1
         // }
         return {
-            offsetRow: r * this.scale,
-            offsetCol: c * this.scale,
+            offsetRow: r * this.scale - (this.comp.rows * this.scale) / 2,
+            offsetCol: c * this.scale - (this.comp.cols * this.scale) / 2,
             offsetFloor: f * this.scale + 0.1
         }
     }

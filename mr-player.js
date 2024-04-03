@@ -20,9 +20,8 @@ class MRPlayer extends MREntity {
     }
 
     connected() {
-        this.model.src = "tiles/chess_horse_01-white.glb";
-
         this.appendChild(this.model);
+        this.model.src = "tiles/chess_horse_01-white.glb";
     }
 
     moveTo(x,y) {
