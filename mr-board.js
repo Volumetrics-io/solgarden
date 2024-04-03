@@ -4,6 +4,15 @@ class BoardSystem extends MRSystem {
 
         this.tilemap = [];
         this.timer = 0;
+
+        // this.state = {
+        //     heightMap: [],
+        //     tiles: [],
+        //     player: {
+        //         element:  
+        //     }
+
+        // }
     }
 
     update(deltaTime, frame) {
@@ -122,12 +131,55 @@ class BoardSystem extends MRSystem {
                             this.goal.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
                         }
 
-                        // player position
-                        // if (r == spawnX && c == spawnY && isTop) {
-                        //     tile.dataset.isPlayer = true;
-                        // } else {
-                        //     tile.dataset.isPlayer = false;
-                        // }
+                        tile.addEventListener("mouseover", () => {
+                            // color tile green if horse can move to a floor tille and red otherwise
+                            if (this.canHorseMove(
+                                parseInt(tile.dataset.columnId),
+                                parseInt(tile.dataset.rowId),
+                                this.playerPos.x,
+                                this.playerPos.y)) {
+                                tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                                    color: "#00ff00",
+                                    transparent: true,
+                                    opacity: 0.75
+                                });
+                            } else {
+                                tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                                    color: "#ff0000",
+                                    transparent: true,
+                                    opacity: 0.75,
+                                });
+                            }
+
+                        })
+
+                        tile.addEventListener("mouseleave", () => {
+                            tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                                color: "#d3ceba",
+                                transparent: true,
+                                opacity: 0.2,
+                            });
+
+                            console.log('mouseleave');
+                        })
+
+                        tile.addEventListener("click", () => {
+                            console.log('click');
+
+                            if (this.canHorseMove(
+                                parseInt(tile.dataset.columnId),
+                                parseInt(tile.dataset.rowId),
+                                this.playerPos.x,
+                                this.playerPos.y)) {
+                                this.movePlayer(parseInt(tile.dataset.rowId), parseInt(tile.dataset.columnId));
+
+                                tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                                    color: "#d3ceba",
+                                    transparent: true,
+                                    opacity: 0.2
+                                });
+                            }
+                        })
 
                         // if (r % 2 && c % 2 || !(r % 2) && !(c % 2)) {
                         //     tile.dataset.isBlack = true;
@@ -151,6 +203,28 @@ class BoardSystem extends MRSystem {
 
             this.tilemap.push(floor);
         }
+    }
+
+    canHorseMove(r, c, px, py) {
+        // const r = parseInt(tile.dataset.rowId);
+        // const c = parseInt(tile.dataset.columnId);
+
+        // const px = this.playerPos.x;
+        // const py = this.playerPos.y;
+
+        let canMove = false;
+        if (r + 1 == px && c + 2 == py ||
+            r + 2 == px && c + 1 == py ||
+            r + 2 == px && c - 1 == py ||
+            r + 1 == px && c - 2 == py ||
+            r - 1 == px && c - 2 == py ||
+            r - 2 == px && c - 1 == py ||
+            r - 2 == px && c + 1 == py ||
+            r - 1 == px && c + 2 == py
+        ) {
+            canMove = true;
+        }
+        return canMove;
     }
 
     projectCoordinates(r, c, f) {

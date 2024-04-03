@@ -90,109 +90,109 @@ class MRTile extends MREntity {
             this.appendChild(this.floorTile);
             // this.floorTile.object3D.children[0].material.opacity = 1;
 
-            this.floorTile.addEventListener("mouseover", () => {
-                // works
-                console.log('mouseover');
+            // this.floorTile.addEventListener("mouseover", () => {
+            //     // works
+            //     console.log('mouseover');
 
-                const r = parseInt(this.dataset.rowId);
-                const c = parseInt(this.dataset.columnId);
+            //     const r = parseInt(this.dataset.rowId);
+            //     const c = parseInt(this.dataset.columnId);
 
-                const px = this.parent.playerPos.x;
-                const py = this.parent.playerPos.y;
+            //     const px = this.parent.playerPos.x;
+            //     const py = this.parent.playerPos.y;
 
-                let canMove = false;
-                if (r + 1 == px && c + 2 == py ||
-                    r + 2 == px && c + 1 == py ||
-                    r + 2 == px && c - 1 == py ||
-                    r + 1 == px && c - 2 == py ||
-                    r - 1 == px && c - 2 == py ||
-                    r - 2 == px && c - 1 == py ||
-                    r - 2 == px && c + 1 == py ||
-                    r - 1 == px && c + 2 == py
-                ) {
-                    canMove = true;
-                }
+            //     let canMove = false;
+            //     if (r + 1 == px && c + 2 == py ||
+            //         r + 2 == px && c + 1 == py ||
+            //         r + 2 == px && c - 1 == py ||
+            //         r + 1 == px && c - 2 == py ||
+            //         r - 1 == px && c - 2 == py ||
+            //         r - 2 == px && c - 1 == py ||
+            //         r - 2 == px && c + 1 == py ||
+            //         r - 1 == px && c + 2 == py
+            //     ) {
+            //         canMove = true;
+            //     }
 
-                if (canMove) {
-                    this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                        color: "#00ff00",
-                        transparent: true,
-                        opacity: 0.75
-                    });
-                } else {
-                    this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                        color: "#ff0000",
-                        transparent: true,
-                        opacity: 0.75,
-                    });
-                }
+            //     if (canMove) {
+            //         this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+            //             color: "#00ff00",
+            //             transparent: true,
+            //             opacity: 0.75
+            //         });
+            //     } else {
+            //         this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+            //             color: "#ff0000",
+            //             transparent: true,
+            //             opacity: 0.75,
+            //         });
+            //     }
 
-            })
+            // })
 
-            this.floorTile.addEventListener("mouseenter", () => {
-                // doesn't works
-                console.log('mouseenter');
-            })
+            // this.floorTile.addEventListener("mouseenter", () => {
+            //     // doesn't works
+            //     console.log('mouseenter');
+            // })
 
-            this.floorTile.addEventListener("mouseout", () => {
-                // doesn't work
-                console.log('mouseout');
-            })
+            // this.floorTile.addEventListener("mouseout", () => {
+            //     // doesn't work
+            //     console.log('mouseout');
+            // })
 
-            this.floorTile.addEventListener("mouseleave", () => {
-                this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                    color: "#d3ceba",
-                    transparent: true,
-                    opacity: 0.2,
-                });
+            // this.floorTile.addEventListener("mouseleave", () => {
+            //     this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+            //         color: "#d3ceba",
+            //         transparent: true,
+            //         opacity: 0.2,
+            //     });
 
-                console.log('mouseleave');
-            })
+            //     console.log('mouseleave');
+            // })
 
-            this.floorTile.addEventListener("hoverend", () => {
-                console.log('hoverend');
-            })
+            // this.floorTile.addEventListener("hoverend", () => {
+            //     console.log('hoverend');
+            // })
 
-            this.floorTile.addEventListener("touchend", () => {
-                console.log('touchend');
-            })
+            // this.floorTile.addEventListener("touchend", () => {
+            //     console.log('touchend');
+            // })
 
-            this.floorTile.addEventListener("selectend", () => {
-                console.log('selectend');
-            })
+            // this.floorTile.addEventListener("selectend", () => {
+            //     console.log('selectend');
+            // })
 
-            this.floorTile.addEventListener("click", () => {
-                console.log('click');
+            // this.floorTile.addEventListener("click", () => {
+            //     console.log('click');
 
-                const r = parseInt(this.dataset.rowId);
-                const c = parseInt(this.dataset.columnId);
+            //     const r = parseInt(this.dataset.rowId);
+            //     const c = parseInt(this.dataset.columnId);
 
-                const px = this.parent.playerPos.x;
-                const py = this.parent.playerPos.y;
+            //     const px = this.parent.playerPos.x;
+            //     const py = this.parent.playerPos.y;
 
-                let canMove = false;
-                if (r + 1 == px && c + 2 == py ||
-                    r + 2 == px && c + 1 == py ||
-                    r + 2 == px && c - 1 == py ||
-                    r + 1 == px && c - 2 == py ||
-                    r - 1 == px && c - 2 == py ||
-                    r - 2 == px && c - 1 == py ||
-                    r - 2 == px && c + 1 == py ||
-                    r - 1 == px && c + 2 == py
-                ) {
-                    canMove = true;
-                }
+            //     let canMove = false;
+            //     if (r + 1 == px && c + 2 == py ||
+            //         r + 2 == px && c + 1 == py ||
+            //         r + 2 == px && c - 1 == py ||
+            //         r + 1 == px && c - 2 == py ||
+            //         r - 1 == px && c - 2 == py ||
+            //         r - 2 == px && c - 1 == py ||
+            //         r - 2 == px && c + 1 == py ||
+            //         r - 1 == px && c + 2 == py
+            //     ) {
+            //         canMove = true;
+            //     }
 
-                if (canMove) {
-                    this.parent.movePlayer(parseInt(this.dataset.rowId), parseInt(this.dataset.columnId));
+            //     if (canMove) {
+            //         this.parent.movePlayer(parseInt(this.dataset.rowId), parseInt(this.dataset.columnId));
 
-                    this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                        color: "#d3ceba",
-                        transparent: true,
-                        opacity: 0.2
-                    });
-                }
-            })
+            //         this.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+            //             color: "#d3ceba",
+            //             transparent: true,
+            //             opacity: 0.2
+            //         });
+            //     }
+            // })
         }
 
     }
