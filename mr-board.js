@@ -2,216 +2,172 @@ class BoardSystem extends MRSystem {
     constructor() {
         super()
 
-        this.tilemap = [];
-        this.timer = 0;
-
-        // this.state = {
-        //     heightMap: [],
-        //     tiles: [],
-        //     player: {
-        //         element:  
-        //     }
-
-        // }
-    }
-
-    update(deltaTime, frame) {
-        // this.timer += deltaTime * 2;
-
-        // console.log(this.playerPos);
-
-        // for (let f = 0; f < this.tilemap.length; f++) {
-        //     for (let r = 0; r < this.tilemap[f].length; r++) {
-        //         for (let c = 0; c < this.tilemap[f][r].length; c++) {
-        //             const tile = this.tilemap[f][r][c];
-        //             const tempPosition = tile.dataset.position.split(" ");
-        //             const deltaY = Math.sin(this.timer + f / 1.5 + r / 1.5 + c / 1.5) / 100;
-        //             const positionY = parseFloat(tile.dataset.offsetFloor) + deltaY;
-        //             tile.dataset.position = `${tempPosition[0]} ${positionY} ${tempPosition[2]}`;
-
-        //             let isTop = (f === this.heightMap[r][c]);
-        //             if (r == this.playerPos.x && c == this.playerPos.y && isTop) {
-        //                 // TODO: make sure there are no plants on the spawn point
-        //                 this.player.dataset.position = tile.dataset.position;
-        //             }
-        //             if (r == this.goalPos.x && c == this.goalPos.y && isTop) {
-        //                 // TODO: make sure there are no plants on the spawn point
-        //                 this.goal.dataset.position = tile.dataset.position;
-        //             }
-
-        //             // this.parent.player.moveTo(this.dataset.position);
-        //         }
-        //     }
-        // }
-
-        // this.player.dataset.position = 
-        // use projectCoordinates(r, c, f) to update the position?
-    }
-
-    attachedComponent(entity) {
-        this.comp = entity.components.get('board')
-        const models = [
+        this.rowCount = 8;
+        this.colCount = 8;
+        this.floorCount = 2;
+        this.modelCollection = [
             "tilegrass001",
             "tilegrass002",
             "tilegrass003"];
-        const rotations = [0, 90, 180, 270];
-        this.scale = 0.05;
-
-        // Generate the height map using smoothNoise
-        this.heightMap = Array.from({ length: this.comp.rows }, (_, x) =>
-            Array.from({ length: this.comp.cols }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.comp.floors))
+        this.rotationCollection = [0, 90, 180, 270];
+        this.scale = 0.075;
+        this.tileMap = [];
+        this.heightMap = Array.from({ length: this.rowCount }, (_, x) =>
+            Array.from({ length: this.colCount }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.floorCount))
         );
-
-        this.playerPos = this.goalPos = {
-            x: Math.floor(Math.random() * this.comp.rows),
-            y: Math.floor(Math.random() * this.comp.cols)
+        this.timer = 0;
+        this.player = {
+            el: document.createElement("mr-player"),
+            pos: {
+                x: Math.floor(Math.random() * this.rowCount),
+                y: Math.floor(Math.random() * this.colCount)
+            }
+        };
+        this.key = {
+            el: "",
+            pos: {
+                x: Math.floor(Math.random() * this.rowCount),
+                y: Math.floor(Math.random() * this.colCount)
+            }
+        };
+        while (this.player.pos == this.key.pos) {
+            this.key.pos = {
+                x: Math.floor(Math.random() * this.rowCount),
+                y: Math.floor(Math.random() * this.colCount)
+            }
         }
-
-        while (this.playerPos == this.goalPos) {
-            this.playerPos = {
-                x: Math.floor(Math.random() * this.comp.rows),
-                y: Math.floor(Math.random() * this.comp.cols)
+        this.goal = {
+            el: document.createElement("mr-goal"),
+            pos: {
+                x: Math.floor(Math.random() * this.rowCount),
+                y: Math.floor(Math.random() * this.colCount)
+            }
+        };
+        while (this.player.pos == this.goal.pos && this.key.pos == this.goal.pos) {
+            this.goal.pos = {
+                x: Math.floor(Math.random() * this.rowCount),
+                y: Math.floor(Math.random() * this.colCount)
             }
         }
 
-        // Player
-        this.player = document.createElement("mr-player");
-        this.player.parent = this;
-        Object.assign(this.player.style, {
-            scale: this.scale
-        })
-        entity.appendChild(this.player);
+        // console.log(this.player, this.goal, this.key);
+    }
 
-        // Goal
-        this.goal = document.createElement("mr-goal");
-        Object.assign(this.goal.style, {
-            scale: this.scale
-        })
-        entity.appendChild(this.goal);
+    update(deltaTime, frame) {
+        this.timer += deltaTime;
 
-        for (let f = 0; f < this.comp.floors; f++) {
-            const floor = [];
+        for (let r = 0; r < this.tileMap.length; r++) {
+            for (let c = 0; c < this.tileMap[r].length; c++) {
+                const tile = this.tileMap[r][c];
+                const pc = this.projectCoordinates(tile.pos.x, tile.pos.y);
+                const deltaY = Math.sin(this.timer + this.heightMap[r][c] / .5 + r / 10.5 + c / 1.5) / 1000;
 
-            for (let r = 0; r < this.comp.rows; r++) {
-                const row = [];
+                tile.el.dataset.position = `${pc.offsetRow} ${pc.offsetFloor + deltaY} ${pc.offsetCol}`;
 
-                for (let c = 0; c < this.comp.cols; c++) {
-
-                    const projected = this.projectCoordinates(r, c, f);
-
-                    let randomModel = models[Math.floor(Math.random() * models.length)];
-                    let randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
-
-                    // 
-                    let isTop = (f === this.heightMap[r][c]);
-                    // if (f <= this.heightMap[r][c]) {
-                    if (f == this.heightMap[r][c]) {
-                        let tile = document.createElement("mr-tile");
-                        // Is the tile at the top of the column?
-                        // We only want to add plant at the top
-                        tile.dataset.isTop = isTop;
-                        tile.dataset.offsetFloor = projected.offsetFloor;
-                        tile.dataset.rotation = `0 ${randomRotation} 0`;
-                        tile.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-                        tile.dataset.scale = this.scale;
-                        tile.dataset.rowId = r;
-                        tile.dataset.columnId = c;
-                        tile.parent = this;
-
-                        // if (isTop) {
-                        tile.dataset.model = randomModel;
-
-                        if (c == this.playerPos.x && r == this.playerPos.y && isTop) {
-                            // TODO: make sure there are no plants on the spawn point
-                            this.player.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-                        }
-
-                        if (r == this.goalPos.x && c == this.goalPos.y && isTop) {
-                            // TODO: make sure there are no pla=nts on the spawn point
-                            this.goal.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-                        }
-
-                        tile.addEventListener("mouseover", () => {
-                            // color tile green if horse can move to a floor tille and red otherwise
-                            if (this.canHorseMove(
-                                parseInt(tile.dataset.columnId),
-                                parseInt(tile.dataset.rowId),
-                                this.playerPos.x,
-                                this.playerPos.y)) {
-                                tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                    color: "#00ff00",
-                                    transparent: true,
-                                    opacity: 0.75
-                                });
-                            } else {
-                                tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                    color: "#ff0000",
-                                    transparent: true,
-                                    opacity: 0.75,
-                                });
-                            }
-
-                        })
-
-                        tile.addEventListener("mouseleave", () => {
-                            tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                color: "#d3ceba",
-                                transparent: true,
-                                opacity: 0.2,
-                            });
-
-                            console.log('mouseleave');
-                        })
-
-                        tile.addEventListener("click", () => {
-                            console.log('click');
-
-                            if (this.canHorseMove(
-                                parseInt(tile.dataset.columnId),
-                                parseInt(tile.dataset.rowId),
-                                this.playerPos.x,
-                                this.playerPos.y)) {
-                                this.movePlayer(parseInt(tile.dataset.rowId), parseInt(tile.dataset.columnId));
-
-                                tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                    color: "#d3ceba",
-                                    transparent: true,
-                                    opacity: 0.2
-                                });
-                            }
-                        })
-
-                        // if (r % 2 && c % 2 || !(r % 2) && !(c % 2)) {
-                        //     tile.dataset.isBlack = true;
-                        // } else {
-                        //     tile.dataset.isBlack = false;
-                        // }
-
-                        entity.appendChild(tile);
-
-                        Object.assign(tile.style, {
-                            scale: this.scale
-                        })
-
-                        row.push(tile);
-                    }
-
+                // place the player
+                if (r == this.player.pos.x && c == this.player.pos.y) {
+                    const plc = this.projectCoordinates(this.player.pos.x, this.player.pos.y);
+                    this.player.el.dataset.position = `${plc.offsetRow} ${plc.offsetFloor + deltaY} ${plc.offsetCol}`;
                 }
 
-                floor.push(row);
+                if (r == this.goal.pos.x && c == this.goal.pos.y) {
+                    const gc = this.projectCoordinates(this.goal.pos.x, this.goal.pos.y);
+                    this.goal.el.dataset.position = `${gc.offsetRow} ${gc.offsetFloor + deltaY} ${gc.offsetCol}`;
+                }
+            }
+        }
+    }
+
+    attachedComponent(entity) {
+
+        this.player.el.style.scale = this.scale;
+        entity.appendChild(this.player.el);
+
+        this.goal.el.style.scale = this.scale;
+        entity.appendChild(this.goal.el);
+
+        for (let r = 0; r < this.rowCount; r++) {
+            const row = [];
+
+            for (let c = 0; c < this.colCount; c++) {
+
+                const tileObj = {
+                    el: document.createElement("mr-tile"),
+                    isBlack: true,
+                    pos: {
+                        x: r,
+                        y: c
+                    }
+                }
+
+                let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
+                let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
+
+                tileObj.el.dataset.rotation = `0 ${randomRotation} 0`;
+                // tile.dataset.rowId = r;
+                // tile.dataset.columnId = c;
+                tileObj.el.dataset.model = randomModel;
+
+                tileObj.el.addEventListener("mouseover", () => {
+                    // color tile green if horse can move to a floor tille and red otherwise
+                    if (this.canHorseMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
+                        tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                            color: "#00ff00",
+                            transparent: true,
+                            opacity: 0.75
+                        });
+                    } else {
+                        tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                            color: "#ff0000",
+                            transparent: true,
+                            opacity: 0.75,
+                        });
+                    }
+                })
+
+                tileObj.el.addEventListener("mouseout", () => {
+                    tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                        color: "#d3ceba",
+                        transparent: true,
+                        opacity: 0.2,
+                    });
+                })
+
+                tileObj.el.addEventListener("click", () => {
+                    console.log('click');
+
+                    if (this.canHorseMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
+                        this.movePlayer(tileObj.pos.x, tileObj.pos.y);
+
+                        tile.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                            color: "#d3ceba",
+                            transparent: true,
+                            opacity: 0.2
+                        });
+                    }
+                })
+
+                if (r % 2 && c % 2 || !(r % 2) && !(c % 2)) {
+                    tileObj.isBlack = true;
+                } else {
+                    tileObj.isBlack = false;
+                }
+
+                entity.appendChild(tileObj.el);
+
+                Object.assign(tileObj.el.style, {
+                    scale: this.scale
+                })
+
+                row.push(tileObj);
+
             }
 
-            this.tilemap.push(floor);
+            this.tileMap.push(row);
         }
     }
 
     canHorseMove(r, c, px, py) {
-        // const r = parseInt(tile.dataset.rowId);
-        // const c = parseInt(tile.dataset.columnId);
-
-        // const px = this.playerPos.x;
-        // const py = this.playerPos.y;
-
         let canMove = false;
         if (r + 1 == px && c + 2 == py ||
             r + 2 == px && c + 1 == py ||
@@ -227,21 +183,16 @@ class BoardSystem extends MRSystem {
         return canMove;
     }
 
-    projectCoordinates(r, c, f) {
-        // return {
-        //     offsetRow: r * this.scale - (this.comp.rows * this.scale) / 2,
-        //     offsetCol: c * this.scale - (this.comp.cols * this.scale) / 2,
-        //     offsetFloor: f * this.scale + 0.1
-        // }
+    projectCoordinates(r, c) {
         return {
-            offsetRow: r * this.scale - (this.comp.rows * this.scale) / 2,
-            offsetCol: c * this.scale - (this.comp.cols * this.scale) / 2,
-            offsetFloor: f * this.scale + 0.1
+            offsetRow: r * this.scale - (this.rowCount * this.scale) / 2,
+            offsetCol: c * this.scale - (this.colCount * this.scale) / 2,
+            offsetFloor: this.heightMap[r][c] * this.scale * 0.5 + 0.1
         }
     }
 
     movePlayer(targetX, targetY) {
-        this.playerPos = {
+        this.player.pos = {
             x: targetX,
             y: targetY
         }

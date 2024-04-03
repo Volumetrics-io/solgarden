@@ -55,8 +55,8 @@ class MRTile extends MREntity {
         this.model.src = `tiles/${this.dataset.model}.glb`;
 
 
-        var isTop = this.dataset.isTop == "true" ? true : false
-        if (isTop && Math.random() > 0.4) {
+        // var isTop = this.dataset.isTop == "true" ? true : false
+        if (Math.random() > 0.4) {
             const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
             const randomRotation = Math.random() * 360;
             const randomScale = Math.random() * 0.3 + 0.7;
@@ -73,7 +73,7 @@ class MRTile extends MREntity {
             this.appendChild(this.prop);
         }
 
-        if (isTop) {
+        // if (isTop) {
             this.floorTile.dataset.position = "0 0.07 0";
             let geometry = new THREE.BoxGeometry(0.92, 0.25, 0.92);
             let material = new THREE.MeshPhongMaterial({
@@ -193,7 +193,7 @@ class MRTile extends MREntity {
             //         });
             //     }
             // })
-        }
+        // }
 
     }
 }
