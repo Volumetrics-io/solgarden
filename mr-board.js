@@ -95,8 +95,8 @@ class BoardSystem extends MRSystem {
 
                     // 
                     let isTop = (f === this.heightMap[r][c]);
-                    if (f <= this.heightMap[r][c]) {
-                    // if (f == this.heightMap[r][c]) {
+                    // if (f <= this.heightMap[r][c]) {
+                    if (f == this.heightMap[r][c]) {
                         let tile = document.createElement("mr-tile");
                         // Is the tile at the top of the column?
                         // We only want to add plant at the top

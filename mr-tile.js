@@ -56,22 +56,22 @@ class MRTile extends MREntity {
 
 
         var isTop = this.dataset.isTop == "true" ? true : false
-        // if (isTop && Math.random() > 0.4) {
-        //     const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
-        //     const randomRotation = Math.random() * 360;
-        //     const randomScale = Math.random() * 0.3 + 0.7;
-        //     const YOffset = Math.random() * 0.1;
-        //     const XJitter = Math.random() * 0.2 - 0.1;
-        //     const ZJitter = Math.random() * 0.2 - 0.1;
+        if (isTop && Math.random() > 0.4) {
+            const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
+            const randomRotation = Math.random() * 360;
+            const randomScale = Math.random() * 0.3 + 0.7;
+            const YOffset = Math.random() * 0.1;
+            const XJitter = Math.random() * 0.2 - 0.1;
+            const ZJitter = Math.random() * 0.2 - 0.1;
 
-        //     this.prop.src = props[Math.floor(Math.random() * props.length)];
-        //     this.prop.dataset.rotation = `0 ${randomRotation} 0`;
-        //     this.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
-        //     Object.assign(this.prop.style, {
-        //         scale: randomScale,
-        //     })
-        //     this.appendChild(this.prop);
-        // }
+            this.prop.src = props[Math.floor(Math.random() * props.length)];
+            this.prop.dataset.rotation = `0 ${randomRotation} 0`;
+            this.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
+            Object.assign(this.prop.style, {
+                scale: randomScale,
+            })
+            this.appendChild(this.prop);
+        }
 
         if (isTop) {
             this.floorTile.dataset.position = "0 0.07 0";
