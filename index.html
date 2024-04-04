@@ -5,6 +5,14 @@
     <meta charset="utf-8">
     <title>Sol Garden</title>
     <script src="dist/mr.js"></script>
+    <style>
+        #game-panel {
+            background-color: moccasin;
+            width: 300px;
+            height: 300px;
+            padding: 20px;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,6 +23,9 @@
         <mr-light color="white" intensity="1" data-position="0 1 0"></mr-light>
         <mr-entity data-comp-board="" data-comp-anchor="type: plane; label: table"></mr-entity>
         <mr-entity id="chess-sound" data-comp-audio="src: ./chess.wav; loop: true;" data-position="0 0 0"></mr-entity>
+        <mr-panel id="game-panel" data-comp-anchor="type: floating;">
+            <mr-text>Hello world</mr-text>
+        </mr-panel>
     </mr-app>
     <script src="heightmap.js"></script>
     <script src="mr-board.js"></script>

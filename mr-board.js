@@ -114,7 +114,7 @@ class BoardSystem extends MRSystem {
     }
 
     waveDeltaYAt(r, c) {
-        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 200;
+        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 600;
     }
 
     update(deltaTime, frame) {
@@ -161,10 +161,11 @@ class BoardSystem extends MRSystem {
             this.goal.pos = this.door.pos;
             const kc = this.projectCoordinates(this.player.pos.x, this.player.pos.y);
             this.key.el.dataset.position = `${kc.offsetRow} ${kc.offsetFloor + this.waveDeltaYAt(this.key.pos.x, this.key.pos.y) + 0.06} ${kc.offsetCol}`;
-            // this.key.el.style.scale = this.scale / 2;
+            this.key.el.dataset.compAnimation = "clip: 0; action: stop;";
         } else {
             const kc = this.projectCoordinates(this.key.pos.x, this.key.pos.y);
             this.key.el.dataset.position = `${kc.offsetRow} ${kc.offsetFloor + this.waveDeltaYAt(this.key.pos.x, this.key.pos.y)} ${kc.offsetCol}`;
+            this.key.el.dataset.compAnimation = "clip: 0; action: play;";
         }
 
         if (this.state.hasKey && this.door.pos.x == this.player.pos.x && this.door.pos.y == this.player.pos.y) {
