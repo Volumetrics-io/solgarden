@@ -21,7 +21,7 @@ class MRPlayer extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/chess_horse_01-white.glb";
+        this.el.src = "tiles/chess_king_01-black.glb";
     }
 
     // moveTo(x,y) {

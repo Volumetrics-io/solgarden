@@ -171,7 +171,6 @@ class BoardSystem extends MRSystem {
         if (this.state.hasKey && this.door.pos.x == this.player.pos.x && this.door.pos.y == this.player.pos.y) {
             this.initialize();
         }
-
     }
 
     attachedComponent(entity) {
@@ -194,7 +193,7 @@ class BoardSystem extends MRSystem {
 
                 tileObj.el.addEventListener("mouseover", () => {
                     // color tile green if horse can move to a floor tille and red otherwise
-                    if (this.canHorseMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
+                    if (this.canMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
                         tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                             color: "#00ff00",
                             transparent: true,
@@ -218,7 +217,7 @@ class BoardSystem extends MRSystem {
                 })
 
                 tileObj.el.addEventListener("touchstart", () => {
-                    if (this.canHorseMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
+                    if (this.canMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
                         this.movePlayer(tileObj.pos.x, tileObj.pos.y);
 
                         tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
@@ -238,16 +237,23 @@ class BoardSystem extends MRSystem {
         }
     }
 
-    canHorseMove(r, c, px, py) {
+    // should there be a function to update the inventory panel?
+    updatePanel() {
+        console.log(this.state.moveCount, this.gameCount)
+        document.querySelector("#move-count").innerText = this.state.moveCount;
+        document.querySelector("#room-count").innerText = this.gameCount;
+    }
+
+    canMove(r, c, px, py) {
         let canMove = false;
-        if (r + 1 == px && c + 2 == py ||
-            r + 2 == px && c + 1 == py ||
-            r + 2 == px && c - 1 == py ||
-            r + 1 == px && c - 2 == py ||
-            r - 1 == px && c - 2 == py ||
-            r - 2 == px && c - 1 == py ||
-            r - 2 == px && c + 1 == py ||
-            r - 1 == px && c + 2 == py
+        if (r + 1 == px && c - 1 == py ||
+            r + 1 == px && c == py ||
+            r + 1 == px && c + 1 == py ||
+            r - 1 == px && c - 1 == py ||
+            r - 1 == px && c == py ||
+            r - 1 == px && c + 1 == py ||
+            r == px && c - 1 == py ||
+            r == px && c + 1 == py
         ) {
             canMove = true;
         }
@@ -268,6 +274,7 @@ class BoardSystem extends MRSystem {
             x: targetX,
             y: targetY
         }
+         this.updatePanel();
     }
 }
 
