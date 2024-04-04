@@ -3,10 +3,10 @@ class MRPlayer extends MREntity {
     constructor() {
         super()
 
-        this.model = document.createElement("mr-model");
+        this.el = document.createElement("mr-model");
 
-        this.model.onLoad = () => {
-            this.model.object3D.traverse(object => {
+        this.el.onLoad = () => {
+            this.el.object3D.traverse(object => {
                 if (object.isMesh) {
                     // Necessary for the single-faced
                     // grass texture to appear correctly
@@ -20,16 +20,16 @@ class MRPlayer extends MREntity {
     }
 
     connected() {
-        this.appendChild(this.model);
-        this.model.src = "tiles/chess_horse_01-white.glb";
+        this.appendChild(this.el);
+        this.el.src = "tiles/chess_horse_01-white.glb";
     }
 
-    moveTo(x,y) {
-        let projected = this.parent.projectCoordinates(x, y, this.parent.heightMap[x][y]);
-        this.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-        // console.log(this.model.dataset.position)
-        // this.dataset.position = position;
-    }
+    // moveTo(x,y) {
+    //     let projected = this.parent.projectCoordinates(x, y, this.parent.heightMap[x][y]);
+    //     this.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
+    //     // console.log(this.el.dataset.position)
+    //     // this.dataset.position = position;
+    // }
 }
 
 customElements.define('mr-player', MRPlayer);

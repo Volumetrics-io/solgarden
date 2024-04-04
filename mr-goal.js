@@ -3,26 +3,26 @@ class MRGoal extends MREntity {
     constructor() {
         super()
 
-        this.model = document.createElement("mr-model");
+        this.el = document.createElement("mr-model");
 
-        this.model.onLoad = () => {
-            this.model.object3D.traverse(object => {
-                if (object.isMesh) {
-                    // Necessary for the single-faced
-                    // grass texture to appear correctly
-                    object.material.alphaTest = 0.5;
-                    object.receiveShadow = true;
-                    object.castShadow = true;
-                    object.morphTargets = true;
-                }
-            })
-        }
+        // this.el.onLoad = () => {
+        //     this.el.object3D.traverse(object => {
+        //         if (object.isMesh) {
+        //             // Necessary for the single-faced
+        //             // grass texture to appear correctly
+        //             object.material.alphaTest = 0.5;
+        //             object.receiveShadow = true;
+        //             object.castShadow = true;
+        //             object.morphTargets = true;
+        //         }
+        //     })
+        // }
     }
 
     connected() {
-        this.appendChild(this.model);
-        this.model.src = "tiles/goal1.glb";
-        this.model.dataset.compAnimation = "clip: 0; action: play;";
+        this.appendChild(this.el);
+        this.el.src = "tiles/goal1.glb";
+        this.el.dataset.compAnimation = "clip: 0; action: play;";
     }
 
 }

@@ -8,8 +8,10 @@ class MRTile extends MREntity {
         this.floorTile = document.createElement("mr-model");
 
         this.rotationCollection = [0, 90, 180, 270];
-
-        this.initialize();
+        this.modelCollection = [
+            "tilegrass001",
+            "tilegrass002",
+            "tilegrass003"];
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -27,17 +29,16 @@ class MRTile extends MREntity {
         }
     }
 
-    connected() {
-        this.elId = this.dataset.model;
-        this.appendChild(this.el);
-        this.el.src = `tiles/${this.dataset.model}.glb`;
+    randomize() {
+        let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
+        this.el.dataset.rotation = `0 ${randomRotation} 0`;
 
         // 60% chance of plant on top
-        if (Math.random() > 0.6) {
+        if (Math.random() > 0.4) {
             const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
             const randomRotation = Math.random() * 360;
-            const randomScale = Math.random() * 0.3 + 0.7;
-            const YOffset = Math.random() * 0.1;
+            const randomScale = Math.random() * 0.5 + 0.5;
+            const YOffset = Math.random() * 0.2;
             const XJitter = Math.random() * 0.6 - 0.3;
             const ZJitter = Math.random() * 0.6 - 0.3;
 
@@ -48,7 +49,26 @@ class MRTile extends MREntity {
                 scale: randomScale,
             })
             this.appendChild(this.prop);
+        // } else {
+        //     this.prop.src = "";
         }
+
+    }
+
+    connected() {
+        // this.elId = this.dataset.model;
+        this.appendChild(this.el);
+
+        if(this.dataset.isBlack === "true") {
+            this.elId = this.modelCollection[0];
+            this.el.src = `tiles/${this.modelCollection[0]}.glb`;
+        } else {
+            this.elId = this.modelCollection[2];
+            this.el.src = `tiles/${this.modelCollection[2]}.glb`;
+        }
+        // this.el.src = `tiles/${this.dataset.model}.glb`;
+
+        this.randomize();
 
         // the translucent colored tile
         this.floorTile.dataset.position = "0 0.07 0";
@@ -62,11 +82,6 @@ class MRTile extends MREntity {
         let mesh = new THREE.Mesh(geometry, material)
         this.floorTile.object3D.add(mesh);
         this.appendChild(this.floorTile);
-    }
-
-    initialize() {
-        let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
-        this.el.dataset.rotation = `0 ${randomRotation} 0`;
     }
 }
 
