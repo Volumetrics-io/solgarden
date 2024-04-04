@@ -8,6 +8,13 @@ class BoardSystem extends MRSystem {
         this.tileMap = [];
         this.gameCount = 0;
 
+        this.sounds = {
+            bgMusic: document.querySelector('#background-music'),
+            chessSound: document.querySelector('#chess-sound'),
+            doorSound: document.querySelector('#door-sound'),
+            analogSound: document.querySelector('#analog-sound')
+        }
+
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
@@ -111,6 +118,14 @@ class BoardSystem extends MRSystem {
                 }
             }
         }
+
+        if (this.gameCount > 1) {
+            this.sounds.doorSound.components.set('audio', { state: 'play' });
+        }
+
+        if (this.gameCount == 2) {
+            this.sounds.bgMusic.components.set('audio', { state: 'play' })
+        }
     }
 
     waveDeltaYAt(r, c) {
@@ -138,9 +153,10 @@ class BoardSystem extends MRSystem {
         const plc = this.projectCoordinates(this.player.pos.x, this.player.pos.y);
         const playerY = plc.offsetFloor + this.waveDeltaYAt(this.player.pos.x, this.player.pos.y) - this.state.fallHeight;
         this.player.el.dataset.position = `${plc.offsetRow} ${playerY} ${plc.offsetCol}`;
+        this.sounds.chessSound.dataset.position = `${plc.offsetRow} ${playerY} ${plc.offsetCol}`;
 
-        // console.log(this.gameCount)
-
+        // tutorial
+        // Blue goal is shown for the first 2 turns
         if (this.gameCount < 3) {
             const gc = this.projectCoordinates(this.goal.pos.x, this.goal.pos.y);
             this.goal.el.dataset.position = `${gc.offsetRow} ${gc.offsetFloor + this.waveDeltaYAt(this.goal.pos.x, this.goal.pos.y)} ${gc.offsetCol}`;
@@ -152,10 +168,6 @@ class BoardSystem extends MRSystem {
 
         const dc = this.projectCoordinates(this.door.pos.x, this.door.pos.y);
         this.door.el.dataset.position = `${dc.offsetRow} ${dc.offsetFloor + this.waveDeltaYAt(this.door.pos.x, this.door.pos.y)} ${dc.offsetCol}`;
-
-        if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y) {
-            this.state.hasKey = true;
-        }
 
         if (this.state.hasKey) {
             this.goal.pos = this.door.pos;
@@ -274,7 +286,13 @@ class BoardSystem extends MRSystem {
             x: targetX,
             y: targetY
         }
-         this.updatePanel();
+        this.updatePanel();
+        //  this.sounds.chessSound.components.set('audio', {state: play ? 'play' : 'stop'})
+        this.sounds.chessSound.components.set('audio', { state: 'play' })
+        if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y) {
+            this.state.hasKey = true;
+            this.sounds.analogSound.components.set('audio', { state: 'play' });
+        }
     }
 }
 
