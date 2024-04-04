@@ -129,7 +129,7 @@ class BoardSystem extends MRSystem {
     }
 
     waveDeltaYAt(r, c) {
-        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 600;
+        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
     }
 
     update(deltaTime, frame) {
@@ -153,7 +153,7 @@ class BoardSystem extends MRSystem {
         const plc = this.projectCoordinates(this.player.pos.x, this.player.pos.y);
         const playerY = plc.offsetFloor + this.waveDeltaYAt(this.player.pos.x, this.player.pos.y) - this.state.fallHeight;
         this.player.el.dataset.position = `${plc.offsetRow} ${playerY} ${plc.offsetCol}`;
-        this.sounds.chessSound.dataset.position = `${plc.offsetRow} ${playerY} ${plc.offsetCol}`;
+        this.sounds.chessSound.dataset.position = this.player.el.dataset.position;
 
         // tutorial
         // Blue goal is shown for the first 2 turns
@@ -168,6 +168,7 @@ class BoardSystem extends MRSystem {
 
         const dc = this.projectCoordinates(this.door.pos.x, this.door.pos.y);
         this.door.el.dataset.position = `${dc.offsetRow} ${dc.offsetFloor + this.waveDeltaYAt(this.door.pos.x, this.door.pos.y)} ${dc.offsetCol}`;
+        this.sounds.doorSound.dataset.position = this.door.el.dataset.position;
 
         if (this.state.hasKey) {
             this.goal.pos = this.door.pos;
@@ -179,6 +180,7 @@ class BoardSystem extends MRSystem {
             this.key.el.dataset.position = `${kc.offsetRow} ${kc.offsetFloor + this.waveDeltaYAt(this.key.pos.x, this.key.pos.y)} ${kc.offsetCol}`;
             this.key.el.dataset.compAnimation = "clip: 0; action: play;";
         }
+        this.sounds.analogSound.dataset.position = this.key.el.dataset.position;
 
         if (this.state.hasKey && this.door.pos.x == this.player.pos.x && this.door.pos.y == this.player.pos.y) {
             this.initialize();
@@ -250,11 +252,11 @@ class BoardSystem extends MRSystem {
     }
 
     // should there be a function to update the inventory panel?
-    updatePanel() {
-        console.log(this.state.moveCount, this.gameCount)
-        document.querySelector("#move-count").innerText = this.state.moveCount;
-        document.querySelector("#room-count").innerText = this.gameCount;
-    }
+    // updatePanel() {
+    //     console.log(this.state.moveCount, this.gameCount)
+    //     document.querySelector("#move-count").innerText = this.state.moveCount;
+    //     document.querySelector("#room-count").innerText = this.gameCount;
+    // }
 
     canMove(r, c, px, py) {
         let canMove = false;
@@ -276,7 +278,7 @@ class BoardSystem extends MRSystem {
         return {
             offsetRow: r * this.scale - (this.rowCount * this.scale) / 2,
             offsetCol: c * this.scale - (this.colCount * this.scale) / 2,
-            offsetFloor: this.heightMap[r][c] * this.scale * 0.5 + 0.1
+            offsetFloor: this.heightMap[r][c] * this.scale * 0.35 + 0.1
         }
     }
 
@@ -286,7 +288,7 @@ class BoardSystem extends MRSystem {
             x: targetX,
             y: targetY
         }
-        this.updatePanel();
+        // this.updatePanel();
         //  this.sounds.chessSound.components.set('audio', {state: play ? 'play' : 'stop'})
         this.sounds.chessSound.components.set('audio', { state: 'play' })
         if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y) {
