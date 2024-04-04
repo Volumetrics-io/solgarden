@@ -9,7 +9,7 @@ class MRTile extends MREntity {
 
         this.rotationCollection = [0, 90, 180, 270];
 
-        this.randomize();
+        this.initialize();
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -64,7 +64,7 @@ class MRTile extends MREntity {
         this.appendChild(this.floorTile);
     }
 
-    randomize() {
+    initialize() {
         let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
         this.el.dataset.rotation = `0 ${randomRotation} 0`;
     }

@@ -1,8 +1,8 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
-        this.rowCount = 8;
-        this.colCount = 8;
+        this.rowCount = 5;
+        this.colCount = 5;
         this.floorCount = 2;
         this.modelCollection = [
             "tilegrass001",
@@ -63,31 +63,22 @@ class BoardSystem extends MRSystem {
 
         this.door.pos = this.player.pos;
         while (
-            this.player.pos == this.door.pos &&
-            this.key.pos == this.door.pos &&
-            (this.door.pos.x != 1 ||
-                this.door.pos.x != this.rowCount - 1 ||
-                this.door.pos.y != 1 ||
-                this.door.pos.y != this.colCount - 1)
-        ) {
+            (this.door.pos.x == 0 &&
+            this.door.pos.x == this.rowCount - 1) ||
+            (this.door.pos.y != 0 &&
+            this.door.pos.y != this.colCount - 1)) {
             this.door.pos = {
                 x: Math.floor(Math.random() * this.rowCount),
                 y: Math.floor(Math.random() * this.colCount)
             }
         }
-
-        // console.log(this.tileMap)
+        if(this.door.pos.x == 1)
 
         if (this.tileMap.length) {
             for (let r = 0; r < this.rowCount; r++) {
                 for (let c = 0; c < this.colCount; c++) {
                     const tileObj = this.tileMap[r][c];
-                    // let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
-                    // let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
-                    // tileObj.el.dataset.rotation = `0 ${randomRotation} 0`;
                     tileObj.initialize();
-                    // tileObj.el.dataset.model = randomModel;
-                    // tileObj.el.src = `tiles/${randomModel}.glb`;
                 }
             }
         }
