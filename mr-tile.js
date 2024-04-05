@@ -8,10 +8,7 @@ class MRTile extends MREntity {
         this.floorTile = document.createElement("mr-model");
 
         this.rotationCollection = [0, 90, 180, 270];
-        this.modelCollection = [
-            "tilegrass001",
-            "tilegrass002",
-            "tilegrass003"];
+        this.modelCollection = ["tilegrass001", "tilegrass002", "tilegrass003"];
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -29,54 +26,24 @@ class MRTile extends MREntity {
         }
     }
 
-    randomize() {
+    connected() {
+        this.appendChild(this.el);
+
         let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
         this.el.dataset.rotation = `0 ${randomRotation} 0`;
 
-        // 60% chance of plant on top
-        if (Math.random() > 0.4) {
-            const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
-            const randomRotation = Math.random() * 360;
-            const randomScale = Math.random() * 0.5 + 0.5;
-            const YOffset = Math.random() * 0.2;
-            const XJitter = Math.random() * 0.6 - 0.3;
-            const ZJitter = Math.random() * 0.6 - 0.3;
+        let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
+        this.el.src = `tiles/${randomModel}.glb`;
 
-            this.prop.src = props[Math.floor(Math.random() * props.length)];
-            this.prop.dataset.rotation = `0 ${randomRotation} 0`;
-            this.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
-            Object.assign(this.prop.style, {
-                scale: randomScale,
-            })
-            this.appendChild(this.prop);
-        // } else {
-        //     this.prop.src = "";
-        }
-
-    }
-
-    connected() {
-        // this.elId = this.dataset.model;
-        this.appendChild(this.el);
-
-        if(this.dataset.isBlack === "true") {
-            this.elId = this.modelCollection[0];
-            this.el.src = `tiles/${this.modelCollection[0]}.glb`;
-        } else {
-            this.elId = this.modelCollection[2];
-            this.el.src = `tiles/${this.modelCollection[2]}.glb`;
-        }
-        // this.el.src = `tiles/${this.dataset.model}.glb`;
-
-        this.randomize();
+        this.appendChild(this.prop);
 
         // the translucent colored tile
-        this.floorTile.dataset.position = "0 0.07 0";
+        this.floorTile.dataset.position = "0 -0.3 0";
         let geometry = new THREE.BoxGeometry(0.92, 0.5, 0.92);
         let material = new THREE.MeshPhongMaterial({
             color: "#d3ceba",
             transparent: true,
-            opacity: 0.2,
+            opacity: 0,
         })
 
         let mesh = new THREE.Mesh(geometry, material)

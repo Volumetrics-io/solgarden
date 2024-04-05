@@ -1,35 +1,20 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
-        this.rowCount = 7;
-        this.colCount = 7;
+        this.rowCount = 6;
+        this.colCount = 6;
         this.floorCount = 2;
         this.scale = 0.06;
-        this.tileMap = [];
         this.gameCount = 0;
+
+        this.rotationCollection = [0, 90, 180, 270];
+        this.modelCollection = ["tilegrass001", "tilegrass002", "tilegrass003"];
 
         this.sounds = {
             bgMusic: document.querySelector('#background-music'),
             chessSound: document.querySelector('#chess-sound'),
             doorSound: document.querySelector('#door-sound'),
             analogSound: document.querySelector('#analog-sound')
-        }
-
-        for (let r = 0; r < this.rowCount; r++) {
-            const row = [];
-            for (let c = 0; c < this.colCount; c++) {
-                const tileObj = {
-                    el: document.createElement("mr-tile"),
-                    pos: {
-                        x: r,
-                        y: c
-                    }
-                }
-                tileObj.el.dataset.isBlack = (r % 2 && c % 2 || !(r % 2) && !(c % 2)) ? true : false;
-                row.push(tileObj);
-
-            }
-            this.tileMap.push(row);
         }
 
         this.player = {
@@ -45,13 +30,29 @@ class BoardSystem extends MRSystem {
             el: document.createElement("mr-goal")
         };
 
+        this.tileMap = [];
+        for (let r = 0; r < this.rowCount; r++) {
+            const row = [];
+            for (let c = 0; c < this.colCount; c++) {
+                const tileObj = {
+                    el: document.createElement("mr-tile"),
+                    pos: {
+                        x: r,
+                        y: c
+                    }
+                }
+                row.push(tileObj);
+            }
+            this.tileMap.push(row);
+        }
+
         this.initialize();
 
         // debug
         document.addEventListener("keydown", (event) => {
             if (event.key === "d") {
                 event.preventDefault();
-                this.initialize();
+                this.randomizeTile();
             }
         });
     }
@@ -107,17 +108,6 @@ class BoardSystem extends MRSystem {
         }
 
         this.goal.pos = this.key.pos;
-
-        if (this.tileMap.length) {
-            // console.log(this.tileMap);
-            for (let r = 0; r < this.rowCount; r++) {
-                for (let c = 0; c < this.colCount; c++) {
-                    const tileObj = this.tileMap[r][c].el;
-                    // console.log(tileObj)
-                    // tileObj.randomize();
-                }
-            }
-        }
 
         if (this.gameCount > 1) {
             this.sounds.doorSound.components.set('audio', { state: 'play' });
@@ -201,12 +191,27 @@ class BoardSystem extends MRSystem {
         this.goal.el.style.scale = this.scale;
         entity.appendChild(this.goal.el);
 
+        this.tileContainer = document.createElement("mr-div");
+        entity.append(this.tileContainer);
+
+        this.generateBoard();
+        this.randomizeTile();
+
+        // debug
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "d") {
+                event.preventDefault();
+                this.initialize();
+            }
+        });
+    }
+
+    generateBoard() {
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
                 const tileObj = this.tileMap[r][c];
 
                 tileObj.el.addEventListener("mouseover", () => {
-                    // color tile green if horse can move to a floor tille and red otherwise
                     if (this.canMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
                         tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                             color: "#00ff00",
@@ -220,14 +225,16 @@ class BoardSystem extends MRSystem {
                             opacity: 0.75,
                         });
                     }
+                    tileObj.el.floorTile.dataset.position = '0 0 0';
                 })
 
                 tileObj.el.addEventListener("mouseout", () => {
                     tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                         color: "#d3ceba",
                         transparent: true,
-                        opacity: 0.2,
+                        opacity: 0,
                     });
+                    tileObj.el.floorTile.dataset.position = '0 -0.3 0';
                 })
 
                 tileObj.el.addEventListener("touchstart", () => {
@@ -237,26 +244,58 @@ class BoardSystem extends MRSystem {
                         tileObj.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                             color: "#d3ceba",
                             transparent: true,
-                            opacity: 0.2
+                            opacity: 0.75
                         });
                     }
                 })
 
-                entity.appendChild(tileObj.el);
-
-                Object.assign(tileObj.el.style, {
-                    scale: this.scale
-                })
+                this.tileContainer.appendChild(tileObj.el);
+                tileObj.el.style.scale = this.scale;
             }
         }
     }
 
-    // should there be a function to update the inventory panel?
-    // updatePanel() {
-    //     console.log(this.state.moveCount, this.gameCount)
-    //     document.querySelector("#move-count").innerText = this.state.moveCount;
-    //     document.querySelector("#room-count").innerText = this.gameCount;
-    // }
+    randomizeTile() {
+        console.log('randomize tiles');
+        for (let r = 0; r < this.rowCount; r++) {
+            for (let c = 0; c < this.colCount; c++) {
+                const tileObj = this.tileMap[r][c];
+
+                const prevSrc = tileObj.el.src;
+
+                let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
+                tileObj.el.dataset.rotation = `0 ${randomRotation} 0`;
+
+                let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
+                tileObj.el.src = `tiles/${randomModel}.glb`;
+
+                console.log(prevSrc, tileObj.el.src)
+
+                // 60% chance of plant on top
+                // if (Math.random() > 0.4) {
+                //     const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
+                //     const randomRotation = Math.random() * 360;
+                //     const randomScale = Math.random() * 0.5 + 0.5;
+                //     const YOffset = Math.random() * 0.2;
+                //     const XJitter = Math.random() * 0.6 - 0.3;
+                //     const ZJitter = Math.random() * 0.6 - 0.3;
+
+                //     tileObj.prop.src = props[Math.floor(Math.random() * props.length)];
+                //     tileObj.prop.dataset.rotation = `0 ${randomRotation} 0`;
+                //     tileObj.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
+                //     Object.assign(tileObj.prop.style, {
+                //         scale: randomScale,
+                //     })
+                // }
+
+            }
+        }
+    }
+
+    updatePanel() {
+        document.querySelector("#move-count").innerText = this.state.moveCount;
+        document.querySelector("#room-count").innerText = this.gameCount;
+    }
 
     canMove(r, c, px, py) {
         let canMove = false;
@@ -284,14 +323,13 @@ class BoardSystem extends MRSystem {
 
     movePlayer(targetX, targetY) {
         this.state.moveCount++;
+        this.updatePanel();
         this.player.pos = {
             x: targetX,
             y: targetY
         }
-        // this.updatePanel();
-        //  this.sounds.chessSound.components.set('audio', {state: play ? 'play' : 'stop'})
         this.sounds.chessSound.components.set('audio', { state: 'play' })
-        if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y) {
+        if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y && !this.state.hasKey) {
             this.state.hasKey = true;
             this.sounds.analogSound.components.set('audio', { state: 'play' });
         }
