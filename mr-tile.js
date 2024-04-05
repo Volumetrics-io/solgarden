@@ -4,7 +4,7 @@ class MRTile extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
-        this.prop = document.createElement("mr-model");
+        // this.prop = document.createElement("mr-model");
         this.floorTile = document.createElement("mr-model");
 
         this.rotationCollection = [0, 90, 180, 270];
@@ -35,7 +35,7 @@ class MRTile extends MREntity {
         let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
         this.el.src = `tiles/${randomModel}.glb`;
 
-        this.appendChild(this.prop);
+        // this.appendChild(this.prop);
 
         // the translucent colored tile
         this.floorTile.dataset.position = "0 -0.3 0";
