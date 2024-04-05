@@ -22,7 +22,7 @@ class MRTile extends MREntity {
                 }
             })
 
-            this.el.object3D.getObjectByName(this.elId).morphTargetInfluences[0] = Math.random();
+            // this.el.object3D.getObjectByName(this.elId).morphTargetInfluences[0] = Math.random();
         }
     }
 
