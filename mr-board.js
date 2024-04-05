@@ -1,13 +1,13 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
-        this.rowCount = 5;
-        this.colCount = 5;
+        this.rowCount = 7;
+        this.colCount = 7;
         this.floorCount = 2;
         this.scale = 0.06;
 
         this.levelId = 0;
-        this.levelCount = 2;
+        this.levelCount = 6;
 
         this.gameIsStarted = false;
 
@@ -74,7 +74,7 @@ class BoardSystem extends MRSystem {
     }
 
     initialize() {
-        if (this.levelId < this.levelCount) {
+        if (this.levelId < this.levelCount - 1) {
             this.levelId++;
             this.state = {
                 hasKey: false,
