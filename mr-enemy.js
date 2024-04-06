@@ -1,4 +1,4 @@
-class MRPlayer extends MREntity {
+class MREnemy extends MREntity {
 
     constructor() {
         super()
@@ -21,7 +21,7 @@ class MRPlayer extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/chess_king_01-black.glb";
+        this.el.src = "tiles/enemy_temp.glb";
     }
 
     // moveTo(x,y) {
@@ -32,4 +32,4 @@ class MRPlayer extends MREntity {
     // }
 }
 
-customElements.define('mr-player', MRPlayer);
+customElements.define('mr-enemy', MREnemy);
