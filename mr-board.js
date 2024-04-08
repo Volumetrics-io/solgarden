@@ -1,17 +1,17 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
-        this.rowCount = 5;
-        this.colCount = 5;
+        this.rowCount = 7;
+        this.colCount = 7;
         this.floorCount = 2;
-        this.scale = 0.06;
+        this.scale = 0.05;
 
         this.levelId = 0;
         this.isPlayerTurn = true;
         this.gameIsStarted = false;
 
         this.rotationCollection = [0, 90, 180, 270];
-        this.modelCollection = [
+        this.tileSets = [
             ["tilegrass001", "tilegrass002", "tilegrass003"],
             ["tilegrass001", "tilegrass001", "tilegrass002"],
             ["tilegrass003", "tilegrass003", "tilegrass003"],
@@ -33,6 +33,8 @@ class BoardSystem extends MRSystem {
         this.enemy = {
             el: document.createElement("mr-enemy")
         };
+        this.enemies = [];
+        this.enemyContainer = document.createElement("mr-div");
         this.key = {
             el: document.createElement("mr-key")
         };
@@ -44,7 +46,6 @@ class BoardSystem extends MRSystem {
         };
 
         this.tilemap = [];
-
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
@@ -68,6 +69,7 @@ class BoardSystem extends MRSystem {
                 this.initialize();
             }
         });
+
     }
 
     initialize() {
@@ -86,10 +88,10 @@ class BoardSystem extends MRSystem {
             x: 0,
             y: 0
         }
-        while ( this.player.pos.x == this.key.pos.x && this.player.pos.y == this.key.pos.y ||
-                this.player.pos.x == this.enemy.pos.x && this.player.pos.y == this.enemy.pos.y ||
-                this.enemy.pos.x == this.key.pos.x && this.enemy.pos.y == this.key.pos.y
-            ) {
+        while (this.player.pos.x == this.key.pos.x && this.player.pos.y == this.key.pos.y ||
+            this.player.pos.x == this.enemy.pos.x && this.player.pos.y == this.enemy.pos.y ||
+            this.enemy.pos.x == this.key.pos.x && this.enemy.pos.y == this.key.pos.y
+        ) {
             this.player.pos = {
                 x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
                 y: Math.floor(Math.random() * (this.colCount - 2) + 1)
@@ -107,6 +109,28 @@ class BoardSystem extends MRSystem {
         this.enemy.isDead = false;
         this.enemy.el.style.visibility = "visible";
 
+
+        this.enemies = [];
+        while (this.enemyContainer.firstChild) {
+            this.enemyContainer.removeChild(this.enemyContainer.lastChild);
+        }
+
+        const enemyCount = Math.floor(Math.random() * 3) + 2;
+        for (let i = 0; i < enemyCount; i++) {
+            const el = document.createElement("mr-enemy");
+            el.style.scale = this.scale;
+            this.enemyContainer.appendChild(el);
+
+            this.enemies.push({
+                el: el,
+                hp: 3,
+                isDead: false,
+                pos: {
+                    x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
+                    y: Math.floor(Math.random() * (this.colCount - 2) + 1)
+                }
+            });
+        }
 
         // Put the door on the outer ring of the map
         if (Math.random() < 0.5) {
@@ -142,7 +166,7 @@ class BoardSystem extends MRSystem {
         }
 
         // a random tileset for this level
-        const randomCollection = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
+        const tileset = this.tileSets[Math.floor(Math.random() * this.tileSets.length)];
 
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
@@ -151,9 +175,7 @@ class BoardSystem extends MRSystem {
                 let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
                 tile.el.el.dataset.rotation = `0 ${randomRotation} 0`;
 
-                // console.log(randomCollection);
-                let randomModel = randomCollection[Math.floor(Math.random() * randomCollection.length)];
-                // console.log(randomModel);
+                let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
                 tile.el.el.src = `tiles/${randomModel}.glb`;
                 tile.el.elId = randomModel;
             }
@@ -184,6 +206,9 @@ class BoardSystem extends MRSystem {
 
                     if (this.isPlayerTurn) {
                         if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
+                            tile.el.floorTile.dataset.position = "0 0 0";
+
+                            // the cell where the enemy is
                             if (tile.pos.x == this.enemy.pos.x && tile.pos.y == this.enemy.pos.y && !this.enemy.isDead) {
                                 tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                                     color: "#ff6666",
@@ -191,6 +216,7 @@ class BoardSystem extends MRSystem {
                                     opacity: 0.5
                                 });
                             } else {
+                                // tile.el.floorTile.dataset.position = "0 0 0";
                                 tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                                     color: "#66aaff",
                                     transparent: true,
@@ -198,6 +224,7 @@ class BoardSystem extends MRSystem {
                                 });
                             }
                         } else {
+                            tile.el.floorTile.dataset.position = "0 -0.2 0";
                             tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
                                 color: "#ffffff",
                                 transparent: true,
@@ -238,6 +265,7 @@ class BoardSystem extends MRSystem {
             this.door.el.dataset.position = `${dc.offsetRow} ${dc.offsetFloor + this.waveDeltaYAt(this.door.pos.x, this.door.pos.y)} ${dc.offsetCol}`;
             this.sounds.doorSound.dataset.position = this.door.el.dataset.position;
 
+            // single (old) enemy
             const ec = this.projectCoordinates(this.enemy.pos.x, this.enemy.pos.y);
             this.enemy.el.dataset.position = `${ec.offsetRow} ${ec.offsetFloor + this.waveDeltaYAt(this.enemy.pos.x, this.enemy.pos.y)} ${ec.offsetCol}`;
             if (this.enemy.isDead) {
@@ -246,6 +274,29 @@ class BoardSystem extends MRSystem {
                 this.enemy.el.style.visibility = "visible";
             }
             this.sounds.clashSound.dataset.position = this.enemy.el.dataset.position;
+
+            // procedural enemy
+            // console.log(this.enemies);
+            this.enemies.forEach(enemy => {
+                const coor = this.projectCoordinates(enemy.pos.x, enemy.pos.y);
+                enemy.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(enemy.pos.x, enemy.pos.y)} ${coor.offsetCol}`;
+                if (enemy.isDead) {
+                    enemy.el.style.visibility = "hidden";
+                } else {
+                    enemy.el.style.visibility = "visible";
+                }
+            })
+            // for (let i = 0; i < this.enemies; i++) {
+            //     const enemy = this.enemies[i];
+            //     console.log(i, enemy)
+            //     const coor = this.projectCoordinates(enemy.pos.x, enemy.pos.y);
+            //     enemy.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(enemy.pos.x, enemy.pos.y)} ${coor.offsetCol}`;
+            //     if (enemy.isDead) {
+            //         enemy.el.style.visibility = "hidden";
+            //     } else {
+            //         enemy.el.style.visibility = "visible";
+            //     }
+            // }
 
             if (this.state.hasKey) {
                 this.goal.pos = this.door.pos;
@@ -270,33 +321,37 @@ class BoardSystem extends MRSystem {
 
     attachedComponent(entity) {
 
+        this.root = entity;
+
         this.player.el.style.scale = this.scale;
-        entity.appendChild(this.player.el);
+        this.root.appendChild(this.player.el);
 
         this.enemy.el.style.scale = this.scale;
-        entity.appendChild(this.enemy.el);
+        this.root.appendChild(this.enemy.el);
+
+        this.root.appendChild(this.enemyContainer);
 
         this.door.el.style.scale = this.scale;
-        entity.appendChild(this.door.el);
+        this.root.appendChild(this.door.el);
 
         this.key.el.style.scale = this.scale;
-        entity.appendChild(this.key.el);
+        this.root.appendChild(this.key.el);
 
         this.goal.el.style.scale = this.scale;
-        entity.appendChild(this.goal.el);
+        this.root.appendChild(this.goal.el);
 
         // for (let l = 0; l < this.levelCount; l++) {
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
                 const tileObj = this.tilemap[r][c];
 
-                tileObj.el.addEventListener("mouseover", () => {
-                    tileObj.el.floorTile.dataset.position = "0 -0.1 0";
-                })
+                // tileObj.el.addEventListener("mouseover", () => {
+                //     tileObj.el.floorTile.dataset.position = "0 -0.1 0";
+                // })
 
-                tileObj.el.addEventListener("mouseout", () => {
-                    tileObj.el.floorTile.dataset.position = "0 0 0";
-                })
+                // tileObj.el.addEventListener("mouseout", () => {
+                //     tileObj.el.floorTile.dataset.position = "0 0 0";
+                // })
 
                 tileObj.el.addEventListener("touchstart", () => {
                     if (this.canMove(tileObj.pos.x, tileObj.pos.y, this.player.pos.x, this.player.pos.y)) {
@@ -305,7 +360,7 @@ class BoardSystem extends MRSystem {
                 })
 
                 // this.tileContainer.appendChild(tileObj.el);
-                entity.append(tileObj.el);
+                this.root.append(tileObj.el);
                 tileObj.el.style.scale = this.scale;
             }
         }
@@ -326,43 +381,6 @@ class BoardSystem extends MRSystem {
         // });
     }
 
-    // randomizeTile() {
-    //     console.log('randomize tiles');
-    //     for (let r = 0; r < this.rowCount; r++) {
-    //         for (let c = 0; c < this.colCount; c++) {
-    //             const tileObj = this.tileMap[r][c];
-
-    //             const prevSrc = tileObj.el.src;
-
-    //             let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
-    //             tileObj.el.dataset.rotation = `0 ${randomRotation} 0`;
-
-    //             let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
-    //             tileObj.el.src = `tiles/${randomModel}.glb`;
-
-    //             console.log(prevSrc, tileObj.el.src)
-
-    //             // 60% chance of plant on top
-    //             // if (Math.random() > 0.4) {
-    //             //     const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
-    //             //     const randomRotation = Math.random() * 360;
-    //             //     const randomScale = Math.random() * 0.5 + 0.5;
-    //             //     const YOffset = Math.random() * 0.2;
-    //             //     const XJitter = Math.random() * 0.6 - 0.3;
-    //             //     const ZJitter = Math.random() * 0.6 - 0.3;
-
-    //             //     tileObj.prop.src = props[Math.floor(Math.random() * props.length)];
-    //             //     tileObj.prop.dataset.rotation = `0 ${randomRotation} 0`;
-    //             //     tileObj.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
-    //             //     Object.assign(tileObj.prop.style, {
-    //             //         scale: randomScale,
-    //             //     })
-    //             // }
-
-    //         }
-    //     }
-    // }
-
     updatePanel() {
         document.querySelector("#move-count").innerText = this.state.moveCount;
         document.querySelector("#room-count").innerText = this.levelId;
@@ -370,28 +388,10 @@ class BoardSystem extends MRSystem {
     }
 
     canMove(r, c, px, py) {
-        let canMove = false;
-
         const diffX = Math.abs(r - px);
         const diffY = Math.abs(c - py);
         const distance = Math.sqrt(diffX * diffX + diffY * diffY);
-
-        if (distance < this.player.playerSpeed) {
-            canMove = true;
-        }
-
-        // if (r + 1 == px && c - 1 == py ||
-        //     r + 1 == px && c == py ||
-        //     r + 1 == px && c + 1 == py ||
-        //     r - 1 == px && c - 1 == py ||
-        //     r - 1 == px && c == py ||
-        //     r - 1 == px && c + 1 == py ||
-        //     r == px && c - 1 == py ||
-        //     r == px && c + 1 == py
-        // ) {
-        //     canMove = true;
-        // }
-        return canMove;
+        return (distance < this.player.playerSpeed)
     }
 
     projectCoordinates(r, c) {
@@ -406,9 +406,6 @@ class BoardSystem extends MRSystem {
     movePlayer(targetX, targetY) {
         if (this.isPlayerTurn) {
             this.state.moveCount++;
-
-            console.log(this.enemy.pos);
-
             if (targetX == this.enemy.pos.x && targetY == this.enemy.pos.y && !this.enemy.isDead) {
                 console.log("attack");
                 this.combat();
