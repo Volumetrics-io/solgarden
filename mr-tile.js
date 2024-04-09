@@ -7,33 +7,70 @@ class MRTile extends MREntity {
         // this.prop = document.createElement("mr-model");
         this.floorTile = document.createElement("mr-model");
 
+        this.rotationCollection = [0, 90, 180, 270];
+        // this.tileSets = ["tilegrass001", "tilegrass002", "tilegrass003"];
+
         // this.rotationCollection = [0, 90, 180, 270];
-        // this.modelCollection = ["tilegrass001", "tilegrass002", "tilegrass003"];
+        // this.tileSets = [
+        //     ["tilegrass001", "tilegrass002", "tilegrass003"],
+        //     ["tilegrass001", "tilegrass001", "tilegrass002"],
+        //     ["tilegrass003", "tilegrass003", "tilegrass003"],
+        //     ["tilegrasscyan001", "tilegrasscyan002", "tilegrasscyan003"],
+        //     ["tilegrasspurple001", "tilegrasspurple002", "tilegrasspurple003"],
+        // ];
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
-                if (object.isMesh) {
+                if (object.isMesh && object.morphTargetInfluences) {
                     // Necessary for the single-faced
                     // grass texture to appear correctly
                     object.material.alphaTest = 0.5;
                     object.receiveShadow = true;
                     object.castShadow = true;
                     object.morphTargets = true;
+
+                    // console.log(object)
+                    object.morphTargetInfluences[0] = Math.random()
                 }
             })
 
-            this.el.object3D.getObjectByName(this.elId).morphTargetInfluences[0] = Math.random();
+            // this.el.object3D.getObjectByName(this.elId).morphTargetInfluences[0] = Math.random();
         }
     }
 
     connected() {
-        
+        // console.log();
+
         this.appendChild(this.el);
+        const tileset = this.dataset.tileset.split(',');
+
+        let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
+        this.dataset.rotation = `0 ${randomRotation} 0`;
+
+        let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
+        this.el.src = `tiles/${randomModel}.glb`;
+
+        // for (let r = 0; r < this.rowCount; r++) {
+        //     for (let c = 0; c < this.colCount; c++) {
+        //         const tile = this.tilemap[r][c];
+
+        // let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
+        // tile.el.el.dataset.rotation = `0 ${randomRotation} 0`;
+
+        // let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
+        // tile.el.el.src = `tiles/${randomModel}.glb`;
+        //         tile.el.elId = randomModel;
+        //     }
+        // }
 
         // let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
         // this.el.dataset.rotation = `0 ${randomRotation} 0`;
 
-        // let randomModel = this.modelCollection[Math.floor(Math.random() * this.modelCollection.length)];
+        // let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
+        // this.el.src = `tiles/${randomModel}.glb`;
+        // this.elId = randomModel;
+
+        // let randomModel = this.tileSets[Math.floor(Math.random() * this.tileSets.length)];
         // this.el.src = `tiles/${randomModel}.glb`;
         // this.elId = randomModel;
 
