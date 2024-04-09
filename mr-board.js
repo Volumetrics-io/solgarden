@@ -15,6 +15,8 @@ class BoardSystem extends MRSystem {
             ["tilegrass001", "tilegrass002", "tilegrass003"],
             ["tilegrass001", "tilegrass001", "tilegrass002"],
             ["tilegrass003", "tilegrass003", "tilegrass003"],
+            // ["tilegrasscyan001", "tilegrasscyan002", "tilegrasscyan003"],
+            // ["tilegrasspurple001", "tilegrasspurple002", "tilegrasspurple003"],
         ];
 
         this.sounds = {
@@ -30,9 +32,9 @@ class BoardSystem extends MRSystem {
             playerMaxHealth: 5000,
             playerSpeed: 2
         };
-        this.enemy = {
-            el: document.createElement("mr-enemy")
-        };
+        // this.enemy = {
+        //     el: document.createElement("mr-enemy")
+        // };
         this.enemies = [];
         this.enemyContainer = document.createElement("mr-div");
         this.key = {
@@ -84,14 +86,11 @@ class BoardSystem extends MRSystem {
             Array.from({ length: this.colCount }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.floorCount))
         );
         this.timer = 0;
-        this.key.pos = this.player.pos = this.enemy.pos = {
+        this.key.pos = this.player.pos = {
             x: 0,
             y: 0
         }
-        while (this.player.pos.x == this.key.pos.x && this.player.pos.y == this.key.pos.y ||
-            this.player.pos.x == this.enemy.pos.x && this.player.pos.y == this.enemy.pos.y ||
-            this.enemy.pos.x == this.key.pos.x && this.enemy.pos.y == this.key.pos.y
-        ) {
+        while (this.player.pos.x == this.key.pos.x && this.player.pos.y == this.key.pos.y) {
             this.player.pos = {
                 x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
                 y: Math.floor(Math.random() * (this.colCount - 2) + 1)
@@ -100,14 +99,14 @@ class BoardSystem extends MRSystem {
                 x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
                 y: Math.floor(Math.random() * (this.colCount - 2) + 1)
             }
-            this.enemy.pos = {
-                x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
-                y: Math.floor(Math.random() * (this.colCount - 2) + 1)
-            }
+            // this.enemy.pos = {
+            //     x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
+            //     y: Math.floor(Math.random() * (this.colCount - 2) + 1)
+            // }
         }
-        this.enemy.hp = 3;
-        this.enemy.isDead = false;
-        this.enemy.el.style.visibility = "visible";
+        // this.enemy.hp = 3;
+        // this.enemy.isDead = false;
+        // this.enemy.el.style.visibility = "visible";
 
 
         this.enemies = [];
@@ -208,28 +207,44 @@ class BoardSystem extends MRSystem {
                         if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
                             tile.el.floorTile.dataset.position = "0 0 0";
 
-                            // the cell where the enemy is
-                            if (tile.pos.x == this.enemy.pos.x && tile.pos.y == this.enemy.pos.y && !this.enemy.isDead) {
-                                tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                    color: "#ff6666",
-                                    transparent: true,
-                                    opacity: 0.5
-                                });
-                            } else {
-                                // tile.el.floorTile.dataset.position = "0 0 0";
-                                tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                    color: "#66aaff",
-                                    transparent: true,
-                                    opacity: 0.5
-                                });
-                            }
+                            
+                            // mrjsUtils.color.setEntityColor(tile.el.floorTile, "#66aaff");
+                            // tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
+                            // tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
+
+                            // first color the tile the default color
+                            // tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                            //     color: "#66aaff",
+                            //     transparent: true,
+                            //     opacity: 0.5
+                            // });
+
+                            tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
+                            tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
+
+                            // recolor the tile if any enemy is on it
+                            this.enemies.forEach(enemy => {
+                                if (tile.pos.x == enemy.pos.x && tile.pos.y == enemy.pos.y && !enemy.isDead) {
+                                    // tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                                    //     color: "#ff6666",
+                                    //     transparent: true,
+                                    //     opacity: 0.5
+                                    // });
+                                    tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
+                                    // mrjsUtils.color.setEntityColor(tile.el.floorTile, "#ff6666");
+                                }
+                            })
+
                         } else {
+                            // otherwise make the tile transparent and shove it 
+                            // in the floor so it doesn't intercept clicks
                             tile.el.floorTile.dataset.position = "0 -0.2 0";
-                            tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                color: "#ffffff",
-                                transparent: true,
-                                opacity: 0,
-                            });
+                            tile.el.floorTile.object3D.children[0].material.opacity = 0;
+                            // tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
+                            //     color: "#ffffff",
+                            //     transparent: true,
+                            //     opacity: 0,
+                            // });
                         }
                     } else {
                         tile.el.floorTile.object3D.children[0].material.opacity = 0;
@@ -266,17 +281,18 @@ class BoardSystem extends MRSystem {
             this.sounds.doorSound.dataset.position = this.door.el.dataset.position;
 
             // single (old) enemy
-            const ec = this.projectCoordinates(this.enemy.pos.x, this.enemy.pos.y);
-            this.enemy.el.dataset.position = `${ec.offsetRow} ${ec.offsetFloor + this.waveDeltaYAt(this.enemy.pos.x, this.enemy.pos.y)} ${ec.offsetCol}`;
-            if (this.enemy.isDead) {
-                this.enemy.el.style.visibility = "hidden";
-            } else {
-                this.enemy.el.style.visibility = "visible";
-            }
-            this.sounds.clashSound.dataset.position = this.enemy.el.dataset.position;
+            // const ec = this.projectCoordinates(this.enemy.pos.x, this.enemy.pos.y);
+            // this.enemy.el.dataset.position = `${ec.offsetRow} ${ec.offsetFloor + this.waveDeltaYAt(this.enemy.pos.x, this.enemy.pos.y)} ${ec.offsetCol}`;
+            // if (this.enemy.isDead) {
+            //     this.enemy.el.style.visibility = "hidden";
+            // } else {
+            //     this.enemy.el.style.visibility = "visible";
+            // }
+
+            // TODO: move the clash sound where the combat is
+            // this.sounds.clashSound.dataset.position = this.enemy.el.dataset.position;
 
             // procedural enemy
-            // console.log(this.enemies);
             this.enemies.forEach(enemy => {
                 const coor = this.projectCoordinates(enemy.pos.x, enemy.pos.y);
                 enemy.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(enemy.pos.x, enemy.pos.y)} ${coor.offsetCol}`;
@@ -286,17 +302,6 @@ class BoardSystem extends MRSystem {
                     enemy.el.style.visibility = "visible";
                 }
             })
-            // for (let i = 0; i < this.enemies; i++) {
-            //     const enemy = this.enemies[i];
-            //     console.log(i, enemy)
-            //     const coor = this.projectCoordinates(enemy.pos.x, enemy.pos.y);
-            //     enemy.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(enemy.pos.x, enemy.pos.y)} ${coor.offsetCol}`;
-            //     if (enemy.isDead) {
-            //         enemy.el.style.visibility = "hidden";
-            //     } else {
-            //         enemy.el.style.visibility = "visible";
-            //     }
-            // }
 
             if (this.state.hasKey) {
                 this.goal.pos = this.door.pos;
@@ -326,8 +331,8 @@ class BoardSystem extends MRSystem {
         this.player.el.style.scale = this.scale;
         this.root.appendChild(this.player.el);
 
-        this.enemy.el.style.scale = this.scale;
-        this.root.appendChild(this.enemy.el);
+        // this.enemy.el.style.scale = this.scale;
+        // this.root.appendChild(this.enemy.el);
 
         this.root.appendChild(this.enemyContainer);
 
@@ -345,9 +350,13 @@ class BoardSystem extends MRSystem {
             for (let c = 0; c < this.colCount; c++) {
                 const tileObj = this.tilemap[r][c];
 
-                // tileObj.el.addEventListener("mouseover", () => {
-                //     tileObj.el.floorTile.dataset.position = "0 -0.1 0";
-                // })
+                tileObj.el.addEventListener("mouseover", () => {
+                    // tileObj.el.floorTile.dataset.position = "0 -0.1 0";
+
+                    tileObj.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
+                    tileObj.el.floorTile.object3D.children[0].material.opacity = 0.5;
+                    // tileObj.el.floorTile.object3D.
+                })
 
                 // tileObj.el.addEventListener("mouseout", () => {
                 //     tileObj.el.floorTile.dataset.position = "0 0 0";
@@ -368,9 +377,6 @@ class BoardSystem extends MRSystem {
 
         this.initialize();
         this.gameIsStarted = true;
-
-
-        // this.randomizeTile();
 
         // debug
         // document.addEventListener("keydown", (event) => {
@@ -406,10 +412,17 @@ class BoardSystem extends MRSystem {
     movePlayer(targetX, targetY) {
         if (this.isPlayerTurn) {
             this.state.moveCount++;
-            if (targetX == this.enemy.pos.x && targetY == this.enemy.pos.y && !this.enemy.isDead) {
-                console.log("attack");
-                this.combat();
-            } else {
+
+            let hadCombats = false;
+            this.enemies.forEach(enemy => {
+                if (targetX == enemy.pos.x && targetY == enemy.pos.y && !enemy.isDead) {
+                    console.log("attacked by " + enemy);
+                    this.combat(enemy);
+                    hadCombats = true;
+                }
+            });
+
+            if (!hadCombats) {
                 this.player.pos = {
                     x: targetX,
                     y: targetY
@@ -428,54 +441,58 @@ class BoardSystem extends MRSystem {
     }
 
     opponentTurn() {
-        if (!this.enemy.isDead) {
-            const directionX = this.player.pos.x - this.enemy.pos.x;
-            const directionY = this.player.pos.y - this.enemy.pos.y;
-
-            let goalX = this.enemy.pos.x;
-            let goalY = this.enemy.pos.y;
-
-            if (directionX < 0) {
-                goalX -= 1;
-            } else if (directionX > 0) {
-                goalX += 1;
-            }
-
-            if (directionY < 0) {
-                goalY -= 1;
-            } else if (directionY > 0) {
-                goalY += 1;
-            }
-
-            if (goalX == this.player.pos.x && goalY == this.player.pos.y) {
-                console.log("you are being attacked");
-                this.combat();
-            } else {
-                if (Math.random() < 0.75) {
-                    this.enemy.pos.x = goalX;
-                    this.enemy.pos.y = goalY;
+        this.enemies.forEach(enemy => {
+            if (!enemy.isDead) {
+                const directionX = this.player.pos.x - enemy.pos.x;
+                const directionY = this.player.pos.y - enemy.pos.y;
+    
+                let goalX = enemy.pos.x;
+                let goalY = enemy.pos.y;
+    
+                if (directionX < 0) {
+                    goalX -= 1;
+                } else if (directionX > 0) {
+                    goalX += 1;
+                }
+    
+                if (directionY < 0) {
+                    goalY -= 1;
+                } else if (directionY > 0) {
+                    goalY += 1;
+                }
+    
+                if (goalX == this.player.pos.x && goalY == this.player.pos.y) {
+                    console.log("you are being attacked");
+                    this.combat(enemy);
+                } else {
+                    if (Math.random() < 0.75) {
+                        enemy.pos.x = goalX;
+                        enemy.pos.y = goalY;
+                    }
                 }
             }
-        }
+
+        });
 
         setTimeout(() => {
             this.isPlayerTurn = true;
         }, 300)
     }
 
-    combat() {
+    combat(enemy) {
+        this.sounds.clashSound.dataset.position = this.player.el.dataset.position;
         this.sounds.clashSound.components.set('audio', { state: 'play' });
 
         this.player.playerHealth--;
-        this.enemy.hp--;
+        enemy.hp--;
 
         if (this.player.playerHealth <= 0) {
             this.gameIsStarted = false;
             console.log('you ded')
         }
 
-        if (this.enemy.hp <= 0) {
-            this.enemy.isDead = true;
+        if (enemy.hp <= 0) {
+            enemy.isDead = true;
         }
     }
 }
