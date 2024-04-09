@@ -8,16 +8,6 @@ class MRTile extends MREntity {
         this.floorTile = document.createElement("mr-model");
 
         this.rotationCollection = [0, 90, 180, 270];
-        // this.tileSets = ["tilegrass001", "tilegrass002", "tilegrass003"];
-
-        // this.rotationCollection = [0, 90, 180, 270];
-        // this.tileSets = [
-        //     ["tilegrass001", "tilegrass002", "tilegrass003"],
-        //     ["tilegrass001", "tilegrass001", "tilegrass002"],
-        //     ["tilegrass003", "tilegrass003", "tilegrass003"],
-        //     ["tilegrasscyan001", "tilegrasscyan002", "tilegrasscyan003"],
-        //     ["tilegrasspurple001", "tilegrasspurple002", "tilegrasspurple003"],
-        // ];
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -33,8 +23,6 @@ class MRTile extends MREntity {
                     object.morphTargetInfluences[0] = Math.random()
                 }
             })
-
-            // this.el.object3D.getObjectByName(this.elId).morphTargetInfluences[0] = Math.random();
         }
     }
 

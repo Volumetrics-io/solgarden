@@ -12,6 +12,17 @@ class BoardSystem extends MRSystem {
         this.gameIsStarted = false;
 
         this.rotationCollection = [0, 90, 180, 270];
+
+        this.biomes = [
+            {
+                name: "plains",
+                tileset: ["tilegrass001", "tilegrass002", "tilegrass003"],
+                
+            },
+            {
+
+            }
+        ]
         this.tileSets = [
             ["tilegrass001", "tilegrass002", "tilegrass003"],
             ["tilegrass001", "tilegrass001", "tilegrass002"],
@@ -226,8 +237,8 @@ class BoardSystem extends MRSystem {
     }
 
     waveDeltaYAt(r, c) {
-        // return 0;
-        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
+        return 0;
+        // return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
     }
 
     update(deltaTime, frame) {
