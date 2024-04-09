@@ -16,20 +16,17 @@ class BoardSystem extends MRSystem {
         this.biomes = [
             {
                 name: "plains",
-                tileset: ["tilegrass001", "tilegrass002", "tilegrass003"],
-                
+                path: "tiles/biome_plains/",
+                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
+                props: ["plant_01.glb", "plant_02.glb", "rock001.glb"]
             },
             {
-
+                name: "deserts",
+                path: "tiles/biome_deserts/",
+                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
+                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test"]
             }
         ]
-        this.tileSets = [
-            ["tilegrass001", "tilegrass002", "tilegrass003"],
-            ["tilegrass001", "tilegrass001", "tilegrass002"],
-            ["tilegrass003", "tilegrass003", "tilegrass003"],
-            ["tilegrasscyan001", "tilegrasscyan002", "tilegrasscyan003"],
-            ["tilegrasspurple001", "tilegrasspurple002", "tilegrasspurple003"],
-        ];
 
         this.sounds = {
             bgMusic: document.querySelector('#background-music'),
@@ -129,13 +126,17 @@ class BoardSystem extends MRSystem {
 
         // Randomly generate tilemap
         this.tilemap = [];
-        const randomTileset = this.tileSets[Math.floor(Math.random() * this.tileSets.length)];
+        // const randomTileset = this.tileSets[Math.floor(Math.random() * this.tileSets.length)];
+        const randomBiome = this.biomes[Math.floor(Math.random() * this.biomes.length)];
+        console.log(randomBiome)
+
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
                 const el = document.createElement("mr-tile");
                 el.style.scale = this.scale;
-                el.dataset.tileset = randomTileset;
+                el.dataset.tileset = randomBiome.tiles;
+                el.dataset.tilepath = randomBiome.path;
                 this.container.appendChild(el);
 
                 const tile = {

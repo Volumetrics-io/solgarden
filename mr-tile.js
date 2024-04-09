@@ -31,12 +31,13 @@ class MRTile extends MREntity {
 
         this.appendChild(this.el);
         const tileset = this.dataset.tileset.split(',');
+        const tilepath = this.dataset.tilepath;
 
         let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
         this.dataset.rotation = `0 ${randomRotation} 0`;
 
         let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
-        this.el.src = `tiles/${randomModel}.glb`;
+        this.el.src = tilepath + randomModel;
 
         // for (let r = 0; r < this.rowCount; r++) {
         //     for (let c = 0; c < this.colCount; c++) {
