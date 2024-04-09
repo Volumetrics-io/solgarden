@@ -32,9 +32,7 @@ class BoardSystem extends MRSystem {
             playerMaxHealth: 5000,
             playerSpeed: 2
         };
-        // this.enemy = {
-        //     el: document.createElement("mr-enemy")
-        // };
+
         this.enemies = [];
         this.enemyContainer = document.createElement("mr-div");
         this.key = {
@@ -205,51 +203,30 @@ class BoardSystem extends MRSystem {
 
                     if (this.isPlayerTurn) {
                         if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
+
+                            // reachable tiles in the zone around the player
                             tile.el.floorTile.dataset.position = "0 0 0";
-
-                            
-                            // mrjsUtils.color.setEntityColor(tile.el.floorTile, "#66aaff");
-                            // tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
-                            // tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
-
-                            // first color the tile the default color
-                            // tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                            //     color: "#66aaff",
-                            //     transparent: true,
-                            //     opacity: 0.5
-                            // });
-
                             tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
                             tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
 
                             // recolor the tile if any enemy is on it
                             this.enemies.forEach(enemy => {
                                 if (tile.pos.x == enemy.pos.x && tile.pos.y == enemy.pos.y && !enemy.isDead) {
-                                    // tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                                    //     color: "#ff6666",
-                                    //     transparent: true,
-                                    //     opacity: 0.5
-                                    // });
                                     tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
-                                    // mrjsUtils.color.setEntityColor(tile.el.floorTile, "#ff6666");
                                 }
                             })
 
                         } else {
+
                             // otherwise make the tile transparent and shove it 
                             // in the floor so it doesn't intercept clicks
                             tile.el.floorTile.dataset.position = "0 -0.2 0";
                             tile.el.floorTile.object3D.children[0].material.opacity = 0;
-                            // tile.el.floorTile.object3D.children[0].material = new THREE.MeshPhongMaterial({
-                            //     color: "#ffffff",
-                            //     transparent: true,
-                            //     opacity: 0,
-                            // });
                         }
                     } else {
+                        // tile.el.floorTile.object3D.children[0].material.color.setStyle('transparent')
                         tile.el.floorTile.object3D.children[0].material.opacity = 0;
                     }
-
                 }
             }
 
