@@ -6,6 +6,7 @@ class MRTile extends MREntity {
         this.el = document.createElement("mr-model");
         // this.prop = document.createElement("mr-model");
         this.floorTile = document.createElement("mr-model");
+        this.debug = document.createElement("mr-text");
 
         this.rotationCollection = [0, 90, 180, 270];
 
@@ -24,6 +25,11 @@ class MRTile extends MREntity {
                 }
             })
         }
+
+        // this.debug.onLoad = () => {
+        //     this.debug.style.fontSize = "50px";
+        //     this.debug.textContent = 'debug';
+        // }
     }
 
     connected() {
@@ -93,6 +99,8 @@ class MRTile extends MREntity {
         let mesh = new THREE.Mesh(geometry, material)
         this.floorTile.object3D.add(mesh);
         this.appendChild(this.floorTile);
+
+        this.appendChild(this.debug);
     }
 }
 

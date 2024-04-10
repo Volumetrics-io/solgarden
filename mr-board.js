@@ -1,8 +1,8 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
-        this.minRowCount = 4;
-        this.minColCount = 4;
+        this.minRowCount = 6;
+        this.minColCount = 6;
         this.minFlrCount = 1;
         this.maxRowCount = 10;
         this.maxColCount = 10;
@@ -65,6 +65,13 @@ class BoardSystem extends MRSystem {
 
     }
 
+    printArray(string, array) {
+        console.log('start of ' + string);
+        array.forEach(row => {
+            console.log(row);
+        })
+    }
+
     initialize() {
         this.levelId++;
         this.state = {
@@ -83,6 +90,9 @@ class BoardSystem extends MRSystem {
         this.heightMap = Array.from({ length: this.rowCount }, (_, x) =>
             Array.from({ length: this.colCount }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
         );
+
+        // console.log("this.heightMap", this.heightMap)
+        this.printArray("this.heightMap", this.heightMap);
 
         // will contain the obstacle 
         this.blockmap = Array.from({ length: this.rowCount }, () =>
@@ -176,6 +186,8 @@ class BoardSystem extends MRSystem {
 
         }
 
+        this.printArray("this.blockmap", this.blockmap);
+
         // Put the door on the outer ring of the map
         if (Math.random() < 0.5) {
             // between first and last row
@@ -218,8 +230,8 @@ class BoardSystem extends MRSystem {
     }
 
     waveDeltaYAt(r, c) {
-        return 0;
-        // return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
+        // return 0;
+        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
     }
 
     uniquePosition(array) {
@@ -291,6 +303,8 @@ class BoardSystem extends MRSystem {
                         let color = `hsl(${offsetY}, 70%, 70%)`;
                         tile.el.floorTile.object3D.children[0].material.color.setStyle(color)
                         tile.el.floorTile.object3D.children[0].material.opacity = 0.75;
+
+                        // tile.debug.innerText = distance;
                     }
 
                     // if (this.isPlayerTurn) {
