@@ -57,6 +57,8 @@ class BoardSystem extends MRSystem {
         // container to store board object references
         this.container = document.createElement("mr-div");
 
+        this.UILayer = document.createElement("mr-div");
+
         // debug
         document.addEventListener("keydown", (event) => {
             if (event.key === "d") {
@@ -181,6 +183,7 @@ class BoardSystem extends MRSystem {
 
                 const enemy = {
                     el: el,
+                    type: 'enemy',
                     hp: 3,
                     isDead: false
                 };
@@ -207,18 +210,14 @@ class BoardSystem extends MRSystem {
             this.container.appendChild(el);
 
             const prop = {
-                el: el
+                el: el,
+                type: 'prop'
             }
 
             let uniquePosition = this.addToEntityMap(prop);
 
-            // let uniquePosition = this.uniquePosition(possiblePos);
             // player can't go on tiles marked 1 on the blockmap
             this.blockmap[uniquePosition.x][uniquePosition.y] = 1;
-            // this.props.push({
-            //     el: el,
-            //     pos: uniquePosition
-            // });
 
         }
 
@@ -226,8 +225,15 @@ class BoardSystem extends MRSystem {
         // player.style.scale = this.scale;
         this.container.appendChild(player);
         this.playerPos = this.addToEntityMap({
-            el: player
+            el: player,
+            type: 'player'
         });
+
+        // player overhead light
+        this.overheadLight = document.createElement("mr-light");
+        this.container.appendChild(this.overheadLight);
+        this.overheadLight.setAttribute('color', "#ffffff")
+        this.overheadLight.setAttribute('intensity', 0.03)
 
         console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
 
@@ -235,7 +241,8 @@ class BoardSystem extends MRSystem {
         // randomChest.style.scale = this.scale;
         this.container.appendChild(randomChest);
         this.addToEntityMap({
-            el: randomChest
+            el: randomChest,
+            type: 'chest'
         });
 
         // Put the door on the outer ring of the map
@@ -364,6 +371,12 @@ class BoardSystem extends MRSystem {
             //     prop.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(prop.pos.x, prop.pos.y)} ${coor.offsetCol}`;
             // })
 
+            const offsetX = - this.scale / 2;
+            const offsetY = (this.rowCount / 2) * this.scale;
+            // const offsetY = this.rowCount * this.scale;
+
+            this.UILayer.dataset.position = `${offsetX} 0 ${offsetY}`;
+
             const distances = this.calculateDistances(this.playerPos.y, this.playerPos.x, this.blockmap);
             // this.printArray('distances array', distances)
             this.tilemap.forEach(row => {
@@ -439,6 +452,10 @@ class BoardSystem extends MRSystem {
                 }
             }
 
+            const coor = this.projectCoordinates(this.playerPos.x, this.playerPos.y);
+            this.overheadLight.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + 0.9 + this.waveDeltaYAt(this.playerPos.x, this.playerPos.y)} ${coor.offsetCol}`;
+
+
             // this.entityMap.forEach(row => {
             //     row.forEach(entity => {
             //         const coor = this.projectCoordinates(tile.pos.x, tile.pos.y);
@@ -474,6 +491,21 @@ class BoardSystem extends MRSystem {
     attachedComponent(entity) {
         this.root = entity;
         this.root.appendChild(this.container);
+
+        this.root.appendChild(this.UILayer);
+        this.UILayer.object3D.add(new THREE.Mesh(
+            new THREE.BoxGeometry(this.scale * 5, this.scale, this.scale),
+            new THREE.MeshPhongMaterial({
+                color: "#ffffff",
+                transparent: true,
+                opacity: 1,
+                receiveShadow: true
+            })));
+        this.root.appendChild(this.UILayer);
+
+
+        // this.root.appendChild(this.overheadLight);
+
 
         this.container.style.scale = this.scale;
 
