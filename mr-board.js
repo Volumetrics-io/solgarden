@@ -24,7 +24,7 @@ class BoardSystem extends MRSystem {
                 name: "deserts",
                 path: "tiles/biome_deserts/",
                 tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
-                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test"]
+                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
             }
         ]
 
@@ -75,12 +75,18 @@ class BoardSystem extends MRSystem {
         };
         this.timer = 0;
         this.isPlayerTurn = true;
-        // elevation for the heightmap
+
+        // random geometry for the room
         this.flrCount = Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
         this.rowCount = Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
         this.colCount = Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
         this.heightMap = Array.from({ length: this.rowCount }, (_, x) =>
             Array.from({ length: this.colCount }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
+        );
+
+        // will contain the obstacle 
+        this.blockmap = Array.from({ length: this.rowCount }, () =>
+            Array.from({ length: this.colCount }, () => 0)
         );
 
         // clear up the dom elements container
@@ -89,8 +95,8 @@ class BoardSystem extends MRSystem {
         }
 
         var possiblePos = [];
-        for (let r = 0; r < this.rowCount; r++) {
-            for (let c = 0; c < this.colCount; c++) {
+        for (let r = 1; r < this.rowCount - 1; r++) {
+            for (let c = 1; c < this.colCount - 1; c++) {
                 const pos = {
                     x: r,
                     y: c
@@ -99,37 +105,12 @@ class BoardSystem extends MRSystem {
             }
         }
 
-        // console.log(possiblePos.splice(Math.floor(Math.random() * possiblePos.length), 1)[0])
-
-        this.player.pos = possiblePos.splice(Math.floor(Math.random() * possiblePos.length), 1)[0];
-        // console.log(possiblePos);
-
-        this.key.pos = possiblePos.splice(Math.floor(Math.random() * possiblePos.length), 1)[0];
-        // console.log(possiblePos);
-
-        // TODO: change the way we find unnoccupied board space
-        // Dictionnary and remove elements?
-        // this.key.pos = this.player.pos = {
-        //     x: 0,
-        //     y: 0
-        // }
-        // while (this.player.pos.x == this.key.pos.x && this.player.pos.y == this.key.pos.y) {
-        // this.player.pos = {
-        //     x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
-        //     y: Math.floor(Math.random() * (this.colCount - 2) + 1)
-        // }
-        // this.key.pos = {
-        //     x: Math.floor(Math.random() * (this.rowCount - 2) + 1),
-        //     y: Math.floor(Math.random() * (this.colCount - 2) + 1)
-        // }
-        // }
+        this.player.pos = this.uniquePosition(possiblePos);
+        this.key.pos = this.uniquePosition(possiblePos);
 
         // Randomly generate tilemap
         this.tilemap = [];
-        // const randomTileset = this.tileSets[Math.floor(Math.random() * this.tileSets.length)];
         const randomBiome = this.biomes[Math.floor(Math.random() * this.biomes.length)];
-        console.log(randomBiome)
-
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
@@ -145,18 +126,13 @@ class BoardSystem extends MRSystem {
                         x: r,
                         y: c
                     }
-                }
-
-                el.addEventListener("mouseover", () => {
-                    el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
-                    el.floorTile.object3D.children[0].material.opacity = 0.5;
-                })
+                };
 
                 el.addEventListener("touchstart", () => {
                     if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
                         this.movePlayer(tile.pos.x, tile.pos.y);
                     }
-                })
+                });
 
                 row.push(tile);
             }
@@ -166,7 +142,7 @@ class BoardSystem extends MRSystem {
         // Generate the enemies starting at the second room
         this.enemies = [];
         if (this.levelId > 1) {
-            const enemyCount = Math.floor(Math.random() * 3) + 2;
+            const enemyCount = Math.floor(Math.random() * 2) + 1;
             for (let i = 0; i < enemyCount; i++) {
                 const el = document.createElement("mr-enemy");
                 el.style.scale = this.scale;
@@ -176,24 +152,28 @@ class BoardSystem extends MRSystem {
                     el: el,
                     hp: 3,
                     isDead: false,
-                    pos: possiblePos.splice(Math.floor(Math.random() * possiblePos.length), 1)[0]
+                    pos: this.uniquePosition(possiblePos)
                 });
             }
         }
 
-        this.impassibles = [];
-        const impassibleCount = Math.floor(Math.random() * 3) + 2;
-        for (let i = 0; i < impassibleCount; i++) {
-            // const el = document.createElement("mr-enemy");
-            // el.style.scale = this.scale;
-            // this.container.appendChild(el);
+        this.props = [];
+        const propCount = 3;
+        for (let i = 0; i < propCount; i++) {
+            const el = document.createElement("mr-prop");
+            el.style.scale = this.scale;
+            el.dataset.tileset = randomBiome.props;
+            el.dataset.tilepath = randomBiome.path;
+            this.container.appendChild(el);
 
-            // this.enemies.push({
-            //     el: el,
-            //     hp: 3,
-            //     isDead: false,
-            //     pos: possiblePos.splice(Math.floor(Math.random() * possiblePos.length), 1)[0]
-            // });
+            let uniquePosition = this.uniquePosition(possiblePos);
+            // player can't go on tiles marked 1 on the blockmap
+            this.blockmap[uniquePosition.x][uniquePosition.y] = 1;
+            this.props.push({
+                el: el,
+                pos: uniquePosition
+            });
+
         }
 
         // Put the door on the outer ring of the map
@@ -242,6 +222,10 @@ class BoardSystem extends MRSystem {
         // return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
     }
 
+    uniquePosition(array) {
+        return array.splice(Math.floor(Math.random() * array.length), 1)[0]
+    }
+
     update(deltaTime, frame) {
 
         if (this.gameIsStarted) {
@@ -286,37 +270,62 @@ class BoardSystem extends MRSystem {
                 }
             })
 
+            // PROPS
+            this.props.forEach(prop => {
+                const coor = this.projectCoordinates(prop.pos.x, prop.pos.y);
+                prop.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(prop.pos.x, prop.pos.y)} ${coor.offsetCol}`;
+            })
+
+            const distances = this.calculateDistances(this.player.pos.x, this.player.pos.y, this.blockmap);
             this.tilemap.forEach(row => {
                 row.forEach(tile => {
                     const coor = this.projectCoordinates(tile.pos.x, tile.pos.y);
                     tile.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(tile.pos.x, tile.pos.y)} ${coor.offsetCol}`;
 
-                    if (this.isPlayerTurn) {
-                        if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
+                    const distance = distances[tile.pos.x][tile.pos.y];
+                    // console.log(distance);
 
-                            // reachable tiles in the zone around the player
-                            tile.el.floorTile.dataset.position = "0 0 0";
-                            tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
-                            tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
-
-                            // recolor the tile if any enemy is on it
-                            this.enemies.forEach(enemy => {
-                                if (tile.pos.x == enemy.pos.x && tile.pos.y == enemy.pos.y && !enemy.isDead) {
-                                    tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
-                                }
-                            })
-
-                        } else {
-
-                            // otherwise make the tile transparent and shove it 
-                            // in the floor so it doesn't intercept clicks
-                            tile.el.floorTile.dataset.position = "0 -0.2 0";
-                            tile.el.floorTile.object3D.children[0].material.opacity = 0;
-                        }
-                    } else {
-                        // tile.el.floorTile.object3D.children[0].material.color.setStyle('transparent')
-                        tile.el.floorTile.object3D.children[0].material.opacity = 0;
+                    if (distance != Infinity) {
+                        let offsetY = distance * 60;
+                        // tile.el.floorTile.dataset.position = `0 0 0`;
+                        let color = `hsl(${offsetY}, 70%, 70%)`;
+                        tile.el.floorTile.object3D.children[0].material.color.setStyle(color)
+                        tile.el.floorTile.object3D.children[0].material.opacity = 0.75;
                     }
+
+                    // if (this.isPlayerTurn) {
+                    //     if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
+
+                    //         // reachable tiles in the zone around the player
+                    //         // console.log(this.pathfinder.findPath(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y))
+                    //         tile.el.floorTile.dataset.position = `0 0 0`;
+                    //         tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
+                    //         tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
+
+                    //         // recolor the tile if any enemy is on it
+                    //         this.enemies.forEach(enemy => {
+                    //             if (tile.pos.x == enemy.pos.x && tile.pos.y == enemy.pos.y && !enemy.isDead) {
+                    //                 tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
+                    //             }
+                    //         })
+
+                    //         // recolor the tile if any prop is on it
+                    //         this.props.forEach(prop => {
+                    //             if (tile.pos.x == prop.pos.x && tile.pos.y == prop.pos.y) {
+                    //                 tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
+                    //             }
+                    //         })
+
+                    //     } else {
+
+                    //         // otherwise make the tile transparent and shove it 
+                    //         // in the floor so it doesn't intercept clicks
+                    //         tile.el.floorTile.dataset.position = "0 -0.2 0";
+                    //         tile.el.floorTile.object3D.children[0].material.opacity = 0;
+                    //     }
+                    // } else {
+                    //     tile.el.floorTile.object3D.children[0].material.opacity = 0;
+                    // }
 
                 })
             })
@@ -343,7 +352,6 @@ class BoardSystem extends MRSystem {
     }
 
     attachedComponent(entity) {
-
         this.root = entity;
         this.root.appendChild(this.container);
 
@@ -360,14 +368,6 @@ class BoardSystem extends MRSystem {
         this.root.appendChild(this.goal.el);
 
         this.initialize();
-
-        // debug
-        // document.addEventListener("keydown", (event) => {
-        //     if (event.key === "d") {
-        //         event.preventDefault();
-        //         this.initialize();
-        //     }
-        // });
     }
 
     updatePanel() {
@@ -476,6 +476,62 @@ class BoardSystem extends MRSystem {
         if (enemy.hp <= 0) {
             enemy.isDead = true;
         }
+    }
+
+    calculateDistances(x, y, blockmap) {
+        // https://codepen.io/lobau/pen/XWQqVwy/6a4c88328ccf9f08befa5463af05708a
+        const width = blockmap[0].length;
+        const height = blockmap.length;
+
+        // Initialize distances array with Infinity for unvisited cells
+        const distances = Array.from({ length: height }, () =>
+            Array(width).fill(Infinity)
+        );
+        distances[y][x] = 0; // Distance to itself is 0
+
+        // Directions array for exploring all 8 directions around a cell (diagonals included)
+        const directions = [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+            [-1, -1],
+            [1, 1],
+            [-1, 1],
+            [1, -1]
+        ];
+
+        // Queue for BFS, starting with the specified cell
+        let queue = [[x, y]];
+
+        while (queue.length > 0) {
+            const [currentX, currentY] = queue.shift();
+
+            for (let [dx, dy] of directions) {
+                const newX = currentX + dx;
+                const newY = currentY + dy;
+
+                // Check bounds and obstacles
+                if (
+                    newX >= 0 &&
+                    newX < width &&
+                    newY >= 0 &&
+                    newY < height &&
+                    blockmap[newY][newX] === 0
+                ) {
+                    // Calculate potential new distance
+                    const newDistance = distances[currentY][currentX] + 1;
+
+                    // Update distance if newDistance is smaller
+                    if (newDistance < distances[newY][newX]) {
+                        distances[newY][newX] = newDistance;
+                        queue.push([newX, newY]);
+                    }
+                }
+            }
+        }
+
+        return distances;
     }
 }
 
