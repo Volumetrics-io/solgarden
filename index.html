@@ -6,6 +6,17 @@
     <title>Sol Garden — The mini roguelike for your desk</title>
     <script src="dist/mr.js"></script>
     <style>
+        @font-face {
+            font-family: 'JetBrains';
+            src: url('JetBrainsMono.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+        }
+
+        html, body {
+            font-family: 'JetBrains';
+        }
+
         #game-panel {
             /* background-color: moccasin; */
             width: 300px;
@@ -52,8 +63,8 @@
         <mr-entity id="clash-sound" data-comp-audio="src: ./audio/clash.mp3; loop: false; state: stop;"></mr-entity>
         <mr-entity id="background-music"
             data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
-        <mr-panel id="game-panel" data-comp-anchor="type: plane; label: table" data-position="0 -0.5 0">
-            <!-- <mr-text class="title">Inventory</mr-text> -->
+        <!-- <mr-panel id="game-panel" data-comp-anchor="type: plane; label: table" data-position="0 -0.5 0">
+            <mr-text class="title">Inventory</mr-text>
             <mr-div class="row">
                 <mr-text>Moves</mr-text>
                 <mr-text id="move-count">0</mr-text>
@@ -66,10 +77,10 @@
                 <mr-text>HP</mr-text>
                 <mr-text id="health-status"></mr-text>
             </mr-div>
-            <!-- <mr-div class="column" id="inventory">
+            <mr-div class="column" id="inventory">
                 <mr-text data-item-id="1">Bronze wrench</mr-text>
-            </mr-div> -->
-        </mr-panel>
+            </mr-div>
+        </mr-panel> -->
     </mr-app>
 
     <script src="heightmap.js"></script>
@@ -77,6 +88,7 @@
     <script src="mr-board.js"></script>
     <script src="mr-tile.js"></script>
     <script src="mr-player.js"></script>
+    <script src="mr-chest.js"></script>
     <script src="mr-enemy.js"></script>
     <script src="mr-goal.js"></script>
     <script src="mr-key.js"></script>
