@@ -37,7 +37,6 @@ class BoardSystem extends MRSystem {
         }
 
         this.playerStats = {
-            // el: document.createElement("mr-player"),
             health: 5000,
             maxHealth: 5000,
             moveSpeed: 2,
@@ -58,6 +57,9 @@ class BoardSystem extends MRSystem {
         this.container = document.createElement("mr-div");
 
         this.UILayer = document.createElement("mr-div");
+        this.actionBalls = [];
+        this.healthBalls = [];
+
 
         // debug
         document.addEventListener("keydown", (event) => {
@@ -326,6 +328,28 @@ class BoardSystem extends MRSystem {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
 
+            ///// UI LAYER
+            this.actionBalls.forEach((actionBall, index) => {
+                const ballsize = 0.01;
+                const margin = 0.015;
+                const offsetX = (this.actionBalls.length / 2) * ballsize + (this.actionBalls.length / 2 - 1) * margin;
+                actionBall.dataset.position = `${index * ballsize + index * margin - offsetX} ${this.scale / 2 + ballsize} 0`;
+
+                if (index < this.playerStats.maxActionPoints) {
+                    actionBall.style.visibility = "visible";
+                    if (index < this.playerStats.actionPoints) {
+                        // actionBall.el.style.opacity = 1;
+                        actionBall.el.object3D.children[0].material.opacity = 1;
+                    } else {
+                        // actionBall.el.style.opacity = 0.25;
+                        actionBall.el.object3D.children[0].material.opacity = 0.25;
+                    }
+                } else {
+                    actionBall.style.visibility = "hidden";
+                }
+            });
+            /////
+
             // PLAYER
             // if (this.state.isFalling) {
             //     this.state.fallHeight += 0.01;
@@ -387,10 +411,10 @@ class BoardSystem extends MRSystem {
                     const distance = distances[tile.pos.x][tile.pos.y];
 
                     if (distance != Infinity &&
-                        distance < this.playerStats.actionPoints &&
+                        distance <= this.playerStats.actionPoints &&
                         distance > 0 &&
                         this.entityMap[tile.pos.x][tile.pos.y] == 0) {
-                        let offsetY = distance * 50;
+                        let offsetY = distance * 40;
                         // tile.el.floorTile.dataset.position = `0 0 0`;
                         let color = `hsl(${offsetY}, 80%, 60%)`;
                         tile.el.floorTile.object3D.children[0].material.color.setStyle(color)
@@ -502,6 +526,19 @@ class BoardSystem extends MRSystem {
                 receiveShadow: true
             })));
         this.root.appendChild(this.UILayer);
+
+        for (let i = 0; i < 7; i++) {
+            let actionBall = document.createElement("mr-action-ball");
+            this.actionBalls.push(actionBall);
+            this.UILayer.appendChild(actionBall);
+        }
+
+        this.endTurnButton = document.createElement("mr-button");
+        this.endTurnButton.innerText = "End turn";
+        this.endTurnButton.style.fontSize = "10px";
+        this.endTurnButton.dataset.position = "0.085 0.027 0";
+        this.endTurnButton.dataset.rotation = "270 0 0";
+        this.UILayer.appendChild(this.endTurnButton);
 
 
         // this.root.appendChild(this.overheadLight);
