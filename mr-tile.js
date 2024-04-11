@@ -54,7 +54,7 @@ class MRTile extends MREntity {
         let material = new THREE.MeshPhongMaterial({
             color: "#d3ceba",
             transparent: true,
-            opacity: 0
+            opacity: 0.75
         })
 
         let mesh = new THREE.Mesh(geometry, material)

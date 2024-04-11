@@ -18,7 +18,7 @@ class BoardSystem extends MRSystem {
                 name: "plains",
                 path: "tiles/biome_plains/",
                 tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
-                props: ["plant_01.glb", "plant_02.glb", "rock001.glb"]
+                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
             },
             {
                 name: "deserts",
@@ -41,17 +41,9 @@ class BoardSystem extends MRSystem {
             maxHealth: 5000,
             moveSpeed: 2,
             actionPoints: 5,
-            maxActionPoints: 5
+            maxActionPoints: 5,
+            projectedCost: 0
         };
-        // this.key = {
-        //     el: document.createElement("mr-key")
-        // };
-        // this.door = {
-        //     el: document.createElement("mr-door")
-        // };
-        // this.goal = {
-        //     el: document.createElement("mr-goal")
-        // };
 
         // container to store board object references
         this.container = document.createElement("mr-div");
@@ -59,7 +51,6 @@ class BoardSystem extends MRSystem {
         this.UILayer = document.createElement("mr-div");
         this.actionBalls = [];
         this.healthBalls = [];
-
 
         // debug
         document.addEventListener("keydown", (event) => {
@@ -85,8 +76,6 @@ class BoardSystem extends MRSystem {
         this.state = {
             hasKey: false,
             moveCount: 0,
-            // isFalling: true,
-            // fallHeight: -0.1
         };
         this.timer = 0;
         this.isPlayerTurn = true;
@@ -99,17 +88,9 @@ class BoardSystem extends MRSystem {
             Array.from({ length: this.colCount }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
         );
 
+        const numberOfAvailableSpots = this.rowCount * this.colCount;
+
         console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`)
-
-        // will contain the obstacle 
-        // this.blockmap = Array.from({ length: this.rowCount }, () =>
-        //     Array.from({ length: this.colCount }, () => 0)
-        // );
-
-        // will contain all the other entities
-        // this.entityMap = Array.from({ length: this.rowCount }, () =>
-        //     Array.from({ length: this.colCount }, () => null)
-        // );
 
         this.blockmap = Array.from({ length: this.rowCount }, () => Array(this.colCount).fill(0));
         this.entityMap = Array.from({ length: this.rowCount }, () => Array(this.colCount).fill(0));
@@ -119,30 +100,6 @@ class BoardSystem extends MRSystem {
             this.container.removeChild(this.container.lastChild);
         }
 
-        // this.entityMap = [];
-        // for (let r = 0; r < this.rowCount; r++) {
-        //     const row = []
-        //     for (let c = 0; c < this.colCount; c++) {
-        //         row.push(null);
-        //     }
-        //     this.entityMap.push(row);
-        // }
-
-
-        // var possiblePos = [];
-        // for (let r = 1; r < this.rowCount - 1; r++) {
-        //     for (let c = 1; c < this.colCount - 1; c++) {
-        //         const pos = {
-        //             x: r,
-        //             y: c
-        //         }
-        //         possiblePos.push(pos);
-        //     }
-        // }
-
-        // this.player.pos = this.uniquePosition(possiblePos);
-        // this.key.pos = this.uniquePosition(possiblePos);
-
         // Randomly generate tilemap
         this.tilemap = [];
         const randomBiome = this.biomes[Math.floor(Math.random() * this.biomes.length)];
@@ -150,9 +107,9 @@ class BoardSystem extends MRSystem {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
                 const el = document.createElement("mr-tile");
-                // el.style.scale = this.scale;
                 el.dataset.tileset = randomBiome.tiles;
                 el.dataset.tilepath = randomBiome.path;
+
                 this.container.appendChild(el);
 
                 const tile = {
@@ -163,11 +120,30 @@ class BoardSystem extends MRSystem {
                     }
                 };
 
-                // el.addEventListener("touchstart", () => {
-                //     if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
-                //         this.movePlayer(tile.pos.x, tile.pos.y);
-                //     }
-                // });
+                el.addEventListener("mouseover", () => {
+                    this.playerStats.projectedCost = this.distances[tile.pos.x][tile.pos.y];
+                    el.floorTile.object3D.children[0].material.opacity = 1;
+                });
+
+                el.addEventListener("mouseout", () => {
+                    this.playerStats.projectedCost = 0;
+                    el.floorTile.object3D.children[0].material.opacity = 0.75;
+                });
+
+                el.addEventListener("touchstart", () => {
+
+                    const moveCost = this.distances[tile.pos.x][tile.pos.y];
+
+                    console.log(this.playerStats.actionPoints, moveCost)
+                    // move the player in the new position
+
+                    if (moveCost <= this.playerStats.actionPoints) {
+                        this.playerStats.actionPoints -= moveCost;
+                        this.moveEntity(this.playerPos.x, this.playerPos.y, tile.pos.x, tile.pos.y);
+                        this.playerPos.x = tile.pos.x;
+                        this.playerPos.y = tile.pos.y;
+                    }
+                });
 
                 row.push(tile);
             }
@@ -175,8 +151,7 @@ class BoardSystem extends MRSystem {
         }
 
         // Generate the enemies starting at the second room
-        // this.enemies = [];
-        if (this.levelId > 1) {
+        // if (this.levelId > 1) {
             const enemyCount = Math.floor(Math.random() * 2) + 1;
             for (let i = 0; i < enemyCount; i++) {
                 const el = document.createElement("mr-enemy");
@@ -186,24 +161,33 @@ class BoardSystem extends MRSystem {
                 const enemy = {
                     el: el,
                     type: 'enemy',
-                    hp: 3,
-                    isDead: false
+                    hp: 3
                 };
 
+                // TODO: doesn't work??
+                el.addEventListener("mouseover", () => {
+                    console.log('here')
+                    this.playerStats.projectedCost = 1;
+                });
+
+                el.addEventListener("mouseout", () => {
+                    console.log('here')
+                    this.playerStats.projectedCost = 0;
+                });
+
+                el.addEventListener("touchstart", () => {
+                    if(this.playerStats.actionPoints > 0) {
+                        this.playerStats.actionPoints--;
+                        // this.combat(enemy, r, c);
+                    }
+                });
+
                 this.addToEntityMap(enemy);
-
-
-                // this.enemies.push({
-                //     el: el,
-                //     hp: 3,
-                //     isDead: false,
-                //     pos: this.uniquePosition(possiblePos)
-                // });
             }
-        }
+        // }
 
         // this.props = [];
-        const propCount = 5;
+        const propCount = Math.floor(numberOfAvailableSpots / 4);
         for (let i = 0; i < propCount; i++) {
             const el = document.createElement("mr-prop");
             // el.style.scale = this.scale;
@@ -274,15 +258,13 @@ class BoardSystem extends MRSystem {
 
         // }
 
-        // this.goal.pos = this.key.pos;
-
         // if (this.levelId > 1) {
         //     this.sounds.doorSound.components.set('audio', { state: 'play' });
         // }
 
         // Play the background music
         // if (this.levelId == 2) {
-        //     this.sounds.bgMusic.components.set('audio', { state: 'play' })
+            // this.sounds.bgMusic.components.set('audio', { state: 'play' })
         // }
 
         this.gameIsStarted = true;
@@ -294,7 +276,7 @@ class BoardSystem extends MRSystem {
 
     waveDeltaYAt(r, c) {
         // return 0;
-        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 1000;
+        return Math.sin(this.timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 500;
     }
 
     uniquePosition(array) {
@@ -344,125 +326,57 @@ class BoardSystem extends MRSystem {
                         // actionBall.el.style.opacity = 0.25;
                         actionBall.el.object3D.children[0].material.opacity = 0.25;
                     }
+                    // console.log(this.playerStats.projectedCost);
+                    if (index < this.playerStats.projectedCost) {
+                        actionBall.el.object3D.children[0].material.color.setStyle('#ff0000')
+                    } else {
+                        actionBall.el.object3D.children[0].material.color.setStyle('#00ff55')
+                    }
                 } else {
                     actionBall.style.visibility = "hidden";
                 }
             });
             /////
 
-            // PLAYER
-            // if (this.state.isFalling) {
-            //     this.state.fallHeight += 0.01;
-            //     if (this.state.fallHeight >= 0) {
-            //         this.state.isFalling = false;
-            //     }
-            // }
-            // const plc = this.projectCoordinates(this.player.pos.x, this.player.pos.y);
-            // const playerY = plc.offsetFloor + this.waveDeltaYAt(this.player.pos.x, this.player.pos.y) - this.state.fallHeight;
-            // this.player.el.dataset.position = `${plc.offsetRow} ${playerY} ${plc.offsetCol}`;
-            // this.sounds.chessSound.dataset.position = this.player.el.dataset.position;
-
-            // TUTORIAL (Blue goal)
-            // Blue goal is shown for the first 2 turns
-            // if (this.levelId < 3) {
-            //     const gc = this.projectCoordinates(this.goal.pos.x, this.goal.pos.y);
-            //     this.goal.el.dataset.position = `${gc.offsetRow} ${gc.offsetFloor + this.waveDeltaYAt(this.goal.pos.x, this.goal.pos.y)} ${gc.offsetCol}`;
-            //     this.goal.el.style.scale = this.scale;
-            //     this.goal.el.style.visibility = "visible";
-            // } else {
-            //     this.goal.el.style.visibility = "hidden";
-            // }
-
-            // DOOR
-            // const dc = this.projectCoordinates(this.door.pos.x, this.door.pos.y);
-            // this.door.el.dataset.position = `${dc.offsetRow} ${dc.offsetFloor + this.waveDeltaYAt(this.door.pos.x, this.door.pos.y)} ${dc.offsetCol}`;
-            // this.sounds.doorSound.dataset.position = this.door.el.dataset.position;
-
-            // ENEMIES
-            // this.enemies.forEach(enemy => {
-            //     const coor = this.projectCoordinates(enemy.pos.x, enemy.pos.y);
-            //     enemy.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(enemy.pos.x, enemy.pos.y)} ${coor.offsetCol}`;
-            //     if (enemy.isDead) {
-            //         enemy.el.style.visibility = "hidden";
-            //     } else {
-            //         enemy.el.style.visibility = "visible";
-            //     }
-            // })
-
-            // PROPS
-            // this.props.forEach(prop => {
-            //     const coor = this.projectCoordinates(prop.pos.x, prop.pos.y);
-            //     prop.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(prop.pos.x, prop.pos.y)} ${coor.offsetCol}`;
-            // })
-
             const offsetX = - this.scale / 2;
             const offsetY = (this.rowCount / 2) * this.scale;
             // const offsetY = this.rowCount * this.scale;
 
             this.UILayer.dataset.position = `${offsetX} 0 ${offsetY}`;
+            // this.UILayer.dataset.rotation = `0 270 0`;
 
-            const distances = this.calculateDistances(this.playerPos.y, this.playerPos.x, this.blockmap);
+            this.calculateDistances(this.playerPos.y, this.playerPos.x, this.blockmap);
             // this.printArray('distances array', distances)
             this.tilemap.forEach(row => {
                 row.forEach(tile => {
                     const coor = this.projectCoordinates(tile.pos.x, tile.pos.y);
                     tile.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(tile.pos.x, tile.pos.y)} ${coor.offsetCol}`;
 
-                    const distance = distances[tile.pos.x][tile.pos.y];
+                    if (this.isPlayerTurn) {
+                        const distance = this.distances[tile.pos.x][tile.pos.y];
 
-                    if (distance != Infinity &&
-                        distance <= this.playerStats.actionPoints &&
-                        distance > 0 &&
-                        this.entityMap[tile.pos.x][tile.pos.y] == 0) {
-                        let offsetY = distance * 40;
-                        // tile.el.floorTile.dataset.position = `0 0 0`;
-                        let color = `hsl(${offsetY}, 80%, 60%)`;
-                        tile.el.floorTile.object3D.children[0].material.color.setStyle(color)
-                        tile.el.floorTile.object3D.children[0].material.opacity = 1;
+                        if (distance != Infinity &&
+                            distance <= this.playerStats.actionPoints &&
+                            distance > 0 &&
+                            this.entityMap[tile.pos.x][tile.pos.y] == 0) {
 
-                        tile.el.numberString.innerText = distance;
+
+                            let offsetY = distance * 40;
+                            // tile.el.floorTile.dataset.position = `0 0 0`;
+                            let color = `hsl(${offsetY}, 80%, 60%)`;
+                            tile.el.floorTile.style.visibility = "visible";
+                            tile.el.floorTile.object3D.children[0].material.color.setStyle(color)
+                            // tile.el.floorTile.object3D.children[0].material.opacity = 1;
+
+                            tile.el.numberString.innerText = distance;
+                        } else {
+                            tile.el.numberString.innerText = '';
+                            tile.el.floorTile.style.visibility = "hidden";
+                        }
+                    } else {
+                        tile.el.numberString.innerText = '';
+                        tile.el.floorTile.style.visibility = "hidden";
                     }
-
-                    // if(this.entityMap[tile.pos.x][tile.pos.y] != 0) {
-                    //     let color = `hsl(0, 70%, 70%)`;
-                    //     tile.el.floorTile.object3D.children[0].material.color.setStyle(color)
-                    //     tile.el.floorTile.object3D.children[0].material.opacity = 1;
-                    // }
-
-                    // if (this.isPlayerTurn) {
-                    //     if (this.canMove(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y)) {
-
-                    //         // reachable tiles in the zone around the player
-                    //         // console.log(this.pathfinder.findPath(tile.pos.x, tile.pos.y, this.player.pos.x, this.player.pos.y))
-                    //         tile.el.floorTile.dataset.position = `0 0 0`;
-                    //         tile.el.floorTile.object3D.children[0].material.color.setStyle('#66aaff')
-                    //         tile.el.floorTile.object3D.children[0].material.opacity = 0.5;
-
-                    //         // recolor the tile if any enemy is on it
-                    //         this.enemies.forEach(enemy => {
-                    //             if (tile.pos.x == enemy.pos.x && tile.pos.y == enemy.pos.y && !enemy.isDead) {
-                    //                 tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
-                    //             }
-                    //         })
-
-                    //         // recolor the tile if any prop is on it
-                    //         this.props.forEach(prop => {
-                    //             if (tile.pos.x == prop.pos.x && tile.pos.y == prop.pos.y) {
-                    //                 tile.el.floorTile.object3D.children[0].material.color.setStyle('#ff6666')
-                    //             }
-                    //         })
-
-                    //     } else {
-
-                    //         // otherwise make the tile transparent and shove it 
-                    //         // in the floor so it doesn't intercept clicks
-                    //         tile.el.floorTile.dataset.position = "0 -0.2 0";
-                    //         tile.el.floorTile.object3D.children[0].material.opacity = 0;
-                    //     }
-                    // } else {
-                    //     tile.el.floorTile.object3D.children[0].material.opacity = 0;
-                    // }
-
                 })
             })
 
@@ -476,16 +390,9 @@ class BoardSystem extends MRSystem {
                 }
             }
 
+            // move the overhead light above the player position
             const coor = this.projectCoordinates(this.playerPos.x, this.playerPos.y);
             this.overheadLight.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + 0.9 + this.waveDeltaYAt(this.playerPos.x, this.playerPos.y)} ${coor.offsetCol}`;
-
-
-            // this.entityMap.forEach(row => {
-            //     row.forEach(entity => {
-            //         const coor = this.projectCoordinates(tile.pos.x, tile.pos.y);
-            //         tile.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(tile.pos.x, tile.pos.y)} ${coor.offsetCol}`;
-            //     })
-            // })
 
             // if (this.state.hasKey) {
             //     this.goal.pos = this.door.pos;
@@ -504,11 +411,6 @@ class BoardSystem extends MRSystem {
             // }
 
             // this.updatePanel();
-
-            // const offsetX = (this.rowCount * this.scale) / 2;
-            // const offsetY = (this.colCount * this.scale) / 2;
-            // this.container.dataset.position = `-${offsetX / 2} 0 -${offsetY / 2}`
-
         }
     }
 
@@ -540,24 +442,15 @@ class BoardSystem extends MRSystem {
         this.endTurnButton.dataset.rotation = "270 0 0";
         this.UILayer.appendChild(this.endTurnButton);
 
-
-        // this.root.appendChild(this.overheadLight);
+        this.endTurnButton.addEventListener('click', () => {
+            console.log("turn ended")
+            this.playerStats.actionPoints = this.playerStats.maxActionPoints;
+            this.isPlayerTurn = false;
+            this.opponentTurn();
+        })
 
 
         this.container.style.scale = this.scale;
-
-        // this.player.el.style.scale = this.scale;
-        // this.root.appendChild(this.player.el);
-
-        // this.door.el.style.scale = this.scale;
-        // this.root.appendChild(this.door.el);
-
-        // this.key.el.style.scale = this.scale;
-        // this.root.appendChild(this.key.el);
-
-        // this.goal.el.style.scale = this.scale;
-        // this.root.appendChild(this.goal.el);
-
         this.initialize();
     }
 
@@ -575,16 +468,6 @@ class BoardSystem extends MRSystem {
     // }
 
     projectCoordinates(r, c) {
-        // return {
-        //     offsetRow: r * this.scale - (this.rowCount * this.scale) / 2,
-        //     offsetCol: c * this.scale - (this.colCount * this.scale) / 2,
-        //     offsetFloor: this.heightMap[r][c] * this.scale * 0.35 + 0.1
-        // }
-        // return {
-        //     offsetRow: r - this.rowCount / 2,
-        //     offsetCol: c - this.colCount / 2,
-        //     offsetFloor: this.heightMap[r][c] * 0.35 + 0.1
-        // }
         return {
             offsetRow: c - this.colCount / 2,
             offsetCol: r - this.rowCount / 2,
@@ -592,90 +475,119 @@ class BoardSystem extends MRSystem {
         }
     }
 
-    movePlayer(targetX, targetY) {
-        if (this.isPlayerTurn) {
-            this.state.moveCount++;
+    // movePlayer(targetX, targetY) {
+    //     if (this.isPlayerTurn) {
+    //         this.state.moveCount++;
 
-            let hadCombats = false;
-            this.enemies.forEach(enemy => {
-                if (targetX == enemy.pos.x && targetY == enemy.pos.y && !enemy.isDead) {
-                    console.log(`attacked by ${enemy.pos.x} ${enemy.pos.y}`);
-                    this.combat(enemy);
-                    hadCombats = true;
-                }
-            });
+    //         let hadCombats = false;
+    //         this.enemies.forEach(enemy => {
+    //             if (targetX == enemy.pos.x && targetY == enemy.pos.y && !enemy.isDead) {
+    //                 console.log(`attacked by ${enemy.pos.x} ${enemy.pos.y}`);
+    //                 this.combat(enemy);
+    //                 hadCombats = true;
+    //             }
+    //         });
 
-            if (!hadCombats) {
-                this.player.pos = {
-                    x: targetX,
-                    y: targetY
-                }
-                this.sounds.chessSound.components.set('audio', { state: 'play' })
-                if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y && !this.state.hasKey) {
-                    this.state.hasKey = true;
-                    this.sounds.analogSound.components.set('audio', { state: 'play' });
+    //         if (!hadCombats) {
+    //             this.player.pos = {
+    //                 x: targetX,
+    //                 y: targetY
+    //             }
+    //             this.sounds.chessSound.components.set('audio', { state: 'play' })
+    //             if (this.key.pos.x == this.player.pos.x && this.key.pos.y == this.player.pos.y && !this.state.hasKey) {
+    //                 this.state.hasKey = true;
+    //                 this.sounds.analogSound.components.set('audio', { state: 'play' });
 
-                    this.playerStats.moveSpeed = 2.35;
-                }
-                this.isPlayerTurn = false;
-                this.opponentTurn();
-            }
+    //                 this.playerStats.moveSpeed = 2.35;
+    //             }
+    //             this.isPlayerTurn = false;
+    //             this.opponentTurn();
+    //         }
+    //     }
+    // }
+
+    moveEntity(x1, y1, x2, y2) {
+        if (!this.entityMap[x1] || !this.entityMap[x1][y1]) {
+            console.log("No object found at the source position.");
+            return; // No object at the source position
         }
+
+        if (!this.entityMap[x2] || this.entityMap[x2][y2] !== 0) {
+            console.log("Target position is not empty or out of bounds.");
+            return; // Target cell is not empty or out of bounds
+        }
+
+        // Move the object
+        this.entityMap[x2][y2] = this.entityMap[x1][y1];
+        this.entityMap[x1][y1] = 0; // Set the source cell to empty
+
+        this.sounds.chessSound.components.set('audio', { state: 'play' })
+
+        console.log("Object moved successfully.");
     }
 
     opponentTurn() {
-        this.enemies.forEach(enemy => {
-            if (!enemy.isDead) {
-                const directionX = this.player.pos.x - enemy.pos.x;
-                const directionY = this.player.pos.y - enemy.pos.y;
+        // TODO: instead of doing a loop, let's do a queue and one at the time,
+        // with a test if the queue is empty, and a timer
+        for (let r = 0; r < this.rowCount; r++) {
+            for (let c = 0; c < this.colCount; c++) {
+                const entity = this.entityMap[r][c];
+                if (entity.type == 'enemy') {
+                    const directionX = this.playerPos.x - r;
+                    const directionY = this.playerPos.y - c;
 
-                let goalX = enemy.pos.x;
-                let goalY = enemy.pos.y;
+                    let goalX = r;
+                    let goalY = c;
 
-                if (directionX < 0) {
-                    goalX -= 1;
-                } else if (directionX > 0) {
-                    goalX += 1;
-                }
+                    if (directionX < 0) {
+                        goalX -= 1;
+                    } else if (directionX > 0) {
+                        goalX += 1;
+                    }
 
-                if (directionY < 0) {
-                    goalY -= 1;
-                } else if (directionY > 0) {
-                    goalY += 1;
-                }
+                    if (directionY < 0) {
+                        goalY -= 1;
+                    } else if (directionY > 0) {
+                        goalY += 1;
+                    }
 
-                if (goalX == this.player.pos.x && goalY == this.player.pos.y) {
-                    console.log("you are being attacked");
-                    this.combat(enemy);
-                } else {
-                    if (Math.random() < 0.75) {
-                        enemy.pos.x = goalX;
-                        enemy.pos.y = goalY;
+                    if (goalX == this.playerPos.x && goalY == this.playerPos.y) {
+                        console.log("you are being attacked");
+                        this.combat(entity, r, c);
+                    } else {
+                        if (Math.random() < 0.75) {
+                            // enemy.pos.x = goalX;
+                            // enemy.pos.y = goalY;
+                            this.moveEntity(r, c, goalX, goalY);
+                        }
                     }
                 }
             }
-
-        });
+        }
 
         setTimeout(() => {
             this.isPlayerTurn = true;
-        }, 300)
+        }, 1000)
     }
 
-    combat(enemy) {
-        this.sounds.clashSound.dataset.position = this.player.el.dataset.position;
+    combat(entity, r, c) {
+        // this.sounds.clashSound.dataset.position = this.player.el.dataset.position;
+        // TODO: the sounds should be attached to the objects producing them.
         this.sounds.clashSound.components.set('audio', { state: 'play' });
 
         this.playerStats.health--;
-        enemy.hp--;
+        entity.hp--;
+
+        console.log(`enemy has ${entity.hp} hp left`);
 
         if (this.playerStats.health <= 0) {
             this.gameIsStarted = false;
             console.log('you ded')
         }
 
-        if (enemy.hp <= 0) {
-            enemy.isDead = true;
+        if (entity.hp <= 0) {
+            this.container.removeChild(entity.el);
+            this.entityMap[r][c] = 0;
         }
     }
 
@@ -685,10 +597,10 @@ class BoardSystem extends MRSystem {
         const height = blockmap.length;
 
         // Initialize distances array with Infinity for unvisited cells
-        const distances = Array.from({ length: height }, () =>
+        this.distances = Array.from({ length: height }, () =>
             Array(width).fill(Infinity)
         );
-        distances[y][x] = 0; // Distance to itself is 0
+        this.distances[y][x] = 0; // Distance to itself is 0
 
         // Directions array for exploring all 8 directions around a cell (diagonals included)
         // const directions = [
@@ -728,18 +640,16 @@ class BoardSystem extends MRSystem {
                     blockmap[newY][newX] === 0
                 ) {
                     // Calculate potential new distance
-                    const newDistance = distances[currentY][currentX] + 1;
+                    const newDistance = this.distances[currentY][currentX] + 1;
 
                     // Update distance if newDistance is smaller
-                    if (newDistance < distances[newY][newX]) {
-                        distances[newY][newX] = newDistance;
+                    if (newDistance < this.distances[newY][newX]) {
+                        this.distances[newY][newX] = newDistance;
                         queue.push([newX, newY]);
                     }
                 }
             }
         }
-
-        return distances;
     }
 }
 
