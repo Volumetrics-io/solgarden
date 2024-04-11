@@ -6,7 +6,9 @@ class MRTile extends MREntity {
         this.el = document.createElement("mr-model");
         // this.prop = document.createElement("mr-model");
         this.floorTile = document.createElement("mr-model");
-        this.debug = document.createElement("mr-text");
+
+        this.numberContainer = document.createElement("mr-div");
+        this.numberString = document.createElement("mr-text");
 
         this.rotationCollection = [0, 90, 180, 270];
 
@@ -45,62 +47,39 @@ class MRTile extends MREntity {
         let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
         this.el.src = tilepath + randomModel;
 
-        // for (let r = 0; r < this.rowCount; r++) {
-        //     for (let c = 0; c < this.colCount; c++) {
-        //         const tile = this.tilemap[r][c];
-
-        // let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
-        // tile.el.el.dataset.rotation = `0 ${randomRotation} 0`;
-
-        // let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
-        // tile.el.el.src = `tiles/${randomModel}.glb`;
-        //         tile.el.elId = randomModel;
-        //     }
-        // }
-
-        // let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
-        // this.el.dataset.rotation = `0 ${randomRotation} 0`;
-
-        // let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
-        // this.el.src = `tiles/${randomModel}.glb`;
-        // this.elId = randomModel;
-
-        // let randomModel = this.tileSets[Math.floor(Math.random() * this.tileSets.length)];
-        // this.el.src = `tiles/${randomModel}.glb`;
-        // this.elId = randomModel;
-
-        // this.appendChild(this.prop);
-
-        // 60 % chance of plant on top
-        // if (Math.random() > 0.4) {
-        //     const props = ["tiles/plant_01.glb", "tiles/plant_02.glb", "tiles/plant_03.glb", "tiles/plant_04.glb", "tiles/plant_05.glb"];
-        //     const randomRotation = Math.random() * 360;
-        //     const randomScale = Math.random() * 0.5 + 0.5;
-        //     const YOffset = Math.random() * 0.2;
-        //     const XJitter = Math.random() * 0.6 - 0.3;
-        //     const ZJitter = Math.random() * 0.6 - 0.3;
-
-        //     this.prop.src = props[Math.floor(Math.random() * props.length)];
-        //     this.prop.dataset.rotation = `0 ${randomRotation} 0`;
-        //     this.prop.dataset.position = `${XJitter} -${YOffset} ${ZJitter}`;
-        //     this.prop.style.scale = randomScale;
-        // }
-
         // the translucent colored tile
         // this.floorTile.dataset.position = "0 -0.3 0";
         this.floorTile.dataset.position = "0 0 0";
-        let geometry = new THREE.BoxGeometry(0.92, 0.5, 0.92);
+        let geometry = new THREE.BoxGeometry(0.92, 0.25, 0.92);
         let material = new THREE.MeshPhongMaterial({
             color: "#d3ceba",
             transparent: true,
-            opacity: 0
+            opacity: 0.75
         })
 
         let mesh = new THREE.Mesh(geometry, material)
         this.floorTile.object3D.add(mesh);
         this.appendChild(this.floorTile);
 
-        this.appendChild(this.debug);
+        this.numberString.dataset.position = '-0.1 0.25 0'
+        this.numberString.style.fontSize = "400px";
+        // this.numberString.style.fontFamily = "JetBrains";
+        // this.numberString.style.textAlign = "center";
+        this.numberContainer.appendChild(this.numberString);
+
+        this.numberContainer.dataset.position = '0 0.2 0'
+        this.numberContainer.dataset.rotation = `270 0 -${randomRotation}`
+        Object.assign(this.numberContainer.style, {
+            // backgroundColor: "#ff9900",
+            // display: "flex",
+            // alignItems: "center",
+            // justifyContent: "center",
+            // textAlign: "center",
+            width: "300px",
+            height: "300px",
+        })
+
+        this.appendChild(this.numberContainer);
     }
 }
 
