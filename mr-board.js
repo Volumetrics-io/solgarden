@@ -152,10 +152,10 @@ class BoardSystem extends MRSystem {
 
         // Generate the enemies starting at the second room
         // if (this.levelId > 1) {
-            const enemyCount = Math.floor(Math.random() * 2) + 1;
+            // const enemyCount = Math.floor(Math.random() * 2) + 1;
+            const enemyCount = 2;
             for (let i = 0; i < enemyCount; i++) {
                 const el = document.createElement("mr-enemy");
-                // el.style.scale = this.scale;
                 this.container.appendChild(el);
 
                 const enemy = {
@@ -165,32 +165,30 @@ class BoardSystem extends MRSystem {
                 };
 
                 // TODO: doesn't work??
-                el.addEventListener("mouseover", () => {
-                    console.log('here')
-                    this.playerStats.projectedCost = 1;
-                });
+                // el.addEventListener("mouseover", () => {
+                //     console.log('here')
+                //     this.playerStats.projectedCost = 1;
+                // });
 
-                el.addEventListener("mouseout", () => {
-                    console.log('here')
-                    this.playerStats.projectedCost = 0;
-                });
+                // el.addEventListener("mouseout", () => {
+                //     console.log('here')
+                //     this.playerStats.projectedCost = 0;
+                // });
 
-                el.addEventListener("touchstart", () => {
-                    if(this.playerStats.actionPoints > 0) {
-                        this.playerStats.actionPoints--;
-                        // this.combat(enemy, r, c);
-                    }
-                });
+                // el.addEventListener("touchstart", () => {
+                //     if(this.playerStats.actionPoints > 0) {
+                //         this.playerStats.actionPoints--;
+                //         // this.combat(enemy, r, c);
+                //     }
+                // });
 
                 this.addToEntityMap(enemy);
             }
         // }
 
-        // this.props = [];
         const propCount = Math.floor(numberOfAvailableSpots / 4);
         for (let i = 0; i < propCount; i++) {
             const el = document.createElement("mr-prop");
-            // el.style.scale = this.scale;
             el.dataset.tileset = randomBiome.props;
             el.dataset.tilepath = randomBiome.path;
             this.container.appendChild(el);
@@ -208,7 +206,6 @@ class BoardSystem extends MRSystem {
         }
 
         const player = document.createElement("mr-player");
-        // player.style.scale = this.scale;
         this.container.appendChild(player);
         this.playerPos = this.addToEntityMap({
             el: player,
@@ -371,7 +368,11 @@ class BoardSystem extends MRSystem {
                             tile.el.numberString.innerText = distance;
                         } else {
                             tile.el.numberString.innerText = '';
-                            tile.el.floorTile.style.visibility = "hidden";
+                            tile.el.floorTile.style.visibility = "visible";
+                            tile.el.floorTile.object3D.children[0].material.color.setStyle("#888");
+
+                            // tile.el.numberString.innerText = '';
+                            // tile.el.floorTile.style.visibility = "hidden";
                         }
                     } else {
                         tile.el.numberString.innerText = '';
@@ -587,7 +588,18 @@ class BoardSystem extends MRSystem {
 
         if (entity.hp <= 0) {
             this.container.removeChild(entity.el);
-            this.entityMap[r][c] = 0;
+            
+            const droppedLoot = document.createElement("mr-loot");
+            this.container.appendChild(droppedLoot);
+
+            const loot = {
+                el: droppedLoot,
+                type: 'loot',
+                increaseHP: 1,
+                increaseAP: 1,
+            };
+
+            this.entityMap[r][c] = loot;
         }
     }
 
