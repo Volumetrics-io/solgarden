@@ -50,7 +50,7 @@ class MRTile extends MREntity {
         // the translucent colored tile
         // this.floorTile.dataset.position = "0 -0.3 0";
         this.floorTile.dataset.position = "0 0 0";
-        let geometry = new THREE.BoxGeometry(0.92, 0.25, 0.92);
+        let geometry = new THREE.BoxGeometry(0.93, 0.25, 0.93);
         this.floorMaterial = new THREE.MeshPhongMaterial({
             color: "#d3ceba",
             transparent: true,

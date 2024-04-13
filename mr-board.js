@@ -37,9 +37,8 @@ class BoardSystem extends MRSystem {
         this.playerStats = {
             health: 10,
             maxHealth: 10,
-            moveSpeed: 2,
-            actionPoints: 5,
-            maxActionPoints: 5,
+            actionPoints: 4,
+            maxActionPoints: 4,
             projectedCost: 0
         };
 
@@ -69,6 +68,18 @@ class BoardSystem extends MRSystem {
         this.timer = 0;
         this.isPlayerTurn = true;
         this.playerStats.actionPoints = this.playerStats.maxActionPoints;
+
+        // TODO:
+        // Big refactor needed here.
+        // Create a separate object called Room
+        // You can pass already-made arrays to predefine rooms
+        // or let it generate new random rooms with various variables
+        // and you use this.myBiome.tileset and this.myBiome.entityMap, for example
+        // const firstRoom = new Room({
+        //      biome: "plains",
+        //      entityMap: [...]
+        // })
+        //
 
         // random geometry for the room
         this.flrCount = Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
@@ -285,12 +296,15 @@ class BoardSystem extends MRSystem {
 
         console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
 
-        const randomChest = document.createElement("mr-chest");
-        this.container.appendChild(randomChest);
-        this.addToEntityMap({
-            el: randomChest,
-            type: 'chest'
-        });
+        if (Math.random() > 0.6) {
+            const randomChest = document.createElement("mr-chest");
+            this.container.appendChild(randomChest);
+            this.addToEntityMap({
+                el: randomChest,
+                type: 'chest'
+            });
+
+        }
 
         // Play the background music
         // if (this.levelId == 2) {
@@ -462,7 +476,7 @@ class BoardSystem extends MRSystem {
                 this.opponentTurn();
             }, 800)
         } else {
-                this.isPlayerTurn = true;
+            this.isPlayerTurn = true;
         }
     }
 
@@ -762,6 +776,7 @@ class BoardSystem extends MRSystem {
         this.UILayer.appendChild(this.healthBar);
 
         this.endTurnButton = document.createElement("mr-button");
+        this.endTurnButton.className = 'end-turn';
         this.endTurnButton.innerText = "End turn";
         this.endTurnButton.style.fontSize = "10px";
         // this.endTurnButton.dataset.position = "0.085 0.027 0";
