@@ -5,7 +5,7 @@ class MRTile extends MREntity {
 
         this.el = document.createElement("mr-model");
         // this.prop = document.createElement("mr-model");
-        this.floorTile = document.createElement("mr-model");
+        this.floorTile = document.createElement("mr-entity");
 
         this.numberContainer = document.createElement("mr-div");
         this.numberString = document.createElement("mr-text");
@@ -51,30 +51,23 @@ class MRTile extends MREntity {
         // this.floorTile.dataset.position = "0 -0.3 0";
         this.floorTile.dataset.position = "0 0 0";
         let geometry = new THREE.BoxGeometry(0.92, 0.25, 0.92);
-        let material = new THREE.MeshPhongMaterial({
+        this.floorMaterial = new THREE.MeshPhongMaterial({
             color: "#d3ceba",
             transparent: true,
             opacity: 0.75
         })
 
-        let mesh = new THREE.Mesh(geometry, material)
+        let mesh = new THREE.Mesh(geometry, this.floorMaterial)
         this.floorTile.object3D.add(mesh);
         this.appendChild(this.floorTile);
 
         this.numberString.dataset.position = '-0.1 0.25 0'
         this.numberString.style.fontSize = "400px";
-        // this.numberString.style.fontFamily = "JetBrains";
-        // this.numberString.style.textAlign = "center";
         this.numberContainer.appendChild(this.numberString);
 
         this.numberContainer.dataset.position = '0 0.2 0'
         this.numberContainer.dataset.rotation = `270 0 -${randomRotation}`
         Object.assign(this.numberContainer.style, {
-            // backgroundColor: "#ff9900",
-            // display: "flex",
-            // alignItems: "center",
-            // justifyContent: "center",
-            // textAlign: "center",
             width: "300px",
             height: "300px",
         })

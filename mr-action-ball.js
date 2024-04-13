@@ -3,22 +3,22 @@ class MRActionBall extends MREntity {
     constructor() {
         super()
 
-        this.el = document.createElement("mr-model");
+        this.el = document.createElement("mr-entity");
     }
 
     connected() {
-
-        this.el.dataset.position = "0 0 0";
-        let geometry = new THREE.SphereGeometry(0.01);
-        let material = new THREE.MeshPhongMaterial({
+        this.geometry = new THREE.SphereGeometry(0.008);
+        this.material = new THREE.MeshPhongMaterial({
             color: "#00ff55",
             transparent: true,
             opacity: 1
         })
 
-        let mesh = new THREE.Mesh(geometry, material)
-        this.el.object3D.add(mesh);
+        this.mesh = new THREE.Mesh(this.geometry, this.material)
+        this.el.object3D.add(this.mesh);
         this.appendChild(this.el);
+
+        this.el.dataset.position = "0 0 -0.015";
     }
 }
 

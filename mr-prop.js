@@ -26,6 +26,7 @@ class MRProp extends MREntity {
         // console.log();
 
         this.appendChild(this.el);
+        this.el.style.pointerEvents = 'none';
 
         const tileset = this.dataset.tileset.split(',');
         const tilepath = this.dataset.tilepath;

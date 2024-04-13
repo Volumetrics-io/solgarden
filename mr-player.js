@@ -22,14 +22,8 @@ class MRPlayer extends MREntity {
     connected() {
         this.appendChild(this.el);
         this.el.src = "tiles/player.glb";
+        this.el.style.pointerEvents = 'none';
     }
-
-    // moveTo(x,y) {
-    //     let projected = this.parent.projectCoordinates(x, y, this.parent.heightMap[x][y]);
-    //     this.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-    //     // console.log(this.el.dataset.position)
-    //     // this.dataset.position = position;
-    // }
 }
 
 customElements.define('mr-player', MRPlayer);

@@ -22,6 +22,7 @@ class MREnemy extends MREntity {
     connected() {
         this.appendChild(this.el);
         this.el.src = "tiles/enemy_temp.glb";
+        this.el.style.pointerEvents = 'none';
     }
 
     // moveTo(x,y) {

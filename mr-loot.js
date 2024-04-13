@@ -8,6 +8,7 @@ class MRLoot extends MREntity {
     connected() {
         this.appendChild(this.el);
         this.el.src = "tiles/loot.glb";
+        this.el.style.pointerEvents = 'none';
     }
 
 }

@@ -22,6 +22,7 @@ class MRChest extends MREntity {
     connected() {
         this.appendChild(this.el);
         this.el.src = "tiles/chest_01.glb";
+        this.el.style.pointerEvents = 'none';
     }
 
     // moveTo(x,y) {

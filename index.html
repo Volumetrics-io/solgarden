@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <title>Sol Garden — The mini roguelike for your desk</title>
     <script src="dist/mr.js"></script>
+    <link rel="preload" href="JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin />
     <style>
         @font-face {
             font-family: 'JetBrains';
@@ -13,7 +14,8 @@
             font-style: normal;
         }
 
-        html, body {
+        html,
+        body {
             font-family: 'JetBrains';
         }
 
@@ -52,17 +54,16 @@
 
     <!-- <mr-app> -->
     <mr-app orbital="true">
-    <!-- <mr-app debug="true" orbital="true"> -->
-        <!-- <mr-light id="over-head" color="white" intensity="0.5" data-position="0 1 0"></mr-light> -->
-        <mr-entity data-comp-board="" data-comp-anchor="type: plane; label: table" id="main">
-
-        </mr-entity>
+        <!-- <mr-app debug="true" orbital="true"> -->
+        <mr-entity data-comp-board="" data-comp-anchor="type: plane; label: table" id="main"></mr-entity>
         <mr-entity id="chess-sound" data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
         <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
         <mr-entity id="analog-sound" data-comp-audio="src: ./audio/analog.mp3; loop: false; state: stop;"></mr-entity>
         <mr-entity id="clash-sound" data-comp-audio="src: ./audio/clash.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="background-music"
-            data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
+        <mr-entity id="nope-sound" data-comp-audio="src: ./audio/nope.mp3; loop: false; state: stop;"></mr-entity>
+        <mr-entity id="swoosh-sound" data-comp-audio="src: ./audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
+
+        <mr-entity id="bg-music" data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
         <!-- <mr-panel id="game-panel" data-comp-anchor="type: plane; label: table" data-position="0 -0.5 0">
             <mr-text class="title">Inventory</mr-text>
             <mr-div class="row">
@@ -96,6 +97,7 @@
     <script src="mr-door.js"></script>
     <script src="mr-prop.js"></script>
     <script src="mr-action-ball.js"></script>
+    <script src="mr-health-bar.js"></script>
 
 </body>
 
