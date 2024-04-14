@@ -1,28 +1,35 @@
 class BoardSystem extends MRSystem {
     constructor() {
         super()
-        this.minRowCount = 4;
-        this.minColCount = 4;
-        this.minFlrCount = 1;
-        this.maxRowCount = 10;
-        this.maxColCount = 10;
-        this.maxFlrCount = 4;
+
+        // will be moved to the Room class
+        // this.minRowCount = 4;
+        // this.minColCount = 4;
+        // this.minFlrCount = 1;
+        // this.maxRowCount = 10;
+        // this.maxColCount = 10;
+        // this.maxFlrCount = 4;
+        //
+        // this.biomes = [{
+        //         name: "plains",
+        //         path: "tiles/biome_plains/",
+        //         tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
+        //         props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
+        //     },
+        //     {
+        //         name: "deserts",
+        //         path: "tiles/biome_deserts/",
+        //         tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
+        //         props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
+        //     }
+        // ]
+        ///////////////////////////////////
+
+
         this.scale = 0.05;
         this.levelId = 0;
         this.gameIsStarted = false;
-        this.biomes = [{
-                name: "plains",
-                path: "tiles/biome_plains/",
-                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
-                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
-            },
-            {
-                name: "deserts",
-                path: "tiles/biome_deserts/",
-                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
-                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
-            }
-        ]
+
 
         this.sounds = {
             bgMusic: document.querySelector('#bg-music'),
@@ -82,32 +89,35 @@ class BoardSystem extends MRSystem {
         //
 
         // random geometry for the room
-        this.flrCount = Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
-        this.rowCount = Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
-        this.colCount = Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
-        this.heightMap = Array.from({
-                length: this.rowCount
-            }, (_, x) =>
-            Array.from({
-                length: this.colCount
-            }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
-        );
-        this.entityMap = Array.from({
-            length: this.rowCount
-        }, () => Array(this.colCount).fill(0));
+        // this.flrCount = Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
+        // this.rowCount = Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
+        // this.colCount = Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
+        // this.heightMap = Array.from({
+        //         length: this.rowCount
+        //     }, (_, x) =>
+        //     Array.from({
+        //         length: this.colCount
+        //     }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
+        // );
+        // this.entityMap = Array.from({
+        //     length: this.rowCount
+        // }, () => Array(this.colCount).fill(0));
 
-        const numberOfAvailableSpots = this.rowCount * this.colCount;
+        // const numberOfAvailableSpots = this.rowCount * this.colCount;
 
-        console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`)
+        // console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`)
+
+        this.room = new Room();
+
 
         // clear up the dom elements container
         while (this.container.firstChild) {
             this.container.removeChild(this.container.lastChild);
         }
 
-        // Randomly generate tilemap
-        this.tilemap = [];
-        const randomBiome = this.biomes[Math.floor(Math.random() * this.biomes.length)];
+        // // Randomly generate tilemap
+        // this.tilemap = [];
+        // const randomBiome = this.biomes[Math.floor(Math.random() * this.biomes.length)];
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
