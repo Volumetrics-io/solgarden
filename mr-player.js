@@ -4,6 +4,7 @@ class MRPlayer extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
+        this.light = document.createElement("mr-light");
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -23,6 +24,13 @@ class MRPlayer extends MREntity {
         this.appendChild(this.el);
         this.el.src = "tiles/player.glb";
         this.el.style.pointerEvents = 'none';
+
+        this.appendChild(this.light);
+        this.light.setAttribute('color', "#ffffff")
+        this.light.setAttribute('intensity', 0.03)
+
+        // this.light.intensity = 2;
+        this.light.dataset.position = `0 1 0`;
     }
 }
 
