@@ -2,6 +2,9 @@ class BoardSystem extends MRSystem {
     constructor() {
         super()
         this.scale = 0.05;
+
+        // TODO: move the high level stats
+        // into a gameStats Class maybe?
         this.levelId = 0;
         this.cycleId = 0;
         this.gameIsStarted = false;
@@ -18,6 +21,8 @@ class BoardSystem extends MRSystem {
             swooshSound: document.querySelector('#swoosh-sound')
         }
 
+        // TODO: package player stats in a simple Class
+        // something like this.stats.useAction(3)
         this.playerStats = {
             health: 10,
             maxHealth: 10,
@@ -133,6 +138,8 @@ class BoardSystem extends MRSystem {
                             // console.log("that will open the chest and drop an item on the floor")
                             if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
                                 // console.log('open the chest')
+
+                                // TODO: should be this.room.removeEntityAt(tile.pos.x, tile.pos.y);
                                 this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
                                 this.dropLoot(tile.pos.x, tile.pos.y);
                             } else {
@@ -169,6 +176,9 @@ class BoardSystem extends MRSystem {
                             // console.log("go to the next room after killing all the enemies")
                             break;
                         default:
+
+                            // TODO: all that below should be a method of Room
+                            // this.room.movePlayer(x, y) 
                             const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
 
                             if (moveCost <= this.playerStats.actionPoints) {
@@ -319,6 +329,8 @@ class BoardSystem extends MRSystem {
         this.room.entityMap[x][y] = loot;
     }
 
+    // TODO: this should be moved to Room
+    // alongside everything that depends on it 
     distanceBetween(x1, y1, x2, y2) {
         var distX = x1 - x2;
         var distY = y1 - y2;
@@ -480,7 +492,6 @@ class BoardSystem extends MRSystem {
         this.endTurnButton = document.createElement("mr-button");
         this.endTurnButton.className = 'end-turn';
         this.endTurnButton.innerText = "End turn";
-        this.endTurnButton.style.fontSize = "10px";
         // this.endTurnButton.dataset.position = "0.085 0.027 0";
         this.endTurnButton.dataset.position = "0 0.027 0.01";
         this.endTurnButton.dataset.rotation = "270 0 0";
