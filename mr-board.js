@@ -18,17 +18,20 @@ class BoardSystem extends MRSystem {
             analogSound: document.querySelector('#analog-sound'),
             clashSound: document.querySelector('#clash-sound'),
             nopeSound: document.querySelector('#nope-sound'),
-            swooshSound: document.querySelector('#swoosh-sound')
+            swooshSound: document.querySelector('#swoosh-sound'),
+            latchSound: document.querySelector('#latch-sound'),
         }
 
         // TODO: package player stats in a simple Class
         // something like this.stats.useAction(3)
         this.playerStats = {
-            health: 10,
-            maxHealth: 10,
+            health: 5,
+            maxHealth: 5,
+            range: 5,
+            maxRange: 20,
             actionPoints: 4,
             maxActionPoints: 4,
-            projectedCost: 0
+            projectedCost: 0,
         };
 
         // container to store board object references
@@ -63,16 +66,58 @@ class BoardSystem extends MRSystem {
         }
 
         // The room class generate all kind of arrays and dom elements
-        // to represent a level, either hardcoded or randomly generated 
-        if(this.levelId == 0) {
+        // to represent a level, either hardcoded or randomly generated
+        if (this.levelId == 0) {
             // starting room
             this.room = new Room(this.container, {
                 flrCount: 1,
                 rowCount: 5,
                 colCount: 5,
-                biomeId: 0,
                 enemyCount: 0,
                 propCount: 0,
+                chestCount: 0,
+                biome: {
+                    path: "tiles/biome_plains/",
+                    tiles: ["tilegrass001.glb"],
+                    props: []
+                }
+            });
+        } else if (this.levelId == 3 || this.levelId == 6 || this.levelId == 9) {
+            // battery room
+            this.room = new Room(this.container, {
+                flrCount: 1,
+                rowCount: 7,
+                colCount: 7,
+                enemyCount: 0,
+                // propCount: 0,
+                chestCount: 0,
+                biome: {
+                    path: "tiles/biome_cyan/",
+                    tiles: ["tilegrasscyan001.glb"],
+                    props: ["rockdesert001.glb", "rockdesert002.glb"]
+                },
+                playerPos: {
+                    x: 5,
+                    y: 3
+                },
+                entityMap: [
+                    [0, 0, 0, {
+                        el: document.createElement("mr-door"),
+                        type: 'door'
+                    }, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, {
+                        el: document.createElement("mr-charging-station"),
+                        type: 'charging-station'
+                    }, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, {
+                        el: document.createElement("mr-player"),
+                        type: 'player'
+                    }, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                ]
             });
         } else {
             this.room = new Room(this.container, {});
@@ -81,9 +126,20 @@ class BoardSystem extends MRSystem {
         // the tile elements (the floor) own all the events handling
         this.room.tilemap.forEach(row => {
             row.forEach(tile => {
+                // console.log(this.room.entityMap[tile.pos.x][tile.pos.y].type);
                 tile.el.addEventListener("mouseover", () => {
                     switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
+                        case "player":
+                            break;
                         case "prop":
+                            break;
+                        case "chest":
+                            break;
+                        case "loot":
+                            break;
+                        case "door":
+                            break;
+                        case "charging-station":
                             break;
                         case "enemy":
                             if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
@@ -91,17 +147,9 @@ class BoardSystem extends MRSystem {
                                 console.log("a weapon would be highlighted");
                             }
                             break;
-                        case "chest":
-                            // console.log("hovering a chest")
-                            break;
-                        case "loot":
-                            console.log("the item will do something on pick up")
-                            break;
-                        case "door":
-                            // console.log("go to the next room after killing all the enemies")
-                            break;
                         default:
                             // console.log("here");
+                            // console.log(this.room.distances);
                             this.playerStats.projectedCost = this.room.distances[tile.pos.x][tile.pos.y];
                             // el.floorTile.object3D.children[0].material.opacity = 1;
                             tile.el.floorMaterial.opacity = 1;
@@ -142,6 +190,10 @@ class BoardSystem extends MRSystem {
                                 // TODO: should be this.room.removeEntityAt(tile.pos.x, tile.pos.y);
                                 this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
                                 this.dropLoot(tile.pos.x, tile.pos.y);
+
+                                this.sounds.latchSound.components.set('audio', {
+                                    state: 'play'
+                                });
                             } else {
                                 this.sounds.nopeSound.components.set('audio', {
                                     state: 'play'
@@ -169,16 +221,22 @@ class BoardSystem extends MRSystem {
                             // console.log("the item will do something on pick up")
                             break;
                         case "door":
-                            this.sounds.doorSound.components.set('audio', {
-                                state: 'play'
-                            });
-                            this.initialize();
+                            if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                this.sounds.doorSound.components.set('audio', {
+                                    state: 'play'
+                                });
+                                this.initialize();
+                            } else {
+                                this.sounds.nopeSound.components.set('audio', {
+                                    state: 'play'
+                                });
+                            }
                             // console.log("go to the next room after killing all the enemies")
                             break;
                         default:
 
                             // TODO: all that below should be a method of Room
-                            // this.room.movePlayer(x, y) 
+                            // this.room.movePlayer(x, y)
                             const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
 
                             if (moveCost <= this.playerStats.actionPoints) {
@@ -195,6 +253,8 @@ class BoardSystem extends MRSystem {
                                 });
                             }
                     }
+
+                    // Automatically end the turn when the player runs out of action points
                     if (this.playerStats.actionPoints == 0) {
                         this.endTurn();
                     }
@@ -209,34 +269,52 @@ class BoardSystem extends MRSystem {
         this.levelId++;
     }
 
+    decreaseRange(){
+        if(this.playerStats.range > 0) {
+            this.combatQueue = [];
+
+            for (let r = 0; r < this.room.rowCount; r++) {
+                for (let c = 0; c < this.room.colCount; c++) {
+                    const entity = this.room.entityMap[r][c];
+                    if (entity.type == 'enemy') {
+                        this.combatQueue.push({
+                            entity: entity,
+                            r: r,
+                            c: c,
+                        });
+                    }
+                }
+            }
+
+            this.opponentTurn();
+            this.playerStats.range--;
+        } else {
+            this.endGame();
+        }
+    }
+
     endTurn() {
         // console.log("turn ended")
         this.playerStats.actionPoints = this.playerStats.maxActionPoints;
         this.isPlayerTurn = false;
-        this.combatQueue = [];
+        this.decreaseRange();
+    }
 
-        for (let r = 0; r < this.room.rowCount; r++) {
-            for (let c = 0; c < this.room.colCount; c++) {
-                const entity = this.room.entityMap[r][c];
-                if (entity.type == 'enemy') {
-                    this.combatQueue.push({
-                        entity: entity,
-                        r: r,
-                        c: c,
-                    });
-                }
-            }
-        }
+    resetPlayer() {
+        this.levelId = 0;
+        this.cycleId++;
+        this.playerStats.health = this.playerStats.maxHealth;
+        this.playerStats.range = this.playerStats.maxRange;
 
-        this.opponentTurn();
+        // TODO: this is were we could assign a random weapon
+        // at the beginning of each run
     }
 
     endGame() {
         console.log('you ded');
 
-        this.playerStats.health = this.playerStats.maxHealth;
-        this.levelId = 0;
-        this.cycleId++;
+        this.resetPlayer()
+
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
         this.initialize();
@@ -330,7 +408,7 @@ class BoardSystem extends MRSystem {
     }
 
     // TODO: this should be moved to Room
-    // alongside everything that depends on it 
+    // alongside everything that depends on it
     distanceBetween(x1, y1, x2, y2) {
         var distX = x1 - x2;
         var distY = y1 - y2;
@@ -369,6 +447,7 @@ class BoardSystem extends MRSystem {
             });
 
             this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
+            this.levelCountLabel.innerText = `Battery remaining: ${Math.round(this.playerStats.range)}`;
 
             const offsetX = -this.scale / 2;
             const offsetY = (this.room.rowCount / 2) * this.scale;
@@ -410,33 +489,41 @@ class BoardSystem extends MRSystem {
                                 case "enemy":
                                     tile.el.floorTile.style.visibility = "visible";
                                     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#f00")
+                                        tile.el.floorMaterial.color.setStyle("#f00");
                                     } else {
-                                        tile.el.floorMaterial.color.setStyle("#888")
+                                        tile.el.floorMaterial.color.setStyle("#888");
                                     }
                                     break;
                                 case "chest":
                                     tile.el.floorTile.style.visibility = "visible";
                                     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#0f0")
+                                        tile.el.floorMaterial.color.setStyle("#0f0");
                                     } else {
-                                        tile.el.floorMaterial.color.setStyle("#888")
+                                        tile.el.floorMaterial.color.setStyle("#888");
                                     }
                                     break;
                                 case "loot":
                                     tile.el.floorTile.style.visibility = "visible";
                                     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#00ffd1")
+                                        tile.el.floorMaterial.color.setStyle("#00ffd1");
                                     } else {
-                                        tile.el.floorMaterial.color.setStyle("#888")
+                                        tile.el.floorMaterial.color.setStyle("#888");
                                     }
                                     break;
+                                case "charging-station":
+                                    // console.log(this.playerStats.range);
+                                    tile.el.floorTile.style.visibility = "visible";
+                                    tile.el.floorMaterial.color.setStyle("#00ffd1");
+                                    if(this.playerStats.range < this.playerStats.maxRange) {
+                                        this.playerStats.range += 0.05;
+                                    }
+
                                 case "door":
                                     tile.el.floorTile.style.visibility = "visible";
                                     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#00ffd1")
+                                        tile.el.floorMaterial.color.setStyle("#00ffd1");
                                     } else {
-                                        tile.el.floorMaterial.color.setStyle("#888")
+                                        tile.el.floorMaterial.color.setStyle("#888");
                                     }
                                     break;
                             }
@@ -453,7 +540,7 @@ class BoardSystem extends MRSystem {
                     const entity = this.room.entityMap[r][c];
                     if (entity != 0) {
                         this.room.project(entity, r, c, this.timer);
-                   }
+                    }
                 }
             }
         }
@@ -492,10 +579,14 @@ class BoardSystem extends MRSystem {
         this.endTurnButton = document.createElement("mr-button");
         this.endTurnButton.className = 'end-turn';
         this.endTurnButton.innerText = "End turn";
-        // this.endTurnButton.dataset.position = "0.085 0.027 0";
         this.endTurnButton.dataset.position = "0 0.027 0.01";
         this.endTurnButton.dataset.rotation = "270 0 0";
         this.UILayer.appendChild(this.endTurnButton);
+
+        this.levelCountLabel = document.createElement("mr-text");
+        this.levelCountLabel.className = 'text-label';
+        this.levelCountLabel.dataset.position = "0 0 0.027";
+        this.UILayer.appendChild(this.levelCountLabel);
 
         this.endTurnButton.addEventListener('click', () => {
             this.endTurn();

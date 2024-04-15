@@ -12,27 +12,27 @@ class Room {
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
 
         this.biomes = [{
-                name: "plains",
-                path: "tiles/biome_plains/",
-                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
-                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
-            },
-            {
-                name: "deserts",
-                path: "tiles/biome_deserts/",
-                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
-                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
-            }
+            // plains
+            path: "tiles/biome_plains/",
+            tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
+            props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
+        },
+        {
+            // desert
+            path: "tiles/biome_deserts/",
+            tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
+            props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
+        }
         ]
-        const randomBiome = this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
+        const randomBiome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
 
         // read the params
         this.flrCount = params.flrCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
         this.rowCount = params.rowCount ?? Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
         this.colCount = params.colCount ?? Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
         this.heightMap = params.heightMap ?? Array.from({
-                length: this.rowCount
-            }, (_, x) =>
+            length: this.rowCount
+        }, (_, x) =>
             Array.from({
                 length: this.colCount
             }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
@@ -94,14 +94,14 @@ class Room {
 
         // player
         const player = document.createElement("mr-player");
-        this.playerPos = this.addToEntityMap({
+        this.playerPos = params.playerPos ?? this.addToEntityMap({
             el: player,
             type: 'player'
         });
         console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
 
         // chests
-        const chestCount = params.chestCount ?? (Math.random() * 2 | 0); 
+        const chestCount = params.chestCount ?? (Math.random() * 2 | 0);
         for (let i = 0; i < chestCount; i++) {
             const randomChest = document.createElement("mr-chest");
             this.addToEntityMap({
@@ -112,7 +112,7 @@ class Room {
 
         this.entityMap.forEach(row => {
             row.forEach(entity => {
-                if(entity) {
+                if (entity) {
                     this.container.appendChild(entity.el);
                 }
             });
@@ -171,26 +171,31 @@ class Room {
         // Move the object
         this.entityMap[x2][y2] = this.entityMap[x1][y1];
         this.entityMap[x1][y1] = 0; // Set the source cell to empty
-
-        // this.sounds.chessSound.components.set('audio', {
-        //     state: 'play'
-        // })
-
-        // console.log("Object moved successfully.");
+        this.entityMap[x2][y2].animation = {
+            started: false,
+            x: x1,
+            y: y1,
+            distX: x2 - x1,
+            distY: y2 - y1
+        }
     }
 
     checkForDoor(container) {
         let isEnemy = false;
+        let isDoor = false;
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
                 const entity = this.entityMap[r][c];
                 if (entity.type == 'enemy') {
                     isEnemy = true;
                 }
+                if (entity.type == 'door') {
+                    isDoor = true;
+                }
             }
         }
 
-        if (!isEnemy) {
+        if (!isEnemy && !isDoor) {
             const el = document.createElement("mr-door");
             container.appendChild(el);
 
@@ -208,15 +213,15 @@ class Room {
     }
 
     calculateDistances(x, y, blockmap) {
-        
+
         // https://codepen.io/lobau/pen/XWQqVwy/6a4c88328ccf9f08befa5463af05708a
         const width = blockmap[0].length;
         const height = blockmap.length;
 
         // Initialize distances array with Infinity for unvisited cells
         this.distances = Array.from({
-                length: height
-            }, () =>
+            length: height
+        }, () =>
             Array(width).fill(Infinity)
         );
         this.distances[y][x] = 0; // Distance to itself is 0
@@ -266,25 +271,82 @@ class Room {
     }
 
     project(entity, r, c, timer) {
-        const coor = this.projectCoordinates(r, c);
-        entity.el.dataset.position = `${coor.offsetRow} ${coor.offsetFloor + this.waveDeltaYAt(r, c, timer)} ${coor.offsetCol}`;
+
+        let coor;
+
+        if (entity.animation && !entity.animation.started) {
+            entity.animation.started = true;
+            entity.animation.timerStart = timer;
+        }
+
+        if (entity.animation) {
+            const duration = 3; // seconds
+            const startTime = timer - entity.animation.timerStart;
+
+            const t = startTime * duration;
+            const p = this.Animator.fanOut(t);
+
+            let distR = entity.animation.x + entity.animation.distX * p;
+            let distC = entity.animation.y + entity.animation.distY * p;
+
+            coor = {
+                x: distC,
+                y: this.heightMap[r][c] * 0.35 + 0.3,
+                z: distR
+            };
+
+            if (t > 1) {
+                delete entity.animation;
+            }
+
+        } else {
+            coor = {
+                x: c,
+                y: this.heightMap[r][c] * 0.35 + 0.3,
+                z: r
+            };
+        }
+
+        entity.el.dataset.position = `${coor.x - this.colCount / 2} ${coor.y + this.waveDeltaYAt(r, c, timer)} ${coor.z - this.rowCount / 2}`;
     }
 
     projectCoordinates(r, c) {
         return {
-            offsetRow: c - this.colCount / 2,
-            offsetCol: r - this.rowCount / 2,
-            offsetFloor: this.heightMap[r][c] * 0.35 + 0.3
+            x: c - this.colCount / 2,
+            y: this.heightMap[r][c] * 0.35 + 0.3,
+            z: r - this.rowCount / 2
         }
     }
 
     waveDeltaYAt(r, c, timer) {
-        // return 0;
-        return Math.sin(timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 100;
+        return 0;
+        // return Math.sin(timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 100;
+        // return Math.sin(timer + this.heightMap[r][c] / 1.1 + r / 1.1 + c / 1.1) / 5;
     }
 
     getPlayerPos() {
         // TODO: find and return the player position
         // no more playerpos
     }
+
+    Animator = {
+        easeInOut: time => {
+            return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
+        },
+        easeOutBack: time => {
+            return Math.pow(time - 1, 2) * ((1.70158 + 1) * (time - 1) + 1.70158) + 1;
+        },
+        elastic: time => {
+            return Math.pow(2, -5 * time) * Math.sin(((time - 0.3 / 4) * (Math.PI * 2)) / 0.3) + 1;
+        },
+        fanOut: time => {
+            return 2 / (1 + Math.pow(1000, -time)) - 1;
+        },
+        rollercoaster: time => {
+            return (-1.15 * Math.sin(time * 7.7)) / (time * 7.7) + 1.15;
+        },
+        linear: time => {
+            return time;
+        },
+    };
 }
