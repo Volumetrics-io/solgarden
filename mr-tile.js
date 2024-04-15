@@ -49,8 +49,8 @@ class MRTile extends MREntity {
 
         // the translucent colored tile
         // this.floorTile.dataset.position = "0 -0.3 0";
-        this.floorTile.dataset.position = "0 0 0";
-        let geometry = new THREE.BoxGeometry(0.93, 0.25, 0.93);
+        this.floorTile.dataset.position = "0 0.1 0";
+        let geometry = new THREE.BoxGeometry(0.8, 0.1, 0.8);
         this.floorMaterial = new THREE.MeshPhongMaterial({
             color: "#d3ceba",
             transparent: true,
@@ -65,7 +65,7 @@ class MRTile extends MREntity {
         this.numberString.style.fontSize = "400px";
         this.numberContainer.appendChild(this.numberString);
 
-        this.numberContainer.dataset.position = '0 0.2 0'
+        this.numberContainer.dataset.position = '0 0.15 0'
         this.numberContainer.dataset.rotation = `270 0 -${randomRotation}`
         Object.assign(this.numberContainer.style, {
             width: "300px",

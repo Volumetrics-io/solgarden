@@ -94,8 +94,8 @@ class BoardSystem extends MRSystem {
                 chestCount: 0,
                 biome: {
                     name: 'spawn',
-                    path: "tiles/biome_plains/",
-                    tiles: ["tilegrass001.glb"],
+                    path: "tiles/biome_purple/",
+                    tiles: ["tilegrasspurple001.glb"],
                     props: []
                 }
             });
@@ -317,7 +317,7 @@ class BoardSystem extends MRSystem {
     }
 
     decreaseRange() {
-        if (this.playerStats.range > 0) {
+        if (this.playerStats.range > 1) {
             this.combatQueue = [];
 
             for (let r = 0; r < this.room.rowCount; r++) {
