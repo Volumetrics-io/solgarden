@@ -10,7 +10,8 @@ class BoardSystem extends MRSystem {
         this.gameIsStarted = false;
 
         // TODO: package the sound into a simple Class
-        // something like this.sound.play('doorHinge');
+        // something like this.sound.play('doorHinge');\
+        // Sound Effect from https://pixabay.com/
         this.sounds = {
             bgMusic: document.querySelector('#bg-music'),
             chessSound: document.querySelector('#chess-sound'),
@@ -20,6 +21,9 @@ class BoardSystem extends MRSystem {
             nopeSound: document.querySelector('#nope-sound'),
             swooshSound: document.querySelector('#swoosh-sound'),
             latchSound: document.querySelector('#latch-sound'),
+            fridgeSound: document.querySelector('#fridge-sound'),
+            farmSound: document.querySelector('#farm-sound'),
+            bandlandsSound: document.querySelector('#badlands-sound'),
         }
 
         // TODO: package player stats in a simple Class
@@ -27,7 +31,7 @@ class BoardSystem extends MRSystem {
         this.playerStats = {
             health: 5,
             maxHealth: 5,
-            range: 5,
+            range: 20,
             maxRange: 20,
             actionPoints: 4,
             maxActionPoints: 4,
@@ -65,8 +69,20 @@ class BoardSystem extends MRSystem {
             this.container.removeChild(this.container.lastChild);
         }
 
+        this.sounds.fridgeSound.components.set('audio', {
+            state: 'pause'
+        });
+        this.sounds.farmSound.components.set('audio', {
+            state: 'pause'
+        });
+        this.sounds.bandlandsSound.components.set('audio', {
+            state: 'pause'
+        });
+
         // The room class generate all kind of arrays and dom elements
         // to represent a level, either hardcoded or randomly generated
+
+        // TODO: make the soundtrack part of the biome
         if (this.levelId == 0) {
             // starting room
             this.room = new Room(this.container, {
@@ -77,12 +93,13 @@ class BoardSystem extends MRSystem {
                 propCount: 0,
                 chestCount: 0,
                 biome: {
+                    name: 'spawn',
                     path: "tiles/biome_plains/",
                     tiles: ["tilegrass001.glb"],
                     props: []
                 }
             });
-        } else if (this.levelId == 3 || this.levelId == 6 || this.levelId == 9) {
+        } else if (this.levelId == 3 || this.levelId == 8 || this.levelId == 13 || this.levelId == 21 || this.levelId == 34 || this.levelId == 55) {
             // battery room
             this.room = new Room(this.container, {
                 flrCount: 1,
@@ -92,6 +109,7 @@ class BoardSystem extends MRSystem {
                 // propCount: 0,
                 chestCount: 0,
                 biome: {
+                    name: 'battery',
                     path: "tiles/biome_cyan/",
                     tiles: ["tilegrasscyan001.glb"],
                     props: ["rockdesert001.glb", "rockdesert002.glb"]
@@ -119,9 +137,27 @@ class BoardSystem extends MRSystem {
                     [0, 0, 0, 0, 0, 0, 0],
                 ]
             });
+
+            this.sounds.fridgeSound.components.set('audio', {
+                state: 'play'
+            });
         } else {
             this.room = new Room(this.container, {});
         }
+
+        switch (this.room.biome.name) {
+            case 'plains':
+                this.sounds.farmSound.components.set('audio', {
+                    state: 'play'
+                });
+                break;
+            case "desert":
+                this.sounds.bandlandsSound.components.set('audio', {
+                    state: 'play'
+                });
+                break;
+        }
+        // console.log(this.room.biome.name);
 
         // the tile elements (the floor) own all the events handling
         this.room.tilemap.forEach(row => {
@@ -209,10 +245,21 @@ class BoardSystem extends MRSystem {
                                     state: 'play'
                                 });
 
-                                if (this.playerStats.health < this.playerStats.maxHealth) {
-                                    this.playerStats.health++;
+                                // check for and apply the effect of the loot
+                                switch (targetEntity.effect) {
+                                    case "health":
+                                        if (this.playerStats.health < this.playerStats.maxHealth) {
+                                            this.playerStats.health++;
+                                        }
+                                        console.log("increased health");
+                                        break;
+                                    case "range":
+                                        if (this.playerStats.range < this.playerStats.maxRange) {
+                                            this.playerStats.range++;
+                                        }
+                                        console.log("increased range");
+                                        break;
                                 }
-                                // console.log("You got loot!!");
                             } else {
                                 this.sounds.nopeSound.components.set('audio', {
                                     state: 'play'
@@ -269,8 +316,8 @@ class BoardSystem extends MRSystem {
         this.levelId++;
     }
 
-    decreaseRange(){
-        if(this.playerStats.range > 0) {
+    decreaseRange() {
+        if (this.playerStats.range > 0) {
             this.combatQueue = [];
 
             for (let r = 0; r < this.room.rowCount; r++) {
@@ -394,14 +441,20 @@ class BoardSystem extends MRSystem {
     }
 
     dropLoot(x, y) {
+        const possibleEffects = [
+            "health",
+            "range"
+        ]
+        const effect = possibleEffects[Math.floor(Math.random() * possibleEffects.length)];
+
         const droppedLoot = document.createElement("mr-loot");
+        droppedLoot.dataset.effect = effect;
         this.container.appendChild(droppedLoot);
 
         const loot = {
             el: droppedLoot,
             type: 'loot',
-            increaseHP: 1,
-            increaseAP: 1,
+            effect: effect
         };
 
         this.room.entityMap[x][y] = loot;
@@ -417,6 +470,8 @@ class BoardSystem extends MRSystem {
 
     update(deltaTime, frame) {
 
+        // console.log(this.playerStats.range);
+
         if (this.gameIsStarted) {
             this.timer += deltaTime;
 
@@ -430,7 +485,8 @@ class BoardSystem extends MRSystem {
                 if (index < this.playerStats.maxActionPoints) {
                     actionBall.style.visibility = "visible";
                     if (index < this.playerStats.actionPoints) {
-                        actionBall.material.color.setStyle('#00ff55')
+                        actionBall.material.color.setStyle(`hsl(${index * 40 + 40}, 80%, 60%)`)
+                        // actionBall.material.color.setStyle('#00ffd1')
                         actionBall.material.opacity = 1;
                     } else {
                         actionBall.material.color.setStyle('#dddddd')
@@ -447,7 +503,7 @@ class BoardSystem extends MRSystem {
             });
 
             this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
-            this.levelCountLabel.innerText = `Battery remaining: ${Math.round(this.playerStats.range)}`;
+            this.levelCountLabel.innerText = `Battery: ${Math.round(this.playerStats.range)} Floor: ${this.levelId} Death: ${this.cycleId}`;
 
             const offsetX = -this.scale / 2;
             const offsetY = (this.room.rowCount / 2) * this.scale;
@@ -514,7 +570,7 @@ class BoardSystem extends MRSystem {
                                     // console.log(this.playerStats.range);
                                     tile.el.floorTile.style.visibility = "visible";
                                     tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                    if(this.playerStats.range < this.playerStats.maxRange) {
+                                    if (this.playerStats.range < this.playerStats.maxRange) {
                                         this.playerStats.range += 0.05;
                                     }
 
@@ -583,10 +639,19 @@ class BoardSystem extends MRSystem {
         this.endTurnButton.dataset.rotation = "270 0 0";
         this.UILayer.appendChild(this.endTurnButton);
 
+        this.labelContainer = document.createElement("mr-div");
+        this.labelContainer.dataset.position = "0 0 0.027";
+        this.labelContainer.className = 'label-container';
+        this.UILayer.appendChild(this.labelContainer);
+
+        // this.batteryRemainingLabel = document.createElement("mr-text");
+        // this.batteryRemainingLabel.className = 'text-label';
+        // this.batteryRemainingLabel.innerText = "test text"
+        // this.labelContainer.appendChild(this.batteryRemainingLabel);
+
         this.levelCountLabel = document.createElement("mr-text");
         this.levelCountLabel.className = 'text-label';
-        this.levelCountLabel.dataset.position = "0 0 0.027";
-        this.UILayer.appendChild(this.levelCountLabel);
+        this.labelContainer.appendChild(this.levelCountLabel);
 
         this.endTurnButton.addEventListener('click', () => {
             this.endTurn();

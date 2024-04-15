@@ -13,18 +13,20 @@ class Room {
 
         this.biomes = [{
             // plains
+            name: "plains",
             path: "tiles/biome_plains/",
             tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
             props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
         },
         {
             // desert
+            name: "desert",
             path: "tiles/biome_deserts/",
             tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
             props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
         }
         ]
-        const randomBiome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
+        this.biome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
 
         // read the params
         this.flrCount = params.flrCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
@@ -52,8 +54,8 @@ class Room {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
                 const el = document.createElement("mr-tile");
-                el.dataset.tileset = randomBiome.tiles;
-                el.dataset.tilepath = randomBiome.path;
+                el.dataset.tileset = this.biome.tiles;
+                el.dataset.tilepath = this.biome.path;
 
                 const tile = {
                     el: el,
@@ -83,8 +85,8 @@ class Room {
         // props
         for (let i = 0; i < this.propCount; i++) {
             const el = document.createElement("mr-prop");
-            el.dataset.tileset = randomBiome.props;
-            el.dataset.tilepath = randomBiome.path;
+            el.dataset.tileset = this.biome.props;
+            el.dataset.tilepath = this.biome.path;
             const prop = {
                 el: el,
                 type: 'prop'

@@ -58,6 +58,12 @@
         .text-label {
             font-size: 10px;
         }
+
+        .label-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
     </style>
 </head>
 
@@ -76,6 +82,9 @@
         <mr-entity id="latch-sound" data-comp-audio="src: ./audio/latch.mp3; loop: false; state: stop;"></mr-entity>
 
         <mr-entity id="bg-music" data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
+        <mr-entity id="fridge-sound" data-comp-audio="src: ./audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
+        <mr-entity id="farm-sound" data-comp-audio="src: ./audio/farm.mp3; loop: true; state: stop;"></mr-entity>
+        <mr-entity id="badlands-sound" data-comp-audio="src: ./audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
         <!-- <mr-panel id="game-panel" data-comp-anchor="type: plane; label: table" data-position="0 -0.5 0">
             <mr-text class="title">Inventory</mr-text>
             <mr-div class="row">

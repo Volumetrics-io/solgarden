@@ -9,7 +9,7 @@ class MRActionBall extends MREntity {
     connected() {
         this.geometry = new THREE.SphereGeometry(0.008);
         this.material = new THREE.MeshPhongMaterial({
-            color: "#00ff55",
+            color: "#00ffd1",
             transparent: true,
             opacity: 1
         })

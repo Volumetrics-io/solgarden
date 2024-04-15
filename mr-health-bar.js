@@ -26,6 +26,7 @@ class MRHealthBar extends MREntity {
         // this.el.object3D.scale.set(0.1 * health, 0, 0);
 
         // that works
+        //  TODO: figure out why the other version doesn't work
         this.mesh.geometry.dispose()
         this.mesh.geometry = new THREE.BoxGeometry(0.1 * health, 0.005, 0.015);
 

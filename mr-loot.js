@@ -7,7 +7,18 @@ class MRLoot extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/loot.glb";
+        this.effect = this.dataset.effect ?? "health";
+
+        switch(this.effect) {
+            case "health":
+                this.el.src = "tiles/loot-health.glb";
+                break;
+            case "range":
+                this.el.src = "tiles/loot-range.glb";
+                break;
+        }
+
+
         this.el.style.pointerEvents = 'none';
     }
 
