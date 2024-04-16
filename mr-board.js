@@ -548,7 +548,6 @@ class BoardSystem extends MRSystem {
                                 }
                                 break;
                             case "charging-station":
-                                // console.log(this.playerStats.range);
                                 tile.el.floorTile.style.visibility = "visible";
                                 tile.el.floorMaterial.color.setStyle("#00ffd1");
                                 if (this.playerStats.range < this.playerStats.maxRange) {
@@ -594,10 +593,7 @@ class BoardSystem extends MRSystem {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
 
-            if (this.needsUpdate) {
-                this.projectRoom();
-            }
-
+            // UI STUFF
             this.actionBalls.forEach((actionBall, index) => {
                 if (index < this.playerStats.maxActionPoints) {
                     actionBall.style.visibility = "visible";
@@ -620,12 +616,17 @@ class BoardSystem extends MRSystem {
 
             this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
             this.levelCountLabel.innerText = `Battery: ${Math.round(this.playerStats.range)} Floor: ${this.levelId} Death: ${this.cycleId}`;
+            ////////////
 
-            for (let r = 0; r < this.room.rowCount; r++) {
-                for (let c = 0; c < this.room.colCount; c++) {
-                    const entity = this.room.entityMap[r][c];
-                    if (entity != 0 && entity.animation) {
-                        this.room.project(entity, r, c, this.timer);
+            if (this.needsUpdate) {
+                this.projectRoom();
+            } else {
+                for (let r = 0; r < this.room.rowCount; r++) {
+                    for (let c = 0; c < this.room.colCount; c++) {
+                        const entity = this.room.entityMap[r][c];
+                        if (entity != 0 && entity.animation) {
+                            this.room.project(entity, r, c, this.timer);
+                        }
                     }
                 }
             }
