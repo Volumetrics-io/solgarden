@@ -375,33 +375,29 @@ class BoardSystem extends MRSystem {
             const entity = entry.entry;
             const r = entry.r;
             const c = entry.c;
+            const x = this.room.playerPos.x;
+            const y = this.room.playerPos.y;
 
-            // TODO: plug a much better pathfinder algo
+            // remove origin and target from the entity map
+            // otherwise the pathfinding can't work
+            const blockmap = this.room.entityMap.map(function(arr) {
+                return arr.slice();
+            });
+            blockmap[r][c] = 0;
+            blockmap[x][y] = 0;
 
-            const directionX = this.room.playerPos.x - r;
-            const directionY = this.room.playerPos.y - c;
+            const pf = new PathFinder(blockmap);
+            const path = pf.findPath([r, c], [x, y]);
 
-            let goalX = r;
-            let goalY = c;
 
-            if (directionX < 0) {
-                goalX -= 1;
-            } else if (directionX > 0) {
-                goalX += 1;
-            }
+            // const nextMove = path[1];
+            const nextMove = path[2];
 
-            if (directionY < 0) {
-                goalY -= 1;
-            } else if (directionY > 0) {
-                goalY += 1;
-            }
-
-            if (goalX == this.room.playerPos.x && goalY == this.room.playerPos.y) {
+            // melee weapon. will need distance here to check range
+            if (nextMove[0] == x && nextMove[1] == y) {
                 this.attackPlayer(entity, 1);
             } else {
-                if (Math.random() < 0.75) {
-                    this.room.moveEntity(r, c, goalX, goalY);
-                }
+                this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
             setTimeout(() => {
