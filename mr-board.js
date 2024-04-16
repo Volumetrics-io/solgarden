@@ -157,154 +157,146 @@ class BoardSystem extends MRSystem {
                 });
                 break;
         }
-        // console.log(this.room.biome.name);
 
         // the tile elements (the floor) own all the events handling
         this.room.tilemap.forEach(row => {
             row.forEach(tile => {
-                // console.log(this.room.entityMap[tile.pos.x][tile.pos.y].type);
                 tile.el.addEventListener("mouseover", () => {
-                    switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
-                        case "player":
-                            break;
-                        case "prop":
-                            break;
-                        case "chest":
-                            break;
-                        case "loot":
-                            break;
-                        case "door":
-                            break;
-                        case "charging-station":
-                            break;
-                        case "enemy":
-                            if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                this.playerStats.projectedCost = 2;
-                                console.log("a weapon would be highlighted");
-                            }
-                            break;
-                        default:
-                            // console.log("here");
-                            // console.log(this.room.distances);
-                            this.playerStats.projectedCost = this.room.distances[tile.pos.x][tile.pos.y];
-                            // el.floorTile.object3D.children[0].material.opacity = 1;
-                            tile.el.floorMaterial.opacity = 1;
+
+                    if (!this.room.entityMap[tile.pos.x][tile.pos.y].type) {
+
+                        // there is nothing on the tile.
+                        this.playerStats.projectedCost = this.room.distances[tile.pos.x][tile.pos.y];
+                        tile.el.floorMaterial.opacity = 1;
+
+                    } else {
+
+                        // there is an entity on the tile
+                        switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
+                            case "enemy":
+                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    this.playerStats.projectedCost = 2;
+                                    console.log("a weapon would be highlighted");
+                                }
+                                break;
+                        }
                     }
 
                 });
 
                 tile.el.addEventListener("mouseout", () => {
                     this.playerStats.projectedCost = 0;
-                    // el.floorTile.object3D.children[0].material.opacity = 0.75;
                     tile.el.floorMaterial.opacity = 0.75;
                 });
 
                 tile.el.addEventListener("touchstart", () => {
                     const targetEntity = this.room.entityMap[tile.pos.x][tile.pos.y];
-                    switch (targetEntity.type) {
-                        case "prop":
-                            // TODO do something when a prop is touched?
-                            // Play a sound, an animation?
-                            // console.log("this is a prop.")
-                            break;
-                        case "enemy":
-                            // console.log("would be combat, depending of the distance.")
-                            if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2 && this.playerStats.actionPoints >= 2) {
-                                this.playerStats.actionPoints -= 2;
-                                this.attackEntity(targetEntity, tile.pos.x, tile.pos.y);
-                            } else {
-                                this.sounds.nopeSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                            }
-                            break;
-                        case "chest":
-                            // console.log("that will open the chest and drop an item on the floor")
-                            if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                // console.log('open the chest')
 
-                                // TODO: should be this.room.removeEntityAt(tile.pos.x, tile.pos.y);
-                                this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
-                                this.dropLoot(tile.pos.x, tile.pos.y);
+                    if (!targetEntity) {
+                        // there is nothing on the tile.
 
-                                this.sounds.latchSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                            } else {
-                                this.sounds.nopeSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                            }
-                            break;
-                        case "loot":
-                            if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
-                                this.room.entityMap[tile.pos.x][tile.pos.y] = 0;
+                        // TODO: all that below should be a method of Room
+                        // this.room.movePlayer(x, y)
+                        const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
 
-                                this.sounds.analogSound.components.set('audio', {
-                                    state: 'play'
-                                });
+                        if (moveCost <= this.playerStats.actionPoints) {
+                            this.playerStats.actionPoints -= moveCost;
+                            this.sounds.chessSound.components.set('audio', {
+                                state: 'play'
+                            })
+                            this.room.moveEntity(this.room.playerPos.x, this.room.playerPos.y, tile.pos.x, tile.pos.y);
+                            this.room.playerPos.x = tile.pos.x;
+                            this.room.playerPos.y = tile.pos.y;
+                        } else {
+                            this.sounds.nopeSound.components.set('audio', {
+                                state: 'play'
+                            });
+                        }
 
-                                // check for and apply the effect of the loot
-                                switch (targetEntity.effect) {
-                                    case "health":
-                                        if (this.playerStats.health < this.playerStats.maxHealth) {
-                                            this.playerStats.health++;
-                                        }
-                                        console.log("increased health");
-                                        break;
-                                    case "range":
-                                        if (this.playerStats.range < this.playerStats.maxRange) {
-                                            this.playerStats.range++;
-                                        }
-                                        console.log("increased range");
-                                        break;
+                    } else {
+                        // there is an entity on the tile
+
+                        switch (targetEntity.type) {
+                            case "enemy":
+                                // console.log("would be combat, depending of the distance.")
+                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2 && this.playerStats.actionPoints >= 2) {
+                                    this.playerStats.actionPoints -= 2;
+                                    this.attackEntity(targetEntity, tile.pos.x, tile.pos.y);
+                                } else {
+                                    this.sounds.nopeSound.components.set('audio', {
+                                        state: 'play'
+                                    });
                                 }
-                            } else {
-                                this.sounds.nopeSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                            }
-                            // console.log("the item will do something on pick up")
-                            break;
-                        case "door":
-                            if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                this.sounds.doorSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                                this.initialize();
-                            } else {
-                                this.sounds.nopeSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                            }
-                            // console.log("go to the next room after killing all the enemies")
-                            break;
-                        default:
+                                break;
+                            case "chest":
+                                // console.log("that will open the chest and drop an item on the floor")
+                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    // console.log('open the chest')
 
-                            // TODO: all that below should be a method of Room
-                            // this.room.movePlayer(x, y)
-                            const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
+                                    // TODO: should be this.room.removeEntityAt(tile.pos.x, tile.pos.y);
+                                    this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
+                                    this.dropLoot(tile.pos.x, tile.pos.y);
 
-                            if (moveCost <= this.playerStats.actionPoints) {
-                                this.playerStats.actionPoints -= moveCost;
-                                this.sounds.chessSound.components.set('audio', {
-                                    state: 'play'
-                                })
-                                this.room.moveEntity(this.room.playerPos.x, this.room.playerPos.y, tile.pos.x, tile.pos.y);
-                                this.room.playerPos.x = tile.pos.x;
-                                this.room.playerPos.y = tile.pos.y;
-                            } else {
-                                this.sounds.nopeSound.components.set('audio', {
-                                    state: 'play'
-                                });
-                            }
+                                    this.sounds.latchSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                } else {
+                                    this.sounds.nopeSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                }
+                                break;
+                            case "loot":
+                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
+                                    this.room.entityMap[tile.pos.x][tile.pos.y] = 0;
+
+                                    this.sounds.analogSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+
+                                    // check for and apply the effect of the loot
+                                    switch (targetEntity.effect) {
+                                        case "health":
+                                            if (this.playerStats.health < this.playerStats.maxHealth) {
+                                                this.playerStats.health++;
+                                            }
+                                            console.log("increased health");
+                                            break;
+                                        case "range":
+                                            if (this.playerStats.range < this.playerStats.maxRange) {
+                                                this.playerStats.range++;
+                                            }
+                                            console.log("increased range");
+                                            break;
+                                    }
+                                } else {
+                                    this.sounds.nopeSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                }
+                                // console.log("the item will do something on pick up")
+                                break;
+                            case "door":
+                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    this.sounds.doorSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                    this.initialize();
+                                } else {
+                                    this.sounds.nopeSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                }
+                                // console.log("go to the next room after killing all the enemies")
+                                break;
+                        }
                     }
 
                     // Automatically end the turn when the player runs out of action points
-                    if (this.playerStats.actionPoints == 0) {
-                        this.endTurn();
-                    }
+                    // if (this.playerStats.actionPoints == 0) {
+                    //     this.endTurn();
+                    // }
 
                 });
             })
@@ -375,38 +367,45 @@ class BoardSystem extends MRSystem {
             const entity = entry.entry;
             const r = entry.r;
             const c = entry.c;
+            const x = this.room.playerPos.x;
+            const y = this.room.playerPos.y;
 
-            // TODO: plug a much better pathfinder algo
+            // remove origin and target from the entity map
+            // otherwise the pathfinding can't work
+            const blockmap = this.room.entityMap.map(function (arr) {
+                return arr.slice();
+            });
+            blockmap[r][c] = 0;
+            blockmap[x][y] = 0;
 
-            const directionX = this.room.playerPos.x - r;
-            const directionY = this.room.playerPos.y - c;
+            const pf = new PathFinder(blockmap);
+            const path = pf.findPath([r, c], [x, y]);
 
-            let goalX = r;
-            let goalY = c;
+            // path[0] is the origin
+            // const nextMove = path[1];
+            // TODO: enemies move one step at the time
 
-            if (directionX < 0) {
-                goalX -= 1;
-            } else if (directionX > 0) {
-                goalX += 1;
-            }
+            // if path[2] is undefined, the path has no solution 
+            const nextMove = (!path[1]) ? [r][c] : path[1];
+            // let nextMove;
+            // if(!path[1]) {
+            //     nextMove = path[1] ?? [r][c];
+            // } else {
 
-            if (directionY < 0) {
-                goalY -= 1;
-            } else if (directionY > 0) {
-                goalY += 1;
-            }
+            // }
 
-            if (goalX == this.room.playerPos.x && goalY == this.room.playerPos.y) {
+
+            // melee weapon.
+            if (this.distanceBetween(nextMove[0], nextMove[1], x, y) < 1) {
+                console.log(this.distanceBetween(nextMove[0], nextMove[1], x, y));
                 this.attackPlayer(entity, 1);
             } else {
-                if (Math.random() < 0.75) {
-                    this.room.moveEntity(r, c, goalX, goalY);
-                }
+                this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
             setTimeout(() => {
                 this.opponentTurn();
-            }, 800)
+            }, 1000)
         } else {
             this.isPlayerTurn = true;
         }
@@ -599,6 +598,13 @@ class BoardSystem extends MRSystem {
                     }
                 }
             }
+
+            if (this.playerStats.actionPoints == 0) {
+                this.endTurnButton.style.backgroundColor = "RebeccaPurple";
+            } else {
+                this.endTurnButton.style.backgroundColor = "#e72d75";
+            }
+
         }
     }
 
