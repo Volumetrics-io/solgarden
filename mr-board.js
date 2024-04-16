@@ -8,6 +8,7 @@ class BoardSystem extends MRSystem {
         this.levelId = 0;
         this.cycleId = 0;
         this.gameIsStarted = false;
+        this.needsUpdate = false;
 
         // TODO: package the sound into a simple Class
         // something like this.sound.play('doorHinge');\
@@ -211,6 +212,7 @@ class BoardSystem extends MRSystem {
                             this.room.moveEntity(this.room.playerPos.x, this.room.playerPos.y, tile.pos.x, tile.pos.y);
                             this.room.playerPos.x = tile.pos.x;
                             this.room.playerPos.y = tile.pos.y;
+                            // this.needsUpdate = true;
                         } else {
                             this.sounds.nopeSound.components.set('audio', {
                                 state: 'play'
@@ -302,12 +304,15 @@ class BoardSystem extends MRSystem {
                     //     this.endTurn();
                     // }
 
+                    this.needsUpdate = true;
+
                 });
             })
         })
 
         this.room.checkForDoor(this.container);
         this.gameIsStarted = true;
+        this.needsUpdate = true;
 
         this.levelId++;
     }
@@ -341,6 +346,7 @@ class BoardSystem extends MRSystem {
         this.playerStats.actionPoints = this.playerStats.maxActionPoints;
         this.isPlayerTurn = false;
         this.decreaseRange();
+        this.needsUpdate = true;
     }
 
     resetPlayer() {
@@ -376,7 +382,7 @@ class BoardSystem extends MRSystem {
 
             // remove origin and target from the entity map
             // otherwise the pathfinding can't work
-            const blockmap = this.room.entityMap.map(function (arr) {
+            const blockmap = this.room.entityMap.map(function(arr) {
                 return arr.slice();
             });
             blockmap[r][c] = 0;
@@ -410,6 +416,8 @@ class BoardSystem extends MRSystem {
         } else {
             this.isPlayerTurn = true;
         }
+
+        this.needsUpdate = true;
     }
 
     attackPlayer(attacker, damage) {
@@ -437,6 +445,7 @@ class BoardSystem extends MRSystem {
 
             this.room.checkForDoor(this.container);
 
+            this.needsUpdate = true;
         }
     }
 
@@ -458,6 +467,8 @@ class BoardSystem extends MRSystem {
         };
 
         this.room.entityMap[x][y] = loot;
+
+        this.needsUpdate = true;
     }
 
     // TODO: this should be moved to Room
@@ -475,28 +486,122 @@ class BoardSystem extends MRSystem {
             const offsetX = ballsize + margin;
             actionBall.dataset.position = `${index * ballsize + index * margin + offsetX} ${this.scale / 2 + ballsize} 0`;
         });
+
+        const offsetX = -this.scale / 2;
+        const offsetY = (this.room.rowCount / 2) * this.scale;
+
+        this.UILayer.dataset.position = `${offsetX} 0 ${offsetY}`;
+
+        this.room.calculateDistancesFromPlayer();
+        this.room.tilemap.forEach(row => {
+            row.forEach(tile => {
+
+                const x = tile.pos.x;
+                const y = tile.pos.y;
+
+                this.room.project(tile, x, y, this.timer);
+
+                if (this.isPlayerTurn) {
+                    const distance = this.room.distances[tile.pos.x][tile.pos.y];
+
+                    if (distance != Infinity &&
+                        distance <= this.playerStats.actionPoints &&
+                        distance > 0 &&
+                        this.room.entityMap[tile.pos.x][tile.pos.y] == 0) {
+
+                        let offsetY = distance * 40;
+                        let color = `hsl(${offsetY}, 80%, 60%)`;
+                        tile.el.floorTile.style.visibility = "visible";
+                        tile.el.floorMaterial.opacity = 0.75;
+                        tile.el.floorMaterial.color.setStyle(color)
+
+                        tile.el.numberString.innerText = distance;
+                    } else {
+                        tile.el.numberString.innerText = '';
+                        tile.el.floorTile.style.visibility = "hidden";
+                        switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
+                            case "prop":
+                                tile.el.floorTile.style.visibility = "hidden";
+                                break;
+                            case "enemy":
+                                tile.el.floorTile.style.visibility = "visible";
+                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    tile.el.floorMaterial.color.setStyle("#f00");
+                                } else {
+                                    tile.el.floorMaterial.color.setStyle("#888");
+                                }
+                                break;
+                            case "chest":
+                                tile.el.floorTile.style.visibility = "visible";
+                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    tile.el.floorMaterial.color.setStyle("#0f0");
+                                } else {
+                                    tile.el.floorMaterial.color.setStyle("#888");
+                                }
+                                break;
+                            case "loot":
+                                tile.el.floorTile.style.visibility = "visible";
+                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    tile.el.floorMaterial.color.setStyle("#00ffd1");
+                                } else {
+                                    tile.el.floorMaterial.color.setStyle("#888");
+                                }
+                                break;
+                            case "charging-station":
+                                // console.log(this.playerStats.range);
+                                tile.el.floorTile.style.visibility = "visible";
+                                tile.el.floorMaterial.color.setStyle("#00ffd1");
+                                if (this.playerStats.range < this.playerStats.maxRange) {
+                                    this.playerStats.range += 0.05;
+                                }
+
+                            case "door":
+                                tile.el.floorTile.style.visibility = "visible";
+                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    tile.el.floorMaterial.color.setStyle("#00ffd1");
+                                } else {
+                                    tile.el.floorMaterial.color.setStyle("#888");
+                                }
+                                break;
+                        }
+                    }
+                } else {
+                    tile.el.numberString.innerText = '';
+                    tile.el.floorTile.style.visibility = "hidden";
+                }
+            })
+        })
+
+        for (let r = 0; r < this.room.rowCount; r++) {
+            for (let c = 0; c < this.room.colCount; c++) {
+                const entity = this.room.entityMap[r][c];
+                if (entity != 0) {
+                    this.room.project(entity, r, c, this.timer);
+                }
+            }
+        }
+
+        if (this.playerStats.actionPoints == 0) {
+            this.endTurnButton.style.backgroundColor = "RebeccaPurple";
+        } else {
+            this.endTurnButton.style.backgroundColor = "#e72d75";
+        }
+
+        this.needsUpdate = false;
     }
 
     update(deltaTime, frame) {
-
-        // console.log(this.playerStats.range);
-
         if (this.gameIsStarted) {
             this.timer += deltaTime;
 
-            this.projectRoom();
+            if (this.needsUpdate) {
+                this.projectRoom();
+            }
 
-            ///// UI LAYER
             this.actionBalls.forEach((actionBall, index) => {
-                // const ballsize = 0.008;
-                // const margin = 0.01;
-                // const offsetX = ballsize + margin;
-                // actionBall.dataset.position = `${index * ballsize + index * margin + offsetX} ${this.scale / 2 + ballsize} 0`;
-
                 if (index < this.playerStats.maxActionPoints) {
                     actionBall.style.visibility = "visible";
                     if (index < this.playerStats.actionPoints) {
-                        // actionBall.material.color.setStyle(`hsl(${index * 40 + 40}, 80%, 60%)`)
                         actionBall.material.color.setStyle('#00d2d2')
                         actionBall.material.opacity = 1;
                     } else {
@@ -516,107 +621,14 @@ class BoardSystem extends MRSystem {
             this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
             this.levelCountLabel.innerText = `Battery: ${Math.round(this.playerStats.range)} Floor: ${this.levelId} Death: ${this.cycleId}`;
 
-            const offsetX = -this.scale / 2;
-            const offsetY = (this.room.rowCount / 2) * this.scale;
-
-            this.UILayer.dataset.position = `${offsetX} 0 ${offsetY}`;
-            // this.UILayer.dataset.rotation = `0 270 0`;
-
-            this.room.calculateDistancesFromPlayer();
-            this.room.tilemap.forEach(row => {
-                row.forEach(tile => {
-
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
-
-                    this.room.project(tile, x, y, this.timer);
-
-                    if (this.isPlayerTurn) {
-                        const distance = this.room.distances[tile.pos.x][tile.pos.y];
-
-                        if (distance != Infinity &&
-                            distance <= this.playerStats.actionPoints &&
-                            distance > 0 &&
-                            this.room.entityMap[tile.pos.x][tile.pos.y] == 0) {
-
-                            let offsetY = distance * 40;
-                            let color = `hsl(${offsetY}, 80%, 60%)`;
-                            tile.el.floorTile.style.visibility = "visible";
-                            tile.el.floorMaterial.opacity = 0.75;
-                            tile.el.floorMaterial.color.setStyle(color)
-
-                            tile.el.numberString.innerText = distance;
-                        } else {
-                            tile.el.numberString.innerText = '';
-                            tile.el.floorTile.style.visibility = "hidden";
-                            switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
-                                case "prop":
-                                    tile.el.floorTile.style.visibility = "hidden";
-                                    break;
-                                case "enemy":
-                                    tile.el.floorTile.style.visibility = "visible";
-                                    if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#f00");
-                                    } else {
-                                        tile.el.floorMaterial.color.setStyle("#888");
-                                    }
-                                    break;
-                                case "chest":
-                                    tile.el.floorTile.style.visibility = "visible";
-                                    if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#0f0");
-                                    } else {
-                                        tile.el.floorMaterial.color.setStyle("#888");
-                                    }
-                                    break;
-                                case "loot":
-                                    tile.el.floorTile.style.visibility = "visible";
-                                    if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                    } else {
-                                        tile.el.floorMaterial.color.setStyle("#888");
-                                    }
-                                    break;
-                                case "charging-station":
-                                    // console.log(this.playerStats.range);
-                                    tile.el.floorTile.style.visibility = "visible";
-                                    tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                    if (this.playerStats.range < this.playerStats.maxRange) {
-                                        this.playerStats.range += 0.05;
-                                    }
-
-                                case "door":
-                                    tile.el.floorTile.style.visibility = "visible";
-                                    if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                        tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                    } else {
-                                        tile.el.floorMaterial.color.setStyle("#888");
-                                    }
-                                    break;
-                            }
-                        }
-                    } else {
-                        tile.el.numberString.innerText = '';
-                        tile.el.floorTile.style.visibility = "hidden";
-                    }
-                })
-            })
-
             for (let r = 0; r < this.room.rowCount; r++) {
                 for (let c = 0; c < this.room.colCount; c++) {
                     const entity = this.room.entityMap[r][c];
-                    if (entity != 0) {
+                    if (entity != 0 && entity.animation) {
                         this.room.project(entity, r, c, this.timer);
                     }
                 }
             }
-
-            if (this.playerStats.actionPoints == 0) {
-                this.endTurnButton.style.backgroundColor = "RebeccaPurple";
-            } else {
-                this.endTurnButton.style.backgroundColor = "#e72d75";
-            }
-
         }
     }
 
