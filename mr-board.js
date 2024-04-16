@@ -142,6 +142,7 @@ class BoardSystem extends MRSystem {
                 state: 'play'
             });
         } else {
+            // otherwise, just get a random room
             this.room = new Room(this.container, {});
         }
 
@@ -161,6 +162,9 @@ class BoardSystem extends MRSystem {
         // the tile elements (the floor) own all the events handling
         this.room.tilemap.forEach(row => {
             row.forEach(tile => {
+
+                // console.log("tile", tile);
+
                 tile.el.addEventListener("mouseover", () => {
 
                     if (!this.room.entityMap[tile.pos.x][tile.pos.y].type) {
@@ -385,22 +389,19 @@ class BoardSystem extends MRSystem {
             // const nextMove = path[1];
             // TODO: enemies move one step at the time
 
-            // if path[2] is undefined, the path has no solution 
-            const nextMove = (!path[1]) ? [r][c] : path[1];
-            // let nextMove;
-            // if(!path[1]) {
-            //     nextMove = path[1] ?? [r][c];
-            // } else {
+            // if path[1] is undefined, the path has no solution
+            const nextMove = (!path[1]) ? [r, c] : path[1];
 
-            // }
+            this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
 
 
             // melee weapon.
-            if (this.distanceBetween(nextMove[0], nextMove[1], x, y) < 1) {
-                console.log(this.distanceBetween(nextMove[0], nextMove[1], x, y));
+            // console.log(nextMove, x, y, this.distanceBetween(nextMove[0], nextMove[1], x, y));
+            if (this.distanceBetween(r, c, x, y) <= 1) {
+                // console.log(this.distanceBetween(r, c, x, y));
                 this.attackPlayer(entity, 1);
-            } else {
-                this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
+                // } else {
+                //     this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
             setTimeout(() => {
@@ -467,6 +468,15 @@ class BoardSystem extends MRSystem {
         return Math.sqrt(distX * distX + distY * distY);
     }
 
+    projectRoom() {
+        this.actionBalls.forEach((actionBall, index) => {
+            const ballsize = 0.008;
+            const margin = 0.01;
+            const offsetX = ballsize + margin;
+            actionBall.dataset.position = `${index * ballsize + index * margin + offsetX} ${this.scale / 2 + ballsize} 0`;
+        });
+    }
+
     update(deltaTime, frame) {
 
         // console.log(this.playerStats.range);
@@ -474,18 +484,20 @@ class BoardSystem extends MRSystem {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
 
+            this.projectRoom();
+
             ///// UI LAYER
             this.actionBalls.forEach((actionBall, index) => {
-                const ballsize = 0.008;
-                const margin = 0.01;
-                const offsetX = ballsize + margin;
-                actionBall.dataset.position = `${index * ballsize + index * margin + offsetX} ${this.scale / 2 + ballsize} 0`;
+                // const ballsize = 0.008;
+                // const margin = 0.01;
+                // const offsetX = ballsize + margin;
+                // actionBall.dataset.position = `${index * ballsize + index * margin + offsetX} ${this.scale / 2 + ballsize} 0`;
 
                 if (index < this.playerStats.maxActionPoints) {
                     actionBall.style.visibility = "visible";
                     if (index < this.playerStats.actionPoints) {
-                        actionBall.material.color.setStyle(`hsl(${index * 40 + 40}, 80%, 60%)`)
-                        // actionBall.material.color.setStyle('#00ffd1')
+                        // actionBall.material.color.setStyle(`hsl(${index * 40 + 40}, 80%, 60%)`)
+                        actionBall.material.color.setStyle('#00d2d2')
                         actionBall.material.opacity = 1;
                     } else {
                         actionBall.material.color.setStyle('#dddddd')

@@ -2,6 +2,8 @@ class Room {
     constructor(container, params) {
         this.container = container;
 
+        this.needsUpdate = false;
+
         this.minRowCount = params.minRowCount ?? 4;
         this.minColCount = params.minColCount ?? 4;
         this.minFlrCount = params.minFlrCount ?? 1;
@@ -126,8 +128,11 @@ class Room {
             });
         });
 
+        this.calculateDistancesFromPlayer();
+
         this.printArray("this.heightMap", this.heightMap);
         this.printArray("this.entityMap", this.entityMap);
+        this.printArray("this.distances", this.distances);
 
     }
 
@@ -212,6 +217,7 @@ class Room {
 
     calculateDistancesFromPlayer() {
         this.calculateDistances(this.playerPos.y, this.playerPos.x, this.entityMap);
+        // this.printArray("this.distances", this.distances);
     }
 
     calculateDistances(x, y, blockmap) {
@@ -286,14 +292,23 @@ class Room {
             const startTime = timer - entity.animation.timerStart;
 
             const t = startTime * duration;
+            // const p = this.Animator.fanOut(t);
             const p = this.Animator.fanOut(t);
+            const h = this.Animator.jump(t);
 
             let distR = entity.animation.x + entity.animation.distX * p;
             let distC = entity.animation.y + entity.animation.distY * p;
+            let distF;
+
+            if(entity.type == "enemy") {
+                distF = h * 0.8;
+            } else {
+                distF = 0;
+            }
 
             coor = {
                 x: distC,
-                y: this.heightMap[r][c] * 0.35 + 0.3,
+                y: this.heightMap[r][c] * 0.35 + 0.3 + distF,
                 z: distR
             };
 
@@ -309,7 +324,12 @@ class Room {
             };
         }
 
-        entity.el.dataset.position = `${coor.x - this.colCount / 2} ${coor.y + this.waveDeltaYAt(r, c, timer)} ${coor.z - this.rowCount / 2}`;
+        // TODO: use threejs directly
+        // https://dustinpfister.github.io/2022/04/04/threejs-object3d-position/
+        entity.el.object3D.position.x = coor.x - this.colCount / 2;
+        entity.el.object3D.position.y = coor.y + this.waveDeltaYAt(r, c, timer);
+        entity.el.object3D.position.z = coor.z - this.rowCount / 2;
+        // entity.el.dataset.position = `${coor.x - this.colCount / 2} ${coor.y + this.waveDeltaYAt(r, c, timer)} ${coor.z - this.rowCount / 2}`;
     }
 
     projectCoordinates(r, c) {
@@ -321,9 +341,9 @@ class Room {
     }
 
     waveDeltaYAt(r, c, timer) {
-        return 0;
+        // return 0;
         // return Math.sin(timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 100;
-        // return Math.sin(timer + this.heightMap[r][c] / 1.1 + r / 1.1 + c / 1.1) / 5;
+        return Math.sin(timer + this.heightMap[r][c] / 1.1 + r / 1.1 + c / 1.1) / 100;
     }
 
     getPlayerPos() {
@@ -350,5 +370,11 @@ class Room {
         linear: time => {
             return time;
         },
+        jump: time => {
+            return -((2 * time - 1) * (2 * time - 1)) + 1;
+        },
+        softJump: time => {
+            return 1 - (Math.cos(time * 2 * Math.PI) / 2 + 0.5);
+        }
     };
 }
