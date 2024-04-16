@@ -3,9 +3,6 @@ class PathFinder {
         this.map = map;
         this.dataGraph = [];
         this.createDataGraph();
-
-
-        console.log(this.dataGraph);
     }
 
     createDataGraph() {
@@ -39,13 +36,9 @@ class PathFinder {
     }
 
     findPath(initial, final) {
-
         this.initial = initial;
         this.final = final;
 
-        console.log(
-            `from: [${this.initial[0]},${this.initial[1]}] - to: [${this.final[0]},${final[1]}]`
-        );
         if (
             !this.initial ||
             !this.final ||
@@ -54,12 +47,10 @@ class PathFinder {
             this.final[0] > this.map.length ||
             this.final[1] > this.map[0].length
         ) {
-            console.error(
-                "check your parameters bounds exceeded, or missing initial or final coords"
-            );
+            console.error("check your parameters bounds exceeded, or missing initial or final coords");
             return;
         } else {
-            console.log("Searching please wait (it may take a while)");
+            // console.log("Searching please wait (it may take a while)");
 
             this.graph = new PathFinder.Graph();
 
@@ -79,7 +70,7 @@ class PathFinder {
                     coordNode.addEdge(surroundNode);
                 }
             }
-            
+
             return this.bfs();
         }
     }
@@ -95,7 +86,7 @@ class PathFinder {
         while (this.queue.length > 0) {
             let current = this.queue.shift();
             if (current == end) {
-                console.log("Valid End Point Found In Map: " + current.value);
+                // console.log("Valid End Point Found In Map: " + current.value);
                 break;
             }
             let edges = current.edges;
@@ -125,23 +116,7 @@ class PathFinder {
         }
         simplePath.reverse();
 
-        // let output = `generated path from: \n[${this.initial[0]},${this.initial[1]}] - to: [${this.final[0]},${this.final[1]}]: \n`;
-
-        // console.log("generated path:", { ...simplePath });
-
-        // console.log(simplePath);
-        // for (let i = 0; i < simplePath.length; i++) {
-        //     let reverse = i - simplePath.length;
-        //     var myobj = simplePath[i];
-        //     if (myobj && myobj.value) {
-        //         myobj = myobj.value + "<-Yey";
-        //     }
-        //     output += `step #${i}: ${myobj} \n`;
-        // }
-
         return simplePath;
-
-        // document.body.innerHTML = output;
     }
 
 }
