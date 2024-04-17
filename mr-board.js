@@ -3,6 +3,14 @@ class BoardSystem extends MRSystem {
         super()
         this.scale = 0.05;
 
+        this.colors = {
+            purple: "#875dff",
+            aqua: "#00ffd1",
+            orange: "#ff7a00",
+            grey: "#888",
+            red: "e72d75",
+        }
+
         // TODO: move the high level stats
         // into a gameStats Class maybe?
         this.levelId = 0;
@@ -171,20 +179,12 @@ class BoardSystem extends MRSystem {
         this.room.tilemap.forEach(row => {
             row.forEach(tile => {
 
-                // console.log("tile", tile);
-
                 tile.el.addEventListener("mouseover", () => {
 
                     if (!this.room.entityMap[tile.pos.x][tile.pos.y].type) {
-
                         // there is nothing on the tile.
                         this.playerStats.projectedCost = this.room.distances[tile.pos.x][tile.pos.y];
-                        // tile.el.floorMaterial.opacity = 1;
-
-                        // tile.el.floorMaterial.color.setStyle("#00ffd1");
-                        tile.el.floorMaterial.color.setStyle("#875dff");
-                        //
-                        //
+                        tile.el.floorMaterial.color.setStyle(this.colors.purple);
 
                     } else {
 
@@ -244,6 +244,9 @@ class BoardSystem extends MRSystem {
                         // if the entity is in move range of the player, or less than 2 tiles accross
                         if (moveCost <= this.playerStats.actionPoints || this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
                             switch (targetEntity.type) {
+                                // case "player":
+                                //     targetEntity.el.showDamage(1);
+                                //     break;
                                 case "enemy":
                                     this.playerStats.actionPoints -= 2;
                                     this.attackEntity(targetEntity, tile.pos.x, tile.pos.y);
@@ -468,6 +471,9 @@ class BoardSystem extends MRSystem {
         });
         this.playerStats.health -= damage;
 
+        this.room.entityMap[this.room.playerPos.x][this.room.playerPos.y].el.showDamage(1);
+        // entity.showDamage(1);
+
         if (this.playerStats.health <= 0) {
             this.endGame();
         }
@@ -479,13 +485,15 @@ class BoardSystem extends MRSystem {
             state: 'play'
         });
         entity.hp -= 1; // TODO: should be tied to the player attack power
+        // entity.el.showDamage(1);
+
+        console.log(this.room.entityMap[r][c].el.showDamage(1));
+        // this.room.entityMap[r][c].showDamage(1);
 
         if (entity.hp <= 0) {
             this.container.removeChild(entity.el);
             this.dropLoot(r, c);
-
             this.room.checkForDoor(this.container);
-
             this.needsUpdate = true;
         }
     }
@@ -552,20 +560,20 @@ class BoardSystem extends MRSystem {
                         if (this.room.entityMap[tile.pos.x][tile.pos.y] == 0) {
                             let offsetY = distance * 40;
                             // let color = `hsl(${offsetY}, 80%, 60%)`;
-                            let color = `#00ffd1`;
+                            // let color = `#00ffd1`;
                             let opacity = distance / this.playerStats.maxActionPoints;
                             tile.el.floorTile.style.visibility = "visible";
                             // tile.el.floorMaterial.opacity = 0.75;
                             tile.el.floorMaterial.opacity = opacity;
-                            tile.el.floorMaterial.color.setStyle(color)
+                            tile.el.floorMaterial.color.setStyle(this.colors.aqua)
 
                             tile.el.numberString.innerText = distance;
                         } else {
                             if (this.room.entityMap[tile.pos.x][tile.pos.y].type != 'prop') {
-                                tile.el.floorMaterial.color.setStyle("#ff7a00");
+                                tile.el.floorMaterial.color.setStyle(this.colors.orange);
                                 tile.el.floorTile.style.visibility = "visible";
                             } else {
-                                tile.el.floorMaterial.color.setStyle("#888");
+                                tile.el.floorMaterial.color.setStyle(this.colors.grey);
                                 tile.el.floorTile.style.visibility = "hidden";
                             }
                         }
@@ -574,80 +582,6 @@ class BoardSystem extends MRSystem {
                     } else {
                         tile.el.numberString.innerText = '';
                         tile.el.floorTile.style.visibility = "hidden";
-
-                        // if (distance <= this.playerStats.actionPoints && distance > 0) {
-                        //     tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        // } else {
-                        //     tile.el.floorMaterial.color.setStyle("#888");
-                        // }
-                        //
-                        // if (this.room.entityMap[tile.pos.x][tile.pos.y].type == 'prop') {
-                        //     tile.el.floorTile.style.visibility = "hidden";
-                        // } else {
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        // }
-
-                        // switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
-                        //     case "prop":
-                        //         tile.el.floorTile.style.visibility = "hidden";
-                        //         break;
-                        // case "enemy":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#f00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // case "chest":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // case "loot":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // case "lore":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // case "weapon":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // case "key":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // case "door":
-                        //     tile.el.floorTile.style.visibility = "visible";
-                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
-                        //     } else {
-                        //         tile.el.floorMaterial.color.setStyle("#888");
-                        //     }
-                        //     break;
-                        // }
                     }
                 } else {
                     tile.el.numberString.innerText = '';
@@ -666,9 +600,9 @@ class BoardSystem extends MRSystem {
         }
 
         if (this.playerStats.actionPoints == 0) {
-            this.endTurnButton.style.backgroundColor = "#875dff";
+            this.endTurnButton.style.backgroundColor = this.colors.purple;
         } else {
-            this.endTurnButton.style.backgroundColor = "#e72d75";
+            this.endTurnButton.style.backgroundColor = this.colors.red;
         }
 
         this.needsUpdate = false;

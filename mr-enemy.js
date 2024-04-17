@@ -4,6 +4,8 @@ class MREnemy extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
+        this.damageContainer = document.createElement("mr-div")
+        this.damageValue = document.createElement("mr-text");
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -23,14 +25,33 @@ class MREnemy extends MREntity {
         this.appendChild(this.el);
         this.el.src = "tiles/enemy_temp.glb";
         this.el.style.pointerEvents = 'none';
+
+        this.appendChild(this.damageContainer);
+        this.damageContainer.dataset.position = '0 2.5 0';
+        this.damageContainer.style.scale = 1 / 0.05; // will be fixed soon in MRjs
+        Object.assign(this.damageContainer.style, {
+            padding: "5px 10px",
+            width: "auto",
+            borderRadius: "5px",
+            backgroundColor: '#e72d75',
+            visibility: 'hidden'
+        });
+
+        this.damageContainer.appendChild(this.damageValue);
+        this.damageValue.innerText = '3';
+        this.damageValue.style.fontSize = '20px';
+        this.damageValue.style.color = 'white';
+        this.damageValue.textObj.position.setX((-this.damageValue.width / 2) / 0.005);
     }
 
-    // moveTo(x,y) {
-    //     let projected = this.parent.projectCoordinates(x, y, this.parent.heightMap[x][y]);
-    //     this.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-    //     // console.log(this.el.dataset.position)
-    //     // this.dataset.position = position;
-    // }
+    showDamage(string) {
+        this.damageValue.innerText = string;
+        this.damageContainer.style.visibility = "visible";
+
+        setTimeout(event => {
+            this.damageContainer.style.visibility = "hidden";
+        }, 500);
+    }
 }
 
 customElements.define('mr-enemy', MREnemy);
