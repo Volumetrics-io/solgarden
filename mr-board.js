@@ -37,6 +37,13 @@ class BoardSystem extends MRSystem {
             actionPoints: 4,
             maxActionPoints: 4,
             projectedCost: 0,
+            inventory: {
+                key: false,
+                // TODO: should you have a "fist weapon" by default instead of false?
+                meleeWeapon: false,
+                rangeWeapon: false
+            },
+            inventoryHistory: []
         };
 
         // container to store board object references
@@ -107,6 +114,7 @@ class BoardSystem extends MRSystem {
                 rowCount: 7,
                 colCount: 7,
                 enemyCount: 0,
+                isDoor: false,
                 // propCount: 0,
                 chestCount: 0,
                 biome: {
@@ -138,7 +146,6 @@ class BoardSystem extends MRSystem {
                     [0, 0, 0, 0, 0, 0, 0],
                 ]
             });
-
             this.sounds.fridgeSound.components.set('audio', {
                 state: 'play'
             });
@@ -172,7 +179,12 @@ class BoardSystem extends MRSystem {
 
                         // there is nothing on the tile.
                         this.playerStats.projectedCost = this.room.distances[tile.pos.x][tile.pos.y];
-                        tile.el.floorMaterial.opacity = 1;
+                        // tile.el.floorMaterial.opacity = 1;
+
+                        // tile.el.floorMaterial.color.setStyle("#00ffd1");
+                        tile.el.floorMaterial.color.setStyle("#875dff");
+                        //
+                        //
 
                     } else {
 
@@ -181,6 +193,8 @@ class BoardSystem extends MRSystem {
                             case "enemy":
                                 if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
                                     this.playerStats.projectedCost = 2;
+
+                                    // TODO: highlight main weapon in the inventory
                                     console.log("a weapon would be highlighted");
                                 }
                                 break;
@@ -191,18 +205,24 @@ class BoardSystem extends MRSystem {
 
                 tile.el.addEventListener("mouseout", () => {
                     this.playerStats.projectedCost = 0;
-                    tile.el.floorMaterial.opacity = 0.75;
+                    // tile.el.floorMaterial.opacity = 0.75;
+                    if (!this.room.entityMap[tile.pos.x][tile.pos.y].type) {
+                        tile.el.floorMaterial.color.setStyle("#00ffd1");
+                    }
                 });
 
                 tile.el.addEventListener("touchstart", () => {
                     const targetEntity = this.room.entityMap[tile.pos.x][tile.pos.y];
+
+                    const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
+                    console.log(moveCost);
 
                     if (!targetEntity) {
                         // there is nothing on the tile.
 
                         // TODO: all that below should be a method of Room
                         // this.room.movePlayer(x, y)
-                        const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
+                        // const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
 
                         if (moveCost <= this.playerStats.actionPoints) {
                             this.playerStats.actionPoints -= moveCost;
@@ -221,40 +241,25 @@ class BoardSystem extends MRSystem {
 
                     } else {
                         // there is an entity on the tile
-
-                        switch (targetEntity.type) {
-                            case "enemy":
-                                // console.log("would be combat, depending of the distance.")
-                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2 && this.playerStats.actionPoints >= 2) {
+                        // if the entity is in move range of the player, or less than 2 tiles accross
+                        if (moveCost <= this.playerStats.actionPoints || this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                            switch (targetEntity.type) {
+                                case "enemy":
                                     this.playerStats.actionPoints -= 2;
                                     this.attackEntity(targetEntity, tile.pos.x, tile.pos.y);
-                                } else {
-                                    this.sounds.nopeSound.components.set('audio', {
-                                        state: 'play'
-                                    });
-                                }
-                                break;
-                            case "chest":
-                                // console.log("that will open the chest and drop an item on the floor")
-                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                    // console.log('open the chest')
+                                    break;
+                                case "chest":
 
                                     // TODO: should be this.room.removeEntityAt(tile.pos.x, tile.pos.y);
-                                    this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
+                                    this.container.removeChild(targetEntity.el);
                                     this.dropLoot(tile.pos.x, tile.pos.y);
 
                                     this.sounds.latchSound.components.set('audio', {
                                         state: 'play'
                                     });
-                                } else {
-                                    this.sounds.nopeSound.components.set('audio', {
-                                        state: 'play'
-                                    });
-                                }
-                                break;
-                            case "loot":
-                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                    this.container.removeChild(this.room.entityMap[tile.pos.x][tile.pos.y].el);
+                                    break;
+                                case "loot":
+                                    this.container.removeChild(targetEntity.el);
                                     this.room.entityMap[tile.pos.x][tile.pos.y] = 0;
 
                                     this.sounds.analogSound.components.set('audio', {
@@ -276,33 +281,49 @@ class BoardSystem extends MRSystem {
                                             console.log("increased range");
                                             break;
                                     }
-                                } else {
-                                    this.sounds.nopeSound.components.set('audio', {
+                                    break;
+                                case "lore":
+                                    targetEntity.el.playLore();
+                                    targetEntity.el.hideModel();
+                                    this.room.entityMap[tile.pos.x][tile.pos.y] = 0;
+                                    this.sounds.analogSound.components.set('audio', {
                                         state: 'play'
                                     });
-                                }
-                                // console.log("the item will do something on pick up")
-                                break;
-                            case "door":
-                                if (this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                                    break;
+                                case "key":
+                                    this.addToInventory(targetEntity);
+                                    this.container.removeChild(targetEntity.el);
+                                    this.room.entityMap[tile.pos.x][tile.pos.y] = 0;
+                                    this.sounds.analogSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                    break;
+                                case "weapon":
+                                    this.addToInventory(targetEntity);
+                                    this.container.removeChild(targetEntity.el);
+                                    this.room.entityMap[tile.pos.x][tile.pos.y] = 0;
+                                    this.sounds.analogSound.components.set('audio', {
+                                        state: 'play'
+                                    });
+                                    break;
+                                case "door":
                                     this.sounds.doorSound.components.set('audio', {
                                         state: 'play'
                                     });
                                     this.initialize();
-                                } else {
-                                    this.sounds.nopeSound.components.set('audio', {
-                                        state: 'play'
-                                    });
-                                }
-                                // console.log("go to the next room after killing all the enemies")
-                                break;
+                                    break;
+                            }
+                        } else {
+                            this.sounds.nopeSound.components.set('audio', {
+                                state: 'play'
+                            });
                         }
                     }
 
                     // Automatically end the turn when the player runs out of action points
-                    // if (this.playerStats.actionPoints == 0) {
-                    //     this.endTurn();
-                    // }
+                    if (this.playerStats.actionPoints == 0) {
+                        this.endTurn();
+                    }
 
                     this.needsUpdate = true;
 
@@ -315,6 +336,22 @@ class BoardSystem extends MRSystem {
         this.needsUpdate = true;
 
         this.levelId++;
+    }
+
+    addToInventory(entity) {
+        if (entity.type == "weapon") {
+            if (entity.subType == "melee") {
+                // TODO: only if it's better
+                this.playerStats.inventory.meleeWeapon = entity;
+            }
+        }
+        if (entity.type == "key") {
+            this.playerStats.inventory.key = entity;
+        }
+
+        this.playerStats.inventoryHistory.push(entity);
+
+        console.log(this.playerStats);
     }
 
     decreaseRange() {
@@ -347,6 +384,10 @@ class BoardSystem extends MRSystem {
         this.isPlayerTurn = false;
         this.decreaseRange();
         this.needsUpdate = true;
+
+        this.sounds.analogSound.components.set('audio', {
+            state: 'play'
+        });
     }
 
     resetPlayer() {
@@ -506,63 +547,107 @@ class BoardSystem extends MRSystem {
 
                     if (distance != Infinity &&
                         distance <= this.playerStats.actionPoints &&
-                        distance > 0 &&
-                        this.room.entityMap[tile.pos.x][tile.pos.y] == 0) {
+                        distance > 0) {
 
-                        let offsetY = distance * 40;
-                        let color = `hsl(${offsetY}, 80%, 60%)`;
-                        tile.el.floorTile.style.visibility = "visible";
-                        tile.el.floorMaterial.opacity = 0.75;
-                        tile.el.floorMaterial.color.setStyle(color)
+                        if (this.room.entityMap[tile.pos.x][tile.pos.y] == 0) {
+                            let offsetY = distance * 40;
+                            // let color = `hsl(${offsetY}, 80%, 60%)`;
+                            let color = `#00ffd1`;
+                            let opacity = distance / this.playerStats.maxActionPoints;
+                            tile.el.floorTile.style.visibility = "visible";
+                            // tile.el.floorMaterial.opacity = 0.75;
+                            tile.el.floorMaterial.opacity = opacity;
+                            tile.el.floorMaterial.color.setStyle(color)
 
-                        tile.el.numberString.innerText = distance;
+                            tile.el.numberString.innerText = distance;
+                        } else {
+                            if (this.room.entityMap[tile.pos.x][tile.pos.y].type != 'prop') {
+                                tile.el.floorMaterial.color.setStyle("#ff7a00");
+                                tile.el.floorTile.style.visibility = "visible";
+                            } else {
+                                tile.el.floorMaterial.color.setStyle("#888");
+                                tile.el.floorTile.style.visibility = "hidden";
+                            }
+                        }
+
+
                     } else {
                         tile.el.numberString.innerText = '';
                         tile.el.floorTile.style.visibility = "hidden";
-                        switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
-                            case "prop":
-                                tile.el.floorTile.style.visibility = "hidden";
-                                break;
-                            case "enemy":
-                                tile.el.floorTile.style.visibility = "visible";
-                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                    tile.el.floorMaterial.color.setStyle("#f00");
-                                } else {
-                                    tile.el.floorMaterial.color.setStyle("#888");
-                                }
-                                break;
-                            case "chest":
-                                tile.el.floorTile.style.visibility = "visible";
-                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                    tile.el.floorMaterial.color.setStyle("#0f0");
-                                } else {
-                                    tile.el.floorMaterial.color.setStyle("#888");
-                                }
-                                break;
-                            case "loot":
-                                tile.el.floorTile.style.visibility = "visible";
-                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                    tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                } else {
-                                    tile.el.floorMaterial.color.setStyle("#888");
-                                }
-                                break;
-                            case "charging-station":
-                                tile.el.floorTile.style.visibility = "visible";
-                                tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                if (this.playerStats.range < this.playerStats.maxRange) {
-                                    this.playerStats.range += 0.05;
-                                }
 
-                            case "door":
-                                tile.el.floorTile.style.visibility = "visible";
-                                if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
-                                    tile.el.floorMaterial.color.setStyle("#00ffd1");
-                                } else {
-                                    tile.el.floorMaterial.color.setStyle("#888");
-                                }
-                                break;
-                        }
+                        // if (distance <= this.playerStats.actionPoints && distance > 0) {
+                        //     tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        // } else {
+                        //     tile.el.floorMaterial.color.setStyle("#888");
+                        // }
+                        //
+                        // if (this.room.entityMap[tile.pos.x][tile.pos.y].type == 'prop') {
+                        //     tile.el.floorTile.style.visibility = "hidden";
+                        // } else {
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        // }
+
+                        // switch (this.room.entityMap[tile.pos.x][tile.pos.y].type) {
+                        //     case "prop":
+                        //         tile.el.floorTile.style.visibility = "hidden";
+                        //         break;
+                        // case "enemy":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#f00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // case "chest":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // case "loot":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // case "lore":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // case "weapon":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // case "key":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // case "door":
+                        //     tile.el.floorTile.style.visibility = "visible";
+                        //     if (this.distanceBetween(x, y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        //         tile.el.floorMaterial.color.setStyle("#ff7a00");
+                        //     } else {
+                        //         tile.el.floorMaterial.color.setStyle("#888");
+                        //     }
+                        //     break;
+                        // }
                     }
                 } else {
                     tile.el.numberString.innerText = '';
@@ -581,7 +666,7 @@ class BoardSystem extends MRSystem {
         }
 
         if (this.playerStats.actionPoints == 0) {
-            this.endTurnButton.style.backgroundColor = "RebeccaPurple";
+            this.endTurnButton.style.backgroundColor = "#875dff";
         } else {
             this.endTurnButton.style.backgroundColor = "#e72d75";
         }
@@ -630,6 +715,34 @@ class BoardSystem extends MRSystem {
                     }
                 }
             }
+
+            // the player is in the battery room
+            if (this.room.biome.name == 'battery') {
+                const chargingPos = {
+                    x: 3,
+                    y: 3
+                }
+
+                // TODO: charging prototype to rewrite
+                if (this.distanceBetween(chargingPos.x, chargingPos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                    if (this.playerStats.range < this.playerStats.maxRange) {
+                        // charging
+                        this.playerStats.range += 0.02;
+                        this.room.tilemap[chargingPos.x][chargingPos.y].el.floorTile.style.visibility = "visible";
+                        this.room.tilemap[chargingPos.x][chargingPos.y].el.floorMaterial.color.setStyle("#f90");
+                    } else {
+                        // charged
+                        this.playerStats.range = this.playerStats.maxRange;
+                        this.room.tilemap[chargingPos.x][chargingPos.y].el.floorTile.style.visibility = "visible";
+                        this.room.tilemap[chargingPos.x][chargingPos.y].el.floorMaterial.color.setStyle("#62ff42");
+                    }
+
+                } else {
+                    this.room.tilemap[chargingPos.x][chargingPos.y].el.floorTile.style.visibility = "visible";
+                    this.room.tilemap[chargingPos.x][chargingPos.y].el.floorMaterial.color.setStyle("#fff");
+
+                }
+            }
         }
     }
 
@@ -674,11 +787,6 @@ class BoardSystem extends MRSystem {
         this.labelContainer.dataset.position = "0 0 0.027";
         this.labelContainer.className = 'label-container';
         this.UILayer.appendChild(this.labelContainer);
-
-        // this.batteryRemainingLabel = document.createElement("mr-text");
-        // this.batteryRemainingLabel.className = 'text-label';
-        // this.batteryRemainingLabel.innerText = "test text"
-        // this.labelContainer.appendChild(this.batteryRemainingLabel);
 
         this.levelCountLabel = document.createElement("mr-text");
         this.levelCountLabel.className = 'text-label';

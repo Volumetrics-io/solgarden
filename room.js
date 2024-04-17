@@ -12,21 +12,22 @@ class Room {
         this.maxFlrCount = params.maxFlrCount ?? 4;
 
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
+        this.loreCount = params.loreCount ?? 1;
 
         this.biomes = [{
-            // plains
-            name: "plains",
-            path: "tiles/biome_plains/",
-            tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
-            props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
-        },
-        {
-            // desert
-            name: "desert",
-            path: "tiles/biome_deserts/",
-            tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
-            props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
-        }
+                // plains
+                name: "plains",
+                path: "tiles/biome_plains/",
+                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
+                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
+            },
+            {
+                // desert
+                name: "desert",
+                path: "tiles/biome_deserts/",
+                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
+                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
+            }
         ]
         this.biome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
 
@@ -35,8 +36,8 @@ class Room {
         this.rowCount = params.rowCount ?? Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
         this.colCount = params.colCount ?? Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
         this.heightMap = params.heightMap ?? Array.from({
-            length: this.rowCount
-        }, (_, x) =>
+                length: this.rowCount
+            }, (_, x) =>
             Array.from({
                 length: this.colCount
             }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
@@ -73,6 +74,17 @@ class Room {
             this.tilemap.push(row);
         }
 
+        // lore
+        for (let i = 0; i < this.loreCount; i++) {
+            const el = document.createElement("mr-lore");
+            const lore = {
+                el: el,
+                type: 'lore',
+                // loreText: 'Lorem ipsum'
+            };
+            this.addToEntityMap(lore);
+        }
+
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
             const el = document.createElement("mr-enemy");
@@ -103,6 +115,33 @@ class Room {
             type: 'player'
         });
         console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
+
+
+        // weapon
+        // TODO: expose weaponCount
+        const weapon = document.createElement("mr-melee-weapon");
+        weapon.dataset.type = "short-sword";
+        this.addToEntityMap({
+            el: weapon,
+            type: 'weapon',
+            subType: 'melee'
+        });
+
+        // key
+        // TODO: expose isKey
+        const key = document.createElement("mr-key");
+        this.addToEntityMap({
+            el: key,
+            type: 'key'
+        });
+
+        // door
+        // TODO: expose isDoor
+        const door = document.createElement("mr-door");
+        this.addToEntityMap({
+            el: door,
+            type: 'door'
+        });
 
         // chests
         const chestCount = params.chestCount ?? (Math.random() * 2 | 0);
@@ -228,8 +267,8 @@ class Room {
 
         // Initialize distances array with Infinity for unvisited cells
         this.distances = Array.from({
-            length: height
-        }, () =>
+                length: height
+            }, () =>
             Array(width).fill(Infinity)
         );
         this.distances[y][x] = 0; // Distance to itself is 0
@@ -263,7 +302,7 @@ class Room {
                     newX < width &&
                     newY >= 0 &&
                     newY < height &&
-                    blockmap[newY][newX] === 0
+                    (blockmap[newY][newX] === 0 || blockmap[newY][newX].type != "prop")
                 ) {
                     // Calculate potential new distance
                     const newDistance = this.distances[currentY][currentX] + 1;
@@ -300,7 +339,7 @@ class Room {
             let distC = entity.animation.y + entity.animation.distY * p;
             let distF;
 
-            if(entity.type == "enemy") {
+            if (entity.type == "enemy") {
                 distF = h * 0.8;
             } else {
                 distF = 0;

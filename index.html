@@ -32,6 +32,13 @@
             gap: 10px;
         }
 
+        #lore-panel {
+            background-color: moccasin;
+            display: flex;
+            flex-flow: column nowrap;
+            gap: 10px;
+        }
+
         .title {
             font-size: 32px;
         }
@@ -71,20 +78,33 @@
 
     <!-- <mr-app> -->
     <mr-app orbital="true" stats="true">
-        <!-- <mr-app debug="true" orbital="true"> -->
-        <mr-entity data-comp-board="" data-comp-anchor="type: plane; label: table" id="main"></mr-entity>
-        <mr-entity id="chess-sound" data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="analog-sound" data-comp-audio="src: ./audio/analog.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="clash-sound" data-comp-audio="src: ./audio/clash.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="nope-sound" data-comp-audio="src: ./audio/nope.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="swoosh-sound" data-comp-audio="src: ./audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
-        <mr-entity id="latch-sound" data-comp-audio="src: ./audio/latch.mp3; loop: false; state: stop;"></mr-entity>
 
-        <mr-entity id="bg-music" data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
-        <mr-entity id="fridge-sound" data-comp-audio="src: ./audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
-        <mr-entity id="farm-sound" data-comp-audio="src: ./audio/farm.mp3; loop: true; state: stop;"></mr-entity>
-        <mr-entity id="badlands-sound" data-comp-audio="src: ./audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+        <!-- <mr-panel id="lore-panel">
+            <mr-text class="title">Lore text</mr-text>
+            <mr-text id="lore-text"></mr-text>
+            <mr-button>Close panel</mr-button>
+        </mr-panel> -->
+
+        <!-- <mr-app debug="true" orbital="true"> -->
+        <mr-entity data-comp-board="" data-comp-anchor="type: plane; label: table">
+            <!-- <mr-panel id="game-panel" data-position="0 0 0">
+                <mr-text>HELLO WORLD</mr-text>
+            </mr-panel> -->
+            <mr-entity id="chess-sound" data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="analog-sound" data-comp-audio="src: ./audio/analog.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="clash-sound" data-comp-audio="src: ./audio/clash.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="nope-sound" data-comp-audio="src: ./audio/nope.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="swoosh-sound" data-comp-audio="src: ./audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="latch-sound" data-comp-audio="src: ./audio/latch.mp3; loop: false; state: stop;"></mr-entity>
+
+            <mr-entity id="bg-music" data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="fridge-sound" data-comp-audio="src: ./audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="farm-sound" data-comp-audio="src: ./audio/farm.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="badlands-sound" data-comp-audio="src: ./audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+        </mr-entity>
+
+
         <!-- <mr-panel id="game-panel" data-comp-anchor="type: plane; label: table" data-position="0 -0.5 0">
             <mr-text class="title">Inventory</mr-text>
             <mr-div class="row">
@@ -113,6 +133,8 @@
     <script src="mr-player.js"></script>
     <script src="mr-chest.js"></script>
     <script src="mr-loot.js"></script>
+    <script src="mr-lore.js"></script>
+    <script src="mr-melee-weapon.js"></script>
     <script src="mr-enemy.js"></script>
     <script src="mr-goal.js"></script>
     <script src="mr-key.js"></script>
