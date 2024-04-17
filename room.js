@@ -80,7 +80,6 @@ class Room {
             const lore = {
                 el: el,
                 type: 'lore',
-                // loreText: 'Lorem ipsum'
             };
             this.addToEntityMap(lore);
         }

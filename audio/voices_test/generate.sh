@@ -12,4 +12,4 @@ curl --request POST \
     "style": 1,
     "speakerBoost": true
   }
-}'
+}' > 0.mp3
