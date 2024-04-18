@@ -14,27 +14,37 @@ class Room {
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
         this.loreCount = params.loreCount ?? 1;
 
+        this.isDoor = params.isDoor ?? false;
+
         this.biomes = [{
                 // plains
                 name: "plains",
                 path: "tiles/biome_plains/",
                 tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
-                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb", "rock001.glb"]
+                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
+                block: ["rock001.glb"]
             },
             {
                 // desert
                 name: "desert",
                 path: "tiles/biome_deserts/",
                 tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
-                props: ["rockdesert001.glb", "rockdesert002.glb", "plant_05_to_test.glb"]
+                props: ["plant_05_to_test.glb"],
+                block: ["rockdesert001.glb", "rockdesert002.glb"]
             }
         ]
         this.biome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
 
-        // read the params
+        // read the params, or generate a random geometry for the room
         this.flrCount = params.flrCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
         this.rowCount = params.rowCount ?? Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
         this.colCount = params.colCount ?? Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
+
+        // this table contains an integer between 0 and the floor count
+        // [ [0, 0, 0],
+        //   [1, 1, 1],
+        //   [2, 2, 2]]
+        // results in a map that look like stairs
         this.heightMap = params.heightMap ?? Array.from({
                 length: this.rowCount
             }, (_, x) =>
@@ -42,14 +52,37 @@ class Room {
                 length: this.colCount
             }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
         );
+
+        // this table contains an interactible or blocking entity
+        // this includes the player. By default each cell contains 0
+        // [ [rock,   0,       door ],
+        //   [0,      player,  0    ],
+        //   [0,      0,       rock ]]
         this.entityMap = params.entityMap ?? Array.from({
             length: this.rowCount
         }, () => Array(this.colCount).fill(0));
 
+        // this table contains uninteractible props
+        // like plants, zone indicators, etc
+        // [ [0,      0,       0 ],
+        //   [plant,  0,       0 ],
+        //   [0,      plant,   0 ]]
+        this.propMap = params.propMap ?? Array.from({
+            length: this.rowCount
+        }, () => Array(this.colCount).fill(0));
+
+        // this tilemap contains the floor tile
+        // floor tiles are the interactive entities that drive the interaction
+        // the player will touch them to move, pick up items, attack, etc.
+        // each cell of this table will contain a tile element
+        // [ [tile,   tile,  tile ],
+        //   [tile,   tile,  tile ],
+        //   [tile,   tile,  tile ]]
         this.tilemap = params.tilemap ?? [];
 
         const numberOfAvailableSpots = this.rowCount * this.colCount;
-        this.propCount = params.propCount ?? Math.floor(numberOfAvailableSpots / 6);
+        this.propCount = params.propCount ?? Math.ceil(numberOfAvailableSpots / 4);
+        this.blockCount = params.blockCount ?? Math.ceil(numberOfAvailableSpots / 8);
 
         console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`);
 
@@ -74,6 +107,32 @@ class Room {
             this.tilemap.push(row);
         }
 
+
+        // player
+        const player = document.createElement("mr-player");
+        this.playerPos = params.playerPos ?? this.addToMap({
+            el: player,
+            type: 'player'
+        }, this.entityMap);
+        // this.addToMap(lore, this.entityMap);
+        console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
+
+        // door
+        if (!this.isDoor) {
+            const door = document.createElement("mr-door");
+            this.addToMap({
+                el: door,
+                type: 'door'
+            }, this.entityMap);
+        }
+
+        ///////////////////////////////////////////////
+        // TODO: make solvable rooms
+        // Now that we have the player and the door,
+        // we can test using the pathfinder with the random
+        // position we generate in addToMap
+        ///////////////////////////////////////////////
+
         // lore
         for (let i = 0; i < this.loreCount; i++) {
             const el = document.createElement("mr-lore");
@@ -81,7 +140,8 @@ class Room {
                 el: el,
                 type: 'lore',
             };
-            this.addToEntityMap(lore);
+            // this.addToEntityMap(lore);
+            this.addToMap(lore, this.entityMap);
         }
 
         // enemies
@@ -92,7 +152,8 @@ class Room {
                 type: 'enemy',
                 hp: 3
             };
-            this.addToEntityMap(enemy);
+            // this.addToEntityMap(enemy);
+            this.addToMap(enemy, this.entityMap);
         }
 
         // props
@@ -104,55 +165,60 @@ class Room {
                 el: el,
                 type: 'prop'
             }
-            this.addToEntityMap(prop);
+            // this.addToPropMap(prop);
+            this.addToMap(prop, this.propMap);
         }
 
-        // player
-        const player = document.createElement("mr-player");
-        this.playerPos = params.playerPos ?? this.addToEntityMap({
-            el: player,
-            type: 'player'
-        });
-        console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
-
+        // blocks
+        for (let i = 0; i < this.blockCount; i++) {
+            const el = document.createElement("mr-prop");
+            el.dataset.tileset = this.biome.block;
+            el.dataset.tilepath = this.biome.path;
+            const prop = {
+                el: el,
+                type: 'prop'
+            }
+            this.addToMap(prop, this.entityMap);
+            // this.addToEntityMap(prop);
+        }
 
         // weapon
         // TODO: expose weaponCount
         const weapon = document.createElement("mr-melee-weapon");
         weapon.dataset.type = "short-sword";
-        this.addToEntityMap({
+        this.addToMap({
             el: weapon,
             type: 'weapon',
             subType: 'melee'
-        });
+        }, this.entityMap);
 
         // key
         // TODO: expose isKey
-        const key = document.createElement("mr-key");
-        this.addToEntityMap({
-            el: key,
-            type: 'key'
-        });
-
-        // door
-        // TODO: expose isDoor
-        const door = document.createElement("mr-door");
-        this.addToEntityMap({
-            el: door,
-            type: 'door'
-        });
+        // const key = document.createElement("mr-key");
+        // this.addToMap({
+        //     el: key,
+        //     type: 'key'
+        // }, this.entityMap);
 
         // chests
         const chestCount = params.chestCount ?? (Math.random() * 2 | 0);
         for (let i = 0; i < chestCount; i++) {
             const randomChest = document.createElement("mr-chest");
-            this.addToEntityMap({
+            this.addToMap({
                 el: randomChest,
                 type: 'chest'
-            });
+            }, this.entityMap);
         }
 
         this.entityMap.forEach(row => {
+            row.forEach(entity => {
+                if (entity) {
+                    this.container.appendChild(entity.el);
+                }
+            });
+        });
+
+        this.propMap.forEach(row => {
             row.forEach(entity => {
                 if (entity) {
                     this.container.appendChild(entity.el);
@@ -168,8 +234,11 @@ class Room {
 
         this.calculateDistancesFromPlayer();
 
+
+        // Debug
         this.printArray("this.heightMap", this.heightMap);
         this.printArray("this.entityMap", this.entityMap);
+        this.printArray("this.propMap", this.propMap);
         this.printArray("this.distances", this.distances);
 
     }
@@ -182,7 +251,7 @@ class Room {
         })
     }
 
-    addToEntityMap(entity) {
+    addToMap(entity, map) {
         let inserted = false;
         let pos;
 
@@ -190,8 +259,8 @@ class Room {
             const randRow = Math.floor(Math.random() * this.rowCount);
             const randCol = Math.floor(Math.random() * this.colCount);
 
-            if (this.entityMap[randRow][randCol] === 0) {
-                this.entityMap[randRow][randCol] = entity;
+            if (map[randRow][randCol] === 0) {
+                map[randRow][randCol] = entity;
                 inserted = true;
                 pos = {
                     x: randRow,
@@ -222,34 +291,6 @@ class Room {
             y: y1,
             distX: x2 - x1,
             distY: y2 - y1
-        }
-    }
-
-    checkForDoor(container) {
-        let isEnemy = false;
-        let isDoor = false;
-        for (let r = 0; r < this.rowCount; r++) {
-            for (let c = 0; c < this.colCount; c++) {
-                const entity = this.entityMap[r][c];
-                if (entity.type == 'enemy') {
-                    isEnemy = true;
-                }
-                if (entity.type == 'door') {
-                    isDoor = true;
-                }
-            }
-        }
-
-        if (!isEnemy && !isDoor) {
-            const el = document.createElement("mr-door");
-            container.appendChild(el);
-
-            const door = {
-                el: el,
-                type: 'door'
-            };
-
-            this.addToEntityMap(door);
         }
     }
 

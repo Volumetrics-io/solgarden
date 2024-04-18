@@ -25,8 +25,10 @@ class MRPlayer extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/player.glb";
+        this.el.src = "models/mainCharacter_wip.glb";
         this.el.style.pointerEvents = 'none';
+
+        this.dataset.rotation = `0 180 0`;
 
         this.appendChild(this.light);
         this.light.setAttribute('color', "#ffffff");
