@@ -40,7 +40,7 @@ class BoardSystem extends MRSystem {
         this.playerStats = {
             health: 5,
             maxHealth: 5,
-            range: 20,
+            range: 10,
             maxRange: 20,
             actionPoints: 4,
             maxActionPoints: 4,
@@ -115,7 +115,7 @@ class BoardSystem extends MRSystem {
                     props: []
                 }
             });
-        } else if (this.levelId == 3 || this.levelId == 8 || this.levelId == 13 || this.levelId == 21 || this.levelId == 34 || this.levelId == 55) {
+        } else if (this.levelId == 1 || this.levelId == 8 || this.levelId == 13 || this.levelId == 21 || this.levelId == 34 || this.levelId == 55) {
             // battery room
             this.room = new Room(this.container, {
                 flrCount: 1,
@@ -662,6 +662,9 @@ class BoardSystem extends MRSystem {
                     if (this.playerStats.range < this.playerStats.maxRange) {
                         // charging
                         this.playerStats.range += 0.02;
+
+                        this.room.entityMap[chargingPos.x][chargingPos.y].el.updateBatteryLevel(this.playerStats.range / this.playerStats.maxRange)
+
                         this.room.tilemap[chargingPos.x][chargingPos.y].el.floorTile.style.visibility = "visible";
                         this.room.tilemap[chargingPos.x][chargingPos.y].el.floorMaterial.color.setStyle("#f90");
                     } else {
