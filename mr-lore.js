@@ -138,33 +138,26 @@ class MRLore extends MREntity {
             // }
         ];
 
-        // const Voices = ["Joanna", "Kendra", "Matthew", "Kimberly", "Salli"];
-        // const voice = Voices[Math.floor(Math.random() * Voices.length)];
-
         // this.appendChild(this.audioEntity);
         const randomId = Math.floor(Math.random() * loreEntries.length);
-        this.components.set('audio', {
-            // src: `./audio/voices_test/${voice}/${randomId}.mp3`,
-            src: `./audio/voices_test/${randomId}.mp3`,
-            state: 'pause',
-            loop: 'false'
-        });
+        // this.components.set('audio', {
+        //     src: `./audio/voices_test/${randomId}.mp3`,
+        //     state: 'pause',
+        //     loop: 'false'
+        // });
 
-        // const loreEntry = loreEntries[randomId];
+        this.loreEntry = loreEntries[randomId];
         // this.loreText = loreEntry.text;
         // this.loreOrigin = loreEntry.origin;
+
+
     }
 
     playLore() {
-        // console.log("./audio/voices_test/Salli/" + this.randomNum + ".mp3");
-        // this.audio.components.set('audio', {
-        //     src: "./audio/voices_test/Salli/" + this.randomNum + ".mp3",
+        console.log(this.loreEntry);
+        // this.components.set('audio', {
         //     state: 'play'
         // });
-
-        this.components.set('audio', {
-            state: 'play'
-        });
     }
 
     hideModel() {

@@ -30,8 +30,8 @@ class BoardSystem extends MRSystem {
         // TODO: package player stats in a simple Class
         // something like this.stats.useAction(3)
         this.playerStats = {
-            health: 5,
-            maxHealth: 5,
+            health: 50,
+            maxHealth: 100,
             range: 10,
             maxRange: 20,
             actionPoints: 4,
@@ -40,11 +40,15 @@ class BoardSystem extends MRSystem {
             inventory: {
                 key: false,
                 // TODO: should you have a "fist weapon" by default instead of false?
-                meleeWeapon: false,
+                meleeWeapon: {
+                    name: 'twig',
+                    attack: 1
+                },
                 rangeWeapon: false
             },
             inventoryHistory: []
         };
+        this.playerStats.selectedWeapon = this.playerStats.inventory.meleeWeapon;
 
         // container to store board object references
         this.container = document.createElement("mr-div");
@@ -67,7 +71,7 @@ class BoardSystem extends MRSystem {
     }
 
     initialize() {
-        console.clear();
+        // console.clear();
         this.timer = 0;
         this.isPlayerTurn = true;
         this.playerStats.actionPoints = this.playerStats.maxActionPoints;
@@ -111,8 +115,8 @@ class BoardSystem extends MRSystem {
                 }
             });
         } else if (
-            this.levelId == 1 ||
-            this.levelId == 5 ||
+            // this.levelId == 1 ||
+            this.levelId == 2 ||
             this.levelId == 8 ||
             this.levelId == 13 ||
             this.levelId == 21 ||
@@ -354,7 +358,11 @@ class BoardSystem extends MRSystem {
         if (entity.type == "weapon") {
             if (entity.subType == "melee") {
                 // TODO: only if it's better
-                this.playerStats.inventory.meleeWeapon = entity;
+                // this.playerStats.inventory.meleeWeapon.name = entity.name;
+                this.playerStats.inventory.meleeWeapon = {
+                        name: entity.name,
+                        attack: entity.attack
+                };
             }
         }
         if (entity.type == "key") {
@@ -427,7 +435,9 @@ class BoardSystem extends MRSystem {
         // each enemy takes a turn
         if (this.combatQueue.length > 0) {
             const entry = this.combatQueue.pop();
-            const entity = entry.entry;
+
+            // console.log('entry',entry);
+            const entity = entry.entity;
             const r = entry.r;
             const c = entry.c;
             const x = this.room.playerPos.x;
@@ -451,16 +461,16 @@ class BoardSystem extends MRSystem {
             // if path[1] is undefined, the path has no solution
             const nextMove = (!path[1]) ? [r, c] : path[1];
 
-            this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
-
-
             // melee weapon.
             // console.log(nextMove, x, y, this.distanceBetween(nextMove[0], nextMove[1], x, y));
             if (this.distanceBetween(r, c, x, y) <= 1) {
                 // console.log(this.distanceBetween(r, c, x, y));
+                console.log(entity);
                 this.attackPlayer(entity, 1);
                 // } else {
                 //     this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
+            } else {
+                this.room.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
             setTimeout(() => {
@@ -474,11 +484,13 @@ class BoardSystem extends MRSystem {
     }
 
     attackPlayer(attacker, damage) {
+        // console.log(attacker);
         // TODO: move the sound where the attacker is
         this.sounds.clashSound.components.set('audio', {
             state: 'play'
         });
-        this.playerStats.health -= damage;
+        this.playerStats.health -= attacker.attack;
+        this.room.entityMap[this.room.playerPos.x][this.room.playerPos.y].el.showDamage(attacker.attack)
 
         if (this.playerStats.health <= 0) {
             this.endGame();
@@ -490,7 +502,9 @@ class BoardSystem extends MRSystem {
         this.sounds.swooshSound.components.set('audio', {
             state: 'play'
         });
-        entity.hp -= 1; // TODO: should be tied to the player attack power
+
+        entity.hp -= this.playerStats.selectedWeapon.attack;
+        // TODO: should be tied to the player attack power
 
         if (entity.hp <= 0) {
             this.container.removeChild(entity.el);
@@ -565,7 +579,7 @@ class BoardSystem extends MRSystem {
                             let offsetY = distance * 40;
                             // let color = `hsl(${offsetY}, 80%, 60%)`;
                             let color = `#00ffd1`;
-                            let opacity = distance / this.playerStats.maxActionPoints;
+                            let opacity = distance / this.playerStats.actionPoints;
                             tile.el.floorTile.style.visibility = "visible";
                             // tile.el.floorMaterial.opacity = 0.75;
                             tile.el.floorMaterial.opacity = opacity;
@@ -641,6 +655,11 @@ class BoardSystem extends MRSystem {
                     actionBall.style.visibility = "hidden";
                 }
             });
+
+            // TODO: shouldn't be done at each frame
+            if(this.playerStats.inventory.meleeWeapon) {
+                this.uiMeleeWeapon.setWeapon(this.playerStats.inventory.meleeWeapon.name);
+            }
 
             this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
             this.levelCountLabel.innerText = `Battery: ${Math.round(this.playerStats.range)} Floor: ${this.levelId} Death: ${this.cycleId}`;
@@ -739,6 +758,11 @@ class BoardSystem extends MRSystem {
         this.levelCountLabel = document.createElement("mr-text");
         this.levelCountLabel.className = 'text-label';
         this.labelContainer.appendChild(this.levelCountLabel);
+
+        this.uiMeleeWeapon = document.createElement('mr-ui-melee-weapon');
+        this.uiMeleeWeapon.dataset.position = "0.1 0.03 0";
+        this.UILayer.appendChild(this.uiMeleeWeapon);
+        // this.uiMeleeWeapon.setWeapon("twig");
 
         this.endTurnButton.addEventListener('click', () => {
             this.endTurn();

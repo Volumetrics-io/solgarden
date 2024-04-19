@@ -7,9 +7,10 @@ class Room {
         this.minRowCount = params.minRowCount ?? 4;
         this.minColCount = params.minColCount ?? 4;
         this.minFlrCount = params.minFlrCount ?? 1;
+
         this.maxRowCount = params.maxRowCount ?? 10;
         this.maxColCount = params.maxColCount ?? 10;
-        this.maxFlrCount = params.maxFlrCount ?? 4;
+        this.maxFlrCount = params.maxFlrCount ?? 5;
 
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
         this.loreCount = params.loreCount ?? 1;
@@ -150,7 +151,8 @@ class Room {
             const enemy = {
                 el: el,
                 type: 'enemy',
-                hp: 3
+                hp: 3,
+                attack: Math.floor(Math.random() * 20) + 1
             };
             // this.addToEntityMap(enemy);
             this.addToMap(enemy, this.entityMap);
@@ -189,7 +191,9 @@ class Room {
         this.addToMap({
             el: weapon,
             type: 'weapon',
-            subType: 'melee'
+            subType: 'melee',
+            name: 'short-sword',
+            attack: 3
         }, this.entityMap);
 
         // key
@@ -236,10 +240,10 @@ class Room {
 
 
         // Debug
-        this.printArray("this.heightMap", this.heightMap);
-        this.printArray("this.entityMap", this.entityMap);
-        this.printArray("this.propMap", this.propMap);
-        this.printArray("this.distances", this.distances);
+        // this.printArray("this.heightMap", this.heightMap);
+        // this.printArray("this.entityMap", this.entityMap);
+        // this.printArray("this.propMap", this.propMap);
+        // this.printArray("this.distances", this.distances);
 
     }
 
