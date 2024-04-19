@@ -10,6 +10,8 @@ class BoardSystem extends MRSystem {
         this.gameIsStarted = false;
         this.needsUpdate = false;
 
+        this.autoEndTurn = false;
+
         // TODO: package the sound into a simple Class
         // something like this.sound.play('doorHinge');\
         // Sound Effect from https://pixabay.com/
@@ -124,6 +126,7 @@ class BoardSystem extends MRSystem {
             this.levelId == 55) {
             // battery room
             this.room = new Room(this.container, {
+                levelId: this.levelId,
                 flrCount: 1,
                 rowCount: 7,
                 colCount: 7,
@@ -132,6 +135,7 @@ class BoardSystem extends MRSystem {
                 propCount: 0,
                 blockCount: 5,
                 chestCount: 0,
+                isLore: false,
                 biome: {
                     name: 'battery',
                     path: "tiles/biome_cyan/",
@@ -167,7 +171,9 @@ class BoardSystem extends MRSystem {
             });
         } else {
             // otherwise, just get a random room
-            this.room = new Room(this.container, {});
+            this.room = new Room(this.container, {
+                levelId: this.levelId
+            });
         }
 
         switch (this.room.biome.name) {
@@ -268,7 +274,8 @@ class BoardSystem extends MRSystem {
 
                                     // TODO: should be this.room.removeEntityAt(tile.pos.x, tile.pos.y);
                                     this.container.removeChild(targetEntity.el);
-                                    this.dropLoot(tile.pos.x, tile.pos.y);
+                                    // this.dropLoot(tile.pos.x, tile.pos.y);
+                                    this.dropWeapon(tile.pos.x, tile.pos.y);
 
                                     this.sounds.latchSound.components.set('audio', {
                                         state: 'play'
@@ -337,7 +344,7 @@ class BoardSystem extends MRSystem {
                     }
 
                     // Automatically end the turn when the player runs out of action points
-                    if (this.playerStats.actionPoints == 0) {
+                    if (this.autoEndTurn && this.playerStats.actionPoints == 0) {
                         this.endTurn();
                     }
 
@@ -355,14 +362,22 @@ class BoardSystem extends MRSystem {
     }
 
     addToInventory(entity) {
+        console.log(entity)
         if (entity.type == "weapon") {
             if (entity.subType == "melee") {
                 // TODO: only if it's better
                 // this.playerStats.inventory.meleeWeapon.name = entity.name;
-                this.playerStats.inventory.meleeWeapon = {
+                if(entity.attack > this.playerStats.inventory.meleeWeapon.attack) {
+                    this.playerStats.inventory.meleeWeapon = {
                         name: entity.name,
                         attack: entity.attack
-                };
+                    };
+
+                    console.log(this.playerStats.inventory.meleeWeapon);
+
+                    // TODO: this is where the redraw should be triggered
+                    // instead of every frame
+                }
             }
         }
         if (entity.type == "key") {
@@ -371,7 +386,7 @@ class BoardSystem extends MRSystem {
 
         this.playerStats.inventoryHistory.push(entity);
 
-        console.log(this.playerStats);
+        // console.log(this.playerStats);
     }
 
     decreaseRange() {
@@ -490,6 +505,8 @@ class BoardSystem extends MRSystem {
             state: 'play'
         });
         this.playerStats.health -= attacker.attack;
+
+        // TODO: this probably should be in room
         this.room.entityMap[this.room.playerPos.x][this.room.playerPos.y].el.showDamage(attacker.attack)
 
         if (this.playerStats.health <= 0) {
@@ -503,8 +520,11 @@ class BoardSystem extends MRSystem {
             state: 'play'
         });
 
-        entity.hp -= this.playerStats.selectedWeapon.attack;
-        // TODO: should be tied to the player attack power
+        console.log(this.playerStats.inventory.meleeWeapon);
+        const damage = this.playerStats.inventory.meleeWeapon.attack;
+        entity.hp -= damage;
+        // TODO: should be moved to room
+        this.room.entityMap[r][c].el.showDamage(damage);
 
         if (entity.hp <= 0) {
             this.container.removeChild(entity.el);
@@ -534,6 +554,30 @@ class BoardSystem extends MRSystem {
         };
 
         this.room.entityMap[x][y] = loot;
+
+        this.needsUpdate = true;
+    }
+
+    dropWeapon(x, y) {
+        const possibleNames = [
+            "twig", "short-sword"
+        ]
+        const name = possibleNames[Math.floor(Math.random() * possibleNames.length)];
+
+        // TODO: there should be only one "mr-weapon" as an entity in the entitymap
+        const weaponEl = document.createElement("mr-melee-weapon");
+        weaponEl.dataset.name = name;
+        this.container.appendChild(weaponEl);
+
+        const weapon = {
+            el: weaponEl,
+            type: 'weapon',
+            subType: 'melee',
+            name: name,
+            attack: this.levelId + 1
+        };
+
+        this.room.entityMap[x][y] = weapon;
 
         this.needsUpdate = true;
     }
@@ -657,8 +701,9 @@ class BoardSystem extends MRSystem {
             });
 
             // TODO: shouldn't be done at each frame
-            if(this.playerStats.inventory.meleeWeapon) {
+            if (this.playerStats.inventory.meleeWeapon) {
                 this.uiMeleeWeapon.setWeapon(this.playerStats.inventory.meleeWeapon.name);
+                this.uiMeleeWeapon.setAttackValue(this.playerStats.inventory.meleeWeapon.attack);
             }
 
             this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
@@ -691,7 +736,7 @@ class BoardSystem extends MRSystem {
                 if (this.distanceBetween(chargingPos.x, chargingPos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
                     if (this.playerStats.range < this.playerStats.maxRange) {
                         // charging
-                        this.playerStats.range += 0.02;
+                        this.playerStats.range += 0.04;
 
                         this.room.entityMap[chargingPos.x][chargingPos.y].el.updateBatteryLevel(this.playerStats.range / this.playerStats.maxRange)
 

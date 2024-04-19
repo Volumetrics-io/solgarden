@@ -49,13 +49,13 @@ class MRPlayer extends MREntity {
         });
 
         this.damageContainer.appendChild(this.damageValue);
-        this.damageValue.innerText = '3';
+        // this.damageValue.innerText = "";
         this.damageValue.style.fontSize = '16px';
         this.damageValue.style.color = 'white';
         this.damageValue.textObj.position.setX((-this.damageValue.width / 2) / 0.005);
 
         this.damageContainer.appendChild(this.damageValueBackface);
-        this.damageValueBackface.innerText = '3';
+        // this.damageValueBackface.innerText = "";
         this.damageValueBackface.style.fontSize = '16px';
         this.damageValueBackface.style.color = 'white';
         this.damageValueBackface.textObj.position.setX((-this.damageValueBackface.width / 2) / 0.005);
@@ -71,6 +71,8 @@ class MRPlayer extends MREntity {
         this.damageContainer.style.visibility = "visible";
 
         setTimeout(event => {
+            this.damageValue.innerText = "";
+            this.damageValueBackface.innerText = "";
             this.damageContainer.style.visibility = "hidden";
         }, 500);
     }

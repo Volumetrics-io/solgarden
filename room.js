@@ -1,6 +1,7 @@
 class Room {
     constructor(container, params) {
         this.container = container;
+        this.levelId = params.levelId ?? 1;
 
         this.needsUpdate = false;
 
@@ -13,7 +14,8 @@ class Room {
         this.maxFlrCount = params.maxFlrCount ?? 5;
 
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
-        this.loreCount = params.loreCount ?? 1;
+        // this.loreCount = params.loreCount ?? 1;
+        this.isLore = params.isLore ?? true;
 
         this.isDoor = params.isDoor ?? false;
 
@@ -82,7 +84,7 @@ class Room {
         this.tilemap = params.tilemap ?? [];
 
         const numberOfAvailableSpots = this.rowCount * this.colCount;
-        this.propCount = params.propCount ?? Math.ceil(numberOfAvailableSpots / 4);
+        this.propCount = params.propCount ?? Math.ceil(numberOfAvailableSpots / 8);
         this.blockCount = params.blockCount ?? Math.ceil(numberOfAvailableSpots / 8);
 
         console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`);
@@ -135,7 +137,9 @@ class Room {
         ///////////////////////////////////////////////
 
         // lore
-        for (let i = 0; i < this.loreCount; i++) {
+
+        // for (let i = 0; i < this.loreCount; i++) {
+        if (this.isLore && Math.random() < 0.1) {
             const el = document.createElement("mr-lore");
             const lore = {
                 el: el,
@@ -145,6 +149,8 @@ class Room {
             this.addToMap(lore, this.entityMap);
         }
 
+        // }
+
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
             const el = document.createElement("mr-enemy");
@@ -152,7 +158,7 @@ class Room {
                 el: el,
                 type: 'enemy',
                 hp: 3,
-                attack: Math.floor(Math.random() * 20) + 1
+                attack: Math.floor(Math.random() * 4 - 1) + this.levelId
             };
             // this.addToEntityMap(enemy);
             this.addToMap(enemy, this.entityMap);
@@ -186,15 +192,15 @@ class Room {
 
         // weapon
         // TODO: expose weaponCount
-        const weapon = document.createElement("mr-melee-weapon");
-        weapon.dataset.type = "short-sword";
-        this.addToMap({
-            el: weapon,
-            type: 'weapon',
-            subType: 'melee',
-            name: 'short-sword',
-            attack: 3
-        }, this.entityMap);
+        // const weapon = document.createElement("mr-melee-weapon");
+        // weapon.dataset.type = "short-sword";
+        // this.addToMap({
+        //     el: weapon,
+        //     type: 'weapon',
+        //     subType: 'melee',
+        //     name: 'short-sword',
+        //     attack: this.levelId + 1
+        // }, this.entityMap);
 
         // key
         // TODO: expose isKey

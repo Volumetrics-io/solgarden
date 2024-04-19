@@ -7,11 +7,16 @@ class MRMeleeWeapon extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.type = this.dataset.effect ?? "short-sword";
+        this.name = this.dataset.name ?? "short-sword";
 
-        switch(this.type) {
+        console.log(this.name);
+
+        switch(this.name) {
             case "short-sword":
                 this.el.src = "models/weapon-shortSword01.glb";
+                break;
+            case "twig":
+                this.el.src = "models/weapon-stick1.glb";
                 break;
         }
 
