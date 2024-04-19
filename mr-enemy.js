@@ -6,6 +6,7 @@ class MREnemy extends MREntity {
         this.el = document.createElement("mr-model");
         this.damageContainer = document.createElement("mr-div")
         this.damageValue = document.createElement("mr-text");
+        this.damageValueBackface = document.createElement("mr-text");
 
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
@@ -38,17 +39,27 @@ class MREnemy extends MREntity {
         });
 
         this.damageContainer.appendChild(this.damageValue);
-        this.damageValue.innerText = '3';
-        this.damageValue.style.fontSize = '20px';
+        this.damageValue.style.fontSize = '16px';
         this.damageValue.style.color = 'white';
         this.damageValue.textObj.position.setX((-this.damageValue.width / 2) / 0.005);
+
+        this.damageContainer.appendChild(this.damageValueBackface);
+        this.damageValueBackface.style.fontSize = '16px';
+        this.damageValueBackface.style.color = 'white';
+        this.damageValueBackface.textObj.position.setX((-this.damageValueBackface.width / 2) / 0.005);
+        this.damageValueBackface.dataset.rotation = "0 180 0";
+        this.damageValueBackface.dataset.position = "0 0 -0.001";
     }
 
     showDamage(string) {
         this.damageValue.innerText = string;
+        this.damageValueBackface.innerText = string;
+
         this.damageContainer.style.visibility = "visible";
 
         setTimeout(event => {
+            this.damageValue.innerText = "";
+            this.damageValueBackface.innerText = "";
             this.damageContainer.style.visibility = "hidden";
         }, 500);
     }

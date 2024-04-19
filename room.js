@@ -1,7 +1,9 @@
 class Room {
     constructor(container, params) {
         this.container = container;
-        this.levelId = params.levelId ?? 1;
+        this.levelId = params.levelId ?? 0;
+
+        console.log("LEVELID", params.levelId);
 
         this.needsUpdate = false;
 
@@ -11,7 +13,7 @@ class Room {
 
         this.maxRowCount = params.maxRowCount ?? 10;
         this.maxColCount = params.maxColCount ?? 10;
-        this.maxFlrCount = params.maxFlrCount ?? 5;
+        this.maxFlrCount = params.maxFlrCount ?? 4;
 
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
         // this.loreCount = params.loreCount ?? 1;
@@ -192,15 +194,17 @@ class Room {
 
         // weapon
         // TODO: expose weaponCount
-        // const weapon = document.createElement("mr-melee-weapon");
-        // weapon.dataset.type = "short-sword";
-        // this.addToMap({
-        //     el: weapon,
-        //     type: 'weapon',
-        //     subType: 'melee',
-        //     name: 'short-sword',
-        //     attack: this.levelId + 1
-        // }, this.entityMap);
+        if (this.levelId == 0) {
+            const weapon = document.createElement("mr-melee-weapon");
+            weapon.dataset.type = "short-sword";
+            this.addToMap({
+                el: weapon,
+                type: 'weapon',
+                subType: 'melee',
+                name: 'short-sword',
+                attack: 2
+            }, this.entityMap);
+        }
 
         // key
         // TODO: expose isKey
@@ -211,8 +215,8 @@ class Room {
         // }, this.entityMap);
 
         // chests
-        const chestCount = params.chestCount ?? (Math.random() * 2 | 0);
-        for (let i = 0; i < chestCount; i++) {
+        const isChest = params.isChest ?? true;
+        if (isChest && Math.random() < 0.1) {
             const randomChest = document.createElement("mr-chest");
             this.addToMap({
                 el: randomChest,
@@ -246,10 +250,10 @@ class Room {
 
 
         // Debug
-        // this.printArray("this.heightMap", this.heightMap);
-        // this.printArray("this.entityMap", this.entityMap);
-        // this.printArray("this.propMap", this.propMap);
-        // this.printArray("this.distances", this.distances);
+        this.printArray("this.heightMap", this.heightMap);
+        this.printArray("this.entityMap", this.entityMap);
+        this.printArray("this.propMap", this.propMap);
+        this.printArray("this.distances", this.distances);
 
     }
 
@@ -402,6 +406,11 @@ class Room {
             };
 
             if (t > 1) {
+                coor = {
+                    x: c,
+                    y: this.heightMap[r][c] * 0.35 + 0.3,
+                    z: r
+                };
                 delete entity.animation;
             }
 

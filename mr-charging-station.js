@@ -1,4 +1,57 @@
-class MRChargingStation extends MREntity {
+/////////////////////
+// I
+class MRChargingStationI extends MREntity {
+
+    constructor() {
+        super()
+        this.el = document.createElement("mr-model");
+    }
+
+    connected() {
+        this.appendChild(this.el);
+        this.el.src = "tiles/battery-room/solarStation1-1.glb";
+        this.el.style.pointerEvents = 'none';
+    }
+}
+customElements.define('mr-charging-station-i', MRChargingStationI);
+
+/////////////////////
+// II
+class MRChargingStationII extends MREntity {
+
+    constructor() {
+        super()
+        this.el = document.createElement("mr-model");
+    }
+
+    connected() {
+        this.appendChild(this.el);
+        this.el.src = "tiles/battery-room/solarStation1-2.glb";
+        this.el.style.pointerEvents = 'none';
+    }
+}
+customElements.define('mr-charging-station-ii', MRChargingStationII);
+
+/////////////////////
+// III
+class MRChargingStationIII extends MREntity {
+
+    constructor() {
+        super()
+        this.el = document.createElement("mr-model");
+    }
+
+    connected() {
+        this.appendChild(this.el);
+        this.el.src = "tiles/battery-room/solarStation1-3.glb";
+        this.el.style.pointerEvents = 'none';
+    }
+}
+customElements.define('mr-charging-station-iii', MRChargingStationIII);
+
+/////////////////////
+// *IV
+class MRChargingStationIV extends MREntity {
 
     constructor() {
         super()
@@ -9,8 +62,6 @@ class MRChargingStation extends MREntity {
         this.appendChild(this.el);
         this.el.src = "tiles/battery-room/solarStation1-4.glb";
         this.el.style.pointerEvents = 'none';
-
-        this.dataset.rotation = `0 90 0`;
     }
 
     updateBatteryLevel(value) {
@@ -21,5 +72,4 @@ class MRChargingStation extends MREntity {
         })
     }
 }
-
-customElements.define('mr-charging-station', MRChargingStation);
+customElements.define('mr-charging-station-iv', MRChargingStationIV);

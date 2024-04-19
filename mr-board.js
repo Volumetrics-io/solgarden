@@ -100,6 +100,7 @@ class BoardSystem extends MRSystem {
         if (this.levelId == 0) {
             // starting room
             this.room = new Room(this.container, {
+                levelId: this.levelId,
                 flrCount: 1,
                 rowCount: 5,
                 colCount: 5,
@@ -107,7 +108,7 @@ class BoardSystem extends MRSystem {
                 isDoor: false,
                 propCount: 0,
                 blockCount: 0,
-                chestCount: 0,
+                isChest: false,
                 biome: {
                     name: 'spawn',
                     path: "tiles/biome_purple/",
@@ -128,13 +129,13 @@ class BoardSystem extends MRSystem {
             this.room = new Room(this.container, {
                 levelId: this.levelId,
                 flrCount: 1,
-                rowCount: 7,
-                colCount: 7,
+                rowCount: 8,
+                colCount: 8,
                 enemyCount: 0,
                 isDoor: true,
                 propCount: 0,
                 blockCount: 5,
-                chestCount: 0,
+                isChest: false,
                 isLore: false,
                 biome: {
                     name: 'battery',
@@ -145,25 +146,45 @@ class BoardSystem extends MRSystem {
                 },
                 playerPos: {
                     x: 5,
-                    y: 3
+                    y: 4
                 },
                 entityMap: [
-                    [0, 0, 0, {
+                    [0, 0, 0, 0, {
                         el: document.createElement("mr-door"),
                         type: 'door'
                     }, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, {
-                        el: document.createElement("mr-charging-station"),
-                        type: 'charging-station'
+                        el: document.createElement("mr-charging-station-ii"),
+                        type: 'prop'
+                    }, {
+                        el: document.createElement("mr-charging-station-i"),
+                        type: 'prop'
                     }, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, {
+                    [0, 0, 0, 0, {
+                        el: document.createElement("mr-charging-station-iv"),
+                        type: 'prop'
+                    }, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, {
                         el: document.createElement("mr-player"),
                         type: 'player'
                     }, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+                propMap: [
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, {
+                        el: document.createElement("mr-charging-station-iii"),
+                        type: 'prop'
+                    }, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
                 ]
             });
             this.sounds.fridgeSound.components.set('audio', {
@@ -237,7 +258,7 @@ class BoardSystem extends MRSystem {
                     const targetEntity = this.room.entityMap[tile.pos.x][tile.pos.y];
 
                     const moveCost = this.room.distances[tile.pos.x][tile.pos.y];
-                    console.log(moveCost);
+                    console.log(moveCost, this.playerStats.actionPoints);
 
                     if (!targetEntity) {
                         // there is nothing on the tile.
@@ -264,7 +285,8 @@ class BoardSystem extends MRSystem {
                     } else {
                         // there is an entity on the tile
                         // if the entity is in move range of the player, or less than 2 tiles accross
-                        if (moveCost <= this.playerStats.actionPoints || this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                        if (moveCost <= this.playerStats.actionPoints &&
+                            this.distanceBetween(tile.pos.x, tile.pos.y, this.room.playerPos.x, this.room.playerPos.y) <= this.playerStats.actionPoints) {
                             switch (targetEntity.type) {
                                 case "enemy":
                                     this.playerStats.actionPoints -= 2;
@@ -367,7 +389,7 @@ class BoardSystem extends MRSystem {
             if (entity.subType == "melee") {
                 // TODO: only if it's better
                 // this.playerStats.inventory.meleeWeapon.name = entity.name;
-                if(entity.attack > this.playerStats.inventory.meleeWeapon.attack) {
+                if (entity.attack > this.playerStats.inventory.meleeWeapon.attack) {
                     this.playerStats.inventory.meleeWeapon = {
                         name: entity.name,
                         attack: entity.attack
@@ -529,9 +551,6 @@ class BoardSystem extends MRSystem {
         if (entity.hp <= 0) {
             this.container.removeChild(entity.el);
             this.dropLoot(r, c);
-
-            // this.room.checkForDoor(this.container);
-
             this.needsUpdate = true;
         }
     }
@@ -729,16 +748,22 @@ class BoardSystem extends MRSystem {
                     x: 3,
                     y: 3
                 }
+                const chargingIndicator = {
+                    x: 3,
+                    y: 4
+                }
 
                 // TODO: charging prototype to rewrite
                 // this.room.updateBattery()
                 // room knows where the player and the battery are
-                if (this.distanceBetween(chargingPos.x, chargingPos.y, this.room.playerPos.x, this.room.playerPos.y) <= 2) {
+                if (this.room.playerPos.x == chargingPos.x &&
+                    this.room.playerPos.y == chargingPos.y) {
                     if (this.playerStats.range < this.playerStats.maxRange) {
                         // charging
                         this.playerStats.range += 0.04;
 
-                        this.room.entityMap[chargingPos.x][chargingPos.y].el.updateBatteryLevel(this.playerStats.range / this.playerStats.maxRange)
+                        // TODO: move this to room?
+                        this.room.entityMap[chargingIndicator.x][chargingIndicator.y].el.updateBatteryLevel(this.playerStats.range / this.playerStats.maxRange)
 
                         this.room.tilemap[chargingPos.x][chargingPos.y].el.floorTile.style.visibility = "visible";
                         this.room.tilemap[chargingPos.x][chargingPos.y].el.floorMaterial.color.setStyle("#f90");
@@ -762,6 +787,8 @@ class BoardSystem extends MRSystem {
         this.root = entity;
         this.root.appendChild(this.container);
         this.container.style.scale = this.scale;
+
+        this.initialize();
 
         this.root.appendChild(this.UILayer);
         this.UILayer.object3D.add(new THREE.Mesh(
@@ -812,8 +839,6 @@ class BoardSystem extends MRSystem {
         this.endTurnButton.addEventListener('click', () => {
             this.endTurn();
         });
-
-        this.initialize();
     }
 }
 
