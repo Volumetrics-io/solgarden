@@ -10,7 +10,7 @@ class BoardSystem extends MRSystem {
         this.gameIsStarted = false;
         this.needsUpdate = false;
 
-        this.autoEndTurn = false;
+        this.autoEndTurn = true;
 
         // TODO: package the sound into a simple Class
         // something like this.sound.play('doorHinge');\
@@ -32,9 +32,9 @@ class BoardSystem extends MRSystem {
         // TODO: package player stats in a simple Class
         // something like this.stats.useAction(3)
         this.playerStats = {
-            health: 50,
-            maxHealth: 100,
-            range: 10,
+            health: 10,
+            maxHealth: 10,
+            range: 20,
             maxRange: 20,
             actionPoints: 4,
             maxActionPoints: 4,
@@ -54,8 +54,16 @@ class BoardSystem extends MRSystem {
 
         // container to store board object references
         this.container = document.createElement("mr-div");
+        this.container.id = 'container'; // for DOM debugging
+
+        // To delete when UI has been refactored
         this.UILayer = document.createElement("mr-div");
         this.actionBalls = [];
+
+        this.interface = document.createElement("mr-div");
+        this.interface.id = 'interface'; // for DOM debugging
+
+        this.UIController = new UIController(this.interface);
 
         // debug
         document.addEventListener("keydown", (event) => {
@@ -617,10 +625,15 @@ class BoardSystem extends MRSystem {
             actionBall.dataset.position = `${index * ballsize + index * margin + offsetX} ${this.scale / 2 + ballsize} 0`;
         });
 
-        const offsetX = -this.scale / 2;
-        const offsetY = (this.room.rowCount / 2) * this.scale;
+        const offsetX = 0;
+        const offsetY = (this.room.rowCount / 2  + 0.5) * this.scale;
 
         this.UILayer.dataset.position = `${offsetX} 0 ${offsetY}`;
+
+        this.UIController.project(this.room.rowCount, this.room.colCount, this.scale);
+
+        // const UIOffsetX = (this.room.rowCount / 2 + 0.5) * this.scale;
+        // this.interface.dataset.position = `-${UIOffsetX} 0 0`;
 
         this.room.calculateDistancesFromPlayer();
         this.room.tilemap.forEach(row => {
@@ -699,6 +712,8 @@ class BoardSystem extends MRSystem {
             this.timer += deltaTime;
 
             // UI STUFF
+            this.UIController.update(this.playerStats, this.room.rowCount, this.room.colCount);
+
             this.actionBalls.forEach((actionBall, index) => {
                 if (index < this.playerStats.maxActionPoints) {
                     actionBall.style.visibility = "visible";
@@ -725,7 +740,7 @@ class BoardSystem extends MRSystem {
                 this.uiMeleeWeapon.setAttackValue(this.playerStats.inventory.meleeWeapon.attack);
             }
 
-            this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
+            // this.healthBar.setHealth(this.playerStats.health / this.playerStats.maxHealth);
             this.levelCountLabel.innerText = `Battery: ${Math.round(this.playerStats.range)} Floor: ${this.levelId} Death: ${this.cycleId}`;
             ////////////
 
@@ -788,6 +803,9 @@ class BoardSystem extends MRSystem {
         this.root.appendChild(this.container);
         this.container.style.scale = this.scale;
 
+        this.root.appendChild(this.interface);
+        this.interface.style.scale = this.scale;
+
         this.initialize();
 
         this.root.appendChild(this.UILayer);
@@ -812,8 +830,8 @@ class BoardSystem extends MRSystem {
             this.UILayer.appendChild(actionBall);
         }
 
-        this.healthBar = document.createElement('mr-health-bar');
-        this.UILayer.appendChild(this.healthBar);
+        // this.healthBar = document.createElement('mr-health-bar');
+        // this.UILayer.appendChild(this.healthBar);
 
         this.endTurnButton = document.createElement("mr-button");
         this.endTurnButton.className = 'end-turn';

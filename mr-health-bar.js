@@ -30,8 +30,8 @@ class MRHealthBar extends MREntity {
         this.mesh.geometry.dispose()
         this.mesh.geometry = new THREE.BoxGeometry(0.1 * health, 0.005, 0.015);
 
-        const offsetX = - health * 0.1;
-        this.el.dataset.position = `${offsetX / 2} 0.035 -0.015`;
+        // const offsetX = - health * 0.1;
+        // this.el.dataset.position = `${offsetX / 2} 0.035 -0.015`;
 
         // console.log(health);
     }

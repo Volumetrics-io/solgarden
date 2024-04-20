@@ -65,8 +65,9 @@ class MRTile extends MREntity {
         this.numberString.style.fontSize = "400px";
         this.numberContainer.appendChild(this.numberString);
 
-        this.numberContainer.dataset.position = '0 0.15 0'
-        this.numberContainer.dataset.rotation = `270 0 -${randomRotation}`
+        this.numberContainer.dataset.position = '0 0.16 0'
+        this.numberContainer.dataset.rotation = `270 0 -${randomRotation + 90}`
+        // this.numberContainer.dataset.rotation = `270 0 0`;
         Object.assign(this.numberContainer.style, {
             width: "300px",
             height: "300px",

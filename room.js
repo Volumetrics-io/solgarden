@@ -3,7 +3,7 @@ class Room {
         this.container = container;
         this.levelId = params.levelId ?? 0;
 
-        console.log("LEVELID", params.levelId);
+        // console.log("LEVELID", params.levelId);
 
         this.needsUpdate = false;
 
@@ -424,10 +424,10 @@ class Room {
 
         // TODO: use threejs directly
         // https://dustinpfister.github.io/2022/04/04/threejs-object3d-position/
-        entity.el.object3D.position.x = coor.x - this.colCount / 2;
+        entity.el.object3D.position.x = coor.x - this.colCount / 2 + 0.5;
         // entity.el.object3D.position.y = coor.y + this.waveDeltaYAt(r, c, timer);
         entity.el.object3D.position.y = coor.y;
-        entity.el.object3D.position.z = coor.z - this.rowCount / 2;
+        entity.el.object3D.position.z = coor.z - this.rowCount / 2 + 0.5;
         // entity.el.dataset.position = `${coor.x - this.colCount / 2} ${coor.y + this.waveDeltaYAt(r, c, timer)} ${coor.z - this.rowCount / 2}`;
     }
 
