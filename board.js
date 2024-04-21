@@ -1,4 +1,4 @@
-class Room {
+class Board {
     constructor(container, params) {
         this.container = container;
         this.levelId = params.levelId ?? 0;
@@ -7,12 +7,12 @@ class Room {
 
         this.needsUpdate = false;
 
-        this.minRowCount = params.minRowCount ?? 4;
+        this.minRowCount = params.minRowCount ?? 5;
         this.minColCount = params.minColCount ?? 4;
         this.minFlrCount = params.minFlrCount ?? 1;
 
-        this.maxRowCount = params.maxRowCount ?? 10;
-        this.maxColCount = params.maxColCount ?? 10;
+        this.maxRowCount = params.maxRowCount ?? 12;
+        this.maxColCount = params.maxColCount ?? 4;
         this.maxFlrCount = params.maxFlrCount ?? 4;
 
         this.enemyCount = params.enemyCount ?? Math.floor(Math.random() * 2) + 1;
@@ -67,6 +67,8 @@ class Room {
             length: this.rowCount
         }, () => Array(this.colCount).fill(0));
 
+        // console.log(this.entityMap)
+
         // this table contains uninteractible props
         // like plants, zone indicators, etc
         // [ [0,      0,       0 ],
@@ -89,7 +91,7 @@ class Room {
         this.propCount = params.propCount ?? Math.ceil(numberOfAvailableSpots / 8);
         this.blockCount = params.blockCount ?? Math.ceil(numberOfAvailableSpots / 8);
 
-        console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`);
+        // console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`);
 
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
@@ -105,8 +107,6 @@ class Room {
                         y: c
                     }
                 };
-
-
                 row.push(tile);
             }
             this.tilemap.push(row);
@@ -115,21 +115,24 @@ class Room {
 
         // player
         const player = document.createElement("mr-player");
-        this.playerPos = params.playerPos ?? this.addToMap({
+        this.playerPos = this.addToMap({
             el: player,
             type: 'player'
         }, this.entityMap);
-        // this.addToMap(lore, this.entityMap);
-        console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
+        // console.log(`Player position: { x: ${this.playerPos.x}, y: ${this.playerPos.y}}`)
 
         // door
-        if (!this.isDoor) {
-            const door = document.createElement("mr-door");
-            this.addToMap({
-                el: door,
-                type: 'door'
-            }, this.entityMap);
-        }
+        // if (!this.isDoor) {
+        const door = document.createElement("mr-door");
+        this.doorPos = this.addToMap({
+            el: door,
+            type: 'door'
+        }, this.entityMap)
+        // this.addToMap({
+        //     el: door,
+        //     type: 'door'
+        // }, this.entityMap);
+        // }
 
         ///////////////////////////////////////////////
         // TODO: make solvable rooms
@@ -139,19 +142,14 @@ class Room {
         ///////////////////////////////////////////////
 
         // lore
-
-        // for (let i = 0; i < this.loreCount; i++) {
         if (this.isLore && Math.random() < 0.1) {
             const el = document.createElement("mr-lore");
             const lore = {
                 el: el,
                 type: 'lore',
             };
-            // this.addToEntityMap(lore);
             this.addToMap(lore, this.entityMap);
         }
-
-        // }
 
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
@@ -162,7 +160,6 @@ class Room {
                 hp: 3,
                 attack: Math.floor(Math.random() * 4 - 1) + this.levelId
             };
-            // this.addToEntityMap(enemy);
             this.addToMap(enemy, this.entityMap);
         }
 
@@ -175,11 +172,11 @@ class Room {
                 el: el,
                 type: 'prop'
             }
-            // this.addToPropMap(prop);
             this.addToMap(prop, this.propMap);
         }
 
         // blocks
+        // this.printArray("before block", this.entityMap);
         for (let i = 0; i < this.blockCount; i++) {
             const el = document.createElement("mr-prop");
             el.dataset.tileset = this.biome.block;
@@ -189,8 +186,8 @@ class Room {
                 type: 'prop'
             }
             this.addToMap(prop, this.entityMap);
-            // this.addToEntityMap(prop);
         }
+        // this.printArray("after block", this.entityMap);
 
         // weapon
         // TODO: expose weaponCount
@@ -246,14 +243,14 @@ class Room {
             });
         });
 
-        this.calculateDistancesFromPlayer();
+        this.calcDistFromPlayer();
 
 
         // Debug
-        this.printArray("this.heightMap", this.heightMap);
-        this.printArray("this.entityMap", this.entityMap);
-        this.printArray("this.propMap", this.propMap);
-        this.printArray("this.distances", this.distances);
+        // this.printArray("this.heightMap", this.heightMap);
+        // this.printArray("this.entityMap", this.entityMap);
+        // this.printArray("this.propMap", this.propMap);
+        // this.printArray("this.distances", this.distances);
 
     }
 
@@ -270,10 +267,34 @@ class Room {
         let pos;
 
         while (!inserted) {
-            const randRow = Math.floor(Math.random() * this.rowCount);
-            const randCol = Math.floor(Math.random() * this.colCount);
+            let randRow;
+            let randCol = Math.floor(Math.random() * this.colCount);
+            let distanceToDoor = Infinity;
 
-            if (map[randRow][randCol] === 0) {
+            if (entity.type == "player") {
+                randRow = 0;
+            } else if (entity.type == "door") {
+                randRow = this.rowCount - 1;
+            } else {
+                randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1);
+
+                // make a copy of the entity map
+                let tempMap = map.map(function(arr) {
+                    return arr.slice();
+                });
+
+                // add the entity to the array copy
+                tempMap[randRow][randCol] = entity;
+
+                // calc distances with the entity
+                // and see if there is a possible solution
+                let tempDistance = this.calcDist(this.playerPos.y, this.playerPos.x, tempMap);
+                distanceToDoor = tempDistance[this.doorPos.x][this.doorPos.y];
+            }
+
+            if (entity.type == "player" ||
+                entity.type == "door" ||
+                (map[randRow][randCol] === 0 && distanceToDoor != Infinity)) {
                 map[randRow][randCol] = entity;
                 inserted = true;
                 pos = {
@@ -282,6 +303,7 @@ class Room {
                 }
             }
         }
+
         return pos
     }
 
@@ -308,24 +330,24 @@ class Room {
         }
     }
 
-    calculateDistancesFromPlayer() {
-        this.calculateDistances(this.playerPos.y, this.playerPos.x, this.entityMap);
+    calcDistFromPlayer() {
+        this.distances = this.calcDist(this.playerPos.y, this.playerPos.x, this.entityMap);
         // this.printArray("this.distances", this.distances);
     }
 
-    calculateDistances(x, y, blockmap) {
+    calcDist(x, y, blockmap) {
 
         // https://codepen.io/lobau/pen/XWQqVwy/6a4c88328ccf9f08befa5463af05708a
         const width = blockmap[0].length;
         const height = blockmap.length;
 
         // Initialize distances array with Infinity for unvisited cells
-        this.distances = Array.from({
+        const distances = Array.from({
                 length: height
             }, () =>
             Array(width).fill(Infinity)
         );
-        this.distances[y][x] = 0; // Distance to itself is 0
+        distances[y][x] = 0; // Distance to itself is 0
 
         const directions = [
             [-1, 0],
@@ -359,16 +381,18 @@ class Room {
                     (blockmap[newY][newX] === 0 || blockmap[newY][newX].type != "prop")
                 ) {
                     // Calculate potential new distance
-                    const newDistance = this.distances[currentY][currentX] + 1;
+                    const newDistance = distances[currentY][currentX] + 1;
 
                     // Update distance if newDistance is smaller
-                    if (newDistance < this.distances[newY][newX]) {
-                        this.distances[newY][newX] = newDistance;
+                    if (newDistance < distances[newY][newX]) {
+                        distances[newY][newX] = newDistance;
                         queue.push([newX, newY]);
                     }
                 }
             }
         }
+
+        return distances;
     }
 
     project(entity, r, c, timer) {
@@ -394,9 +418,9 @@ class Room {
             let distF;
 
             if (entity.type == "enemy") {
-                distF = h * 0.8;
-            } else {
                 distF = 0;
+            } else {
+                distF = h * 0.8;
             }
 
             coor = {
@@ -422,13 +446,10 @@ class Room {
             };
         }
 
-        // TODO: use threejs directly
-        // https://dustinpfister.github.io/2022/04/04/threejs-object3d-position/
         entity.el.object3D.position.x = coor.x - this.colCount / 2 + 0.5;
         // entity.el.object3D.position.y = coor.y + this.waveDeltaYAt(r, c, timer);
         entity.el.object3D.position.y = coor.y;
         entity.el.object3D.position.z = coor.z - this.rowCount / 2 + 0.5;
-        // entity.el.dataset.position = `${coor.x - this.colCount / 2} ${coor.y + this.waveDeltaYAt(r, c, timer)} ${coor.z - this.rowCount / 2}`;
     }
 
     projectCoordinates(r, c) {

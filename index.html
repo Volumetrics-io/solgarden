@@ -60,7 +60,8 @@
         .end-turn {
             /* background-color: RebeccaPurple; */
             color: white;
-            font-size: 10px;
+            font-size: 200px;
+            border-radius: 50px;
         }
 
         .text-label {
@@ -96,7 +97,7 @@
         </mr-panel> -->
 
         <!-- <mr-app debug="true" orbital="true"> -->
-        <mr-entity data-comp-board="" data-comp-anchor="type: plane; label: table">
+        <mr-entity data-comp-game="" data-comp-anchor="type: plane; label: table">
             <!-- <mr-panel id="game-panel" data-position="0 0 0">
                 <mr-text>HELLO WORLD</mr-text>
             </mr-panel> -->
@@ -138,9 +139,13 @@
 
     <script src="heightmap.js"></script>
     <script src="pathfinder.js"></script>
-    <script src="room.js"></script>
-    <script src="ui-controller.js"></script>
-    <script src="mr-board.js"></script>
+    <script src="board.js"></script>
+
+    <!-- MRjs Systems -->
+    <script src="mr-player-state.js"></script>
+    <script src="mr-game.js"></script>
+
+    <!-- Mrjs Entities -->
     <script src="mr-tile.js"></script>
     <script src="mr-player.js"></script>
     <script src="mr-chest.js"></script>
@@ -153,13 +158,9 @@
     <script src="mr-door.js"></script>
     <script src="mr-prop.js"></script>
     <script src="mr-charging-station.js"></script>
-    <script src="mr-action-ball.js"></script>
-    <!-- <script src="mr-health-bar.js"></script> -->
     <script src="mr-ui-melee-weapon.js"></script>
     <script src="mr-ui-range-weapon.js"></script>
-    <!-- <script src="mr-ui-range.js"></script> -->
-
-
+    
 </body>
 
 </html>

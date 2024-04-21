@@ -23,6 +23,8 @@ class MRDoor extends MREntity {
         this.appendChild(this.el);
         this.el.src = "tiles/door_01.glb";
         this.el.style.pointerEvents = 'none';
+
+        this.dataset.rotation = `0 180 0`
         // this.el.dataset.compAnimation = "clip: 0; action: play;";
     }
 

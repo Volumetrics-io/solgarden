@@ -9,7 +9,7 @@ class MRMeleeWeapon extends MREntity {
         this.appendChild(this.el);
         this.name = this.dataset.name ?? "short-sword";
 
-        console.log(this.name);
+        // console.log(this.name);
 
         switch(this.name) {
             case "short-sword":

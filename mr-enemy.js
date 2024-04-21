@@ -24,7 +24,9 @@ class MREnemy extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/enemy_temp.glb";
+        this.el.src = "models/enemy-floater1.glb";
+        this.el.dataset.compAnimation = "clip: 0; action: play;";
+        this.el.dataset.rotation = `0 180 0`
         this.el.style.pointerEvents = 'none';
 
         this.appendChild(this.damageContainer);
