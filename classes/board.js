@@ -15,6 +15,7 @@ class Board {
         this.isLore = params.isLore ?? true;
         this.isDoor = params.isDoor ?? false;
 
+        // TODO: biome soundtrack sound be here
         this.biomes = [{
                 // plains
                 name: "plains",
@@ -140,11 +141,15 @@ class Board {
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
             const el = document.createElement("mr-enemy");
+            const hp = Math.ceil(Math.random() * 4) + this.levelId;
+            const attack = Math.ceil(Math.random() * 4) + this.levelId;
+            el.dataset.hp = hp;
+            el.dataset.attack = attack;
             const enemy = {
                 el: el,
                 type: 'enemy',
-                hp: 3,
-                attack: Math.floor(Math.random() * 4 - 1) + this.levelId
+                hp: hp,
+                attack: attack
             };
             this.addToMap(enemy, this.entityMap);
         }

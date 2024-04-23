@@ -26,6 +26,8 @@ class MREnemy extends MREntity {
         this.appendChild(this.el);
         this.el.src = "models/enemy-floater1.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
+        // this.el.src = "models/enemy_temp.glb";
+        // this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.dataset.rotation = `0 180 0`
         this.el.style.pointerEvents = 'none';
 

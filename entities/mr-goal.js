@@ -21,7 +21,7 @@ class MRGoal extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/goal1.glb";
+        this.el.src = "models/goal1.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
     }

@@ -11,10 +11,10 @@ class MRLoot extends MREntity {
 
         switch (this.effect) {
             case "health":
-                this.el.src = "tiles/loot-health.glb";
+                this.el.src = "models/loot-health.glb";
                 break;
             case "range":
-                this.el.src = "tiles/loot-range.glb";
+                this.el.src = "models/loot-range.glb";
                 break;
         }
 

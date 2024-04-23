@@ -14,17 +14,17 @@ class GameSystem extends MRSystem {
             levelId: 0,
             cycleId: 0,
             health: 10,
-            maxHealth: 10,
-            range: 20,
-            maxRange: 20,
+            maxHealth: 20,
+            range: 50,
+            maxRange: 50,
             actionPoints: 4,
             maxActionPoints: 4,
             projectedCost: 0,
             hasKey: false,
             meleeWeaponName: 'twig',
             meleeWeaponAttack: 1,
-            rangeWeaponName: false,
-            rangeWeaponAttack: false,
+            rangeWeaponName: 'slingshot',
+            rangeWeaponAttack: 1,
             selectedWeapon: "melee",
             isPlayerTurn: true,
             needsUpdate: false
@@ -234,11 +234,17 @@ class GameSystem extends MRSystem {
             needsUpdate: true,
             levelId: state.levelId + 1
         });
-
-        // this.levelId++;
     }
 
     addToInventory(entity, state) {
+        // if (entity.el.dataset.type == "weapon") {
+        //     if (entity.el.dataset.subType == "melee") {
+        //         if (entity.el.dataset.attack > state.meleeWeaponAttack) {
+        //             state.meleeWeaponName = entity.el.dataset.name;
+        //             state.meleeWeaponAttack = entity.el.dataset.attack;
+        //         }
+        //     }
+        // }
         if (entity.type == "weapon") {
             if (entity.subType == "melee") {
                 if (entity.attack > state.meleeWeaponAttack) {
@@ -293,13 +299,15 @@ class GameSystem extends MRSystem {
     }
 
     resetPlayer() {
+        const state = this.state.components.get('state');
         // this.levelId = 0;
-        this.cycleId++;
 
         this.state.components.set('state', {
+            cycleId: state.cycleId + 1,
             levelId: 0,
-            health: this.state.components.get('state').maxHealth,
-            range: this.state.components.get('state').maxRange,
+            health: state.maxHealth,
+            range: state.maxRange,
+            needsUpdate: true
         });
 
         // TODO: this is were we could assign a random weapon
@@ -371,12 +379,15 @@ class GameSystem extends MRSystem {
         // this.soundController.moveSound()
         this.soundController.play('clashSound');
 
-        state.health -= attacker.attack;
-        state.needsUpdate = true;
-        this.state.components.set('state', state);
+        const health = state.health - attacker.attack;
+        this.state.components.set('state', {
+            health: health,
+            needsUpdate: true
+        });
+
         this.board.showDamageAt(playerPos.x, playerPos.y, attacker.attack);
 
-        if (state.health <= 0) {
+        if (health <= 0) {
             this.endGame();
         }
     }
@@ -485,24 +496,24 @@ class GameSystem extends MRSystem {
     }
 
     dropWeapon(x, y) {
-        const Names = [
-            "twig", "short-sword"
-        ]
-        const name = Names[Math.floor(Math.random() * Names.length)];
+        // const Names = [
+        //     "twig", "short-sword"
+        // ]
+        // const name = Names[Math.floor(Math.random() * Names.length)];
         const state = this.state.components.get('state');
 
         // TODO: there should be only one "mr-weapon"
         // as an entity in the entitymap
         const weaponEl = document.createElement("mr-melee-weapon");
-        weaponEl.dataset.name = name;
+        weaponEl.dataset.levelId = state.levelId;
         this.container.appendChild(weaponEl);
 
         const weapon = {
             el: weaponEl,
-            type: 'weapon',
-            subType: 'melee',
-            name: name,
-            attack: state.levelId + 1
+            // type: 'weapon',
+            // subType: 'melee',
+            // name: name,
+            // attack: state.levelId + 1
         };
 
         this.board.entityMap[x][y] = weapon;
@@ -572,7 +583,7 @@ class GameSystem extends MRSystem {
 
         this.endTurnButton.className = 'end-turn';
         this.endTurnButton.innerText = "End turn";
-        this.endTurnButton.dataset.position = "0 0.08 -0.55";
+        this.endTurnButton.dataset.position = "0 0.08 2";
         this.endTurnButton.dataset.rotation = "270 0 270";
         this.state.appendChild(this.endTurnButton);
 

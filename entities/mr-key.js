@@ -21,7 +21,7 @@ class MRKey extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/key_01.glb";
+        this.el.src = "models/key_01.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
     }
