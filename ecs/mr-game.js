@@ -3,6 +3,8 @@ class GameSystem extends MRSystem {
         super()
         this.gameIsStarted = false;
         this.needsUpdate = false;
+        this.level = 0;
+        this.cycle = 0;
 
         // container to store board object references
         this.container = document.createElement("mr-div");
@@ -11,14 +13,12 @@ class GameSystem extends MRSystem {
         // The state system dealing with player state and UI
         this.state = document.createElement("mr-entity");
         this.state.components.set('state', {
-            levelId: 0,
-            cycleId: 0,
             health: 10,
             maxHealth: 20,
             range: 50,
             maxRange: 50,
-            actionPoints: 4,
-            maxActionPoints: 4,
+            actionPoints: 3,
+            maxActionPoints: 3,
             projectedCost: 0,
             hasKey: false,
             meleeWeaponName: 'twig',
@@ -73,12 +73,13 @@ class GameSystem extends MRSystem {
 
         let params;
         // TODO: make the soundtrack part of the biome
-        if (state.levelId == 0) {
+        // console.log(state.levelId);
+        if (this.level == 0) {
             // starting room
             // The room class generate all kind of arrays and dom elements
             // to represent a level, either hardcoded or randomly generated
             params = {
-                levelId: state.levelId,
+                levelId: this.level,
                 flrCount: 1,
                 rowCount: 6,
                 colCount: 4,
@@ -97,22 +98,22 @@ class GameSystem extends MRSystem {
             }
         } else if (
             // this.levelId == 1 ||
-            state.levelId == 2 ||
-            state.levelId == 4 ||
-            state.levelId == 8 ||
-            state.levelId == 13 ||
-            state.levelId == 21 ||
-            state.levelId == 34 ||
-            state.levelId == 55) {
+            this.level == 2 ||
+            this.level == 4 ||
+            this.level == 8 ||
+            this.level == 13 ||
+            this.level == 21 ||
+            this.level == 34 ||
+            this.level == 55) {
 
             // battery room
             params = {
-                levelId: state.levelId,
+                levelId: this.level,
                 flrCount: 1,
                 rowCount: 8,
                 colCount: 4,
                 enemyCount: 0,
-                propCount: 6,
+                propCount: 12,
                 blockCount: 0,
                 isChest: false,
                 isLore: false,
@@ -121,7 +122,7 @@ class GameSystem extends MRSystem {
                     path: "tiles/biome_cyan/",
                     audio: "/audio/fridge.mp3",
                     tiles: ["tilegrasscyan001.glb"],
-                    props: ["plant_01.glb", "plant_02.glb", "plant_03.glb"],
+                    props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
                     block: []
                 },
                 entityMap: [
@@ -160,11 +161,12 @@ class GameSystem extends MRSystem {
             this.soundController.play('fridgeSound');
         } else {
             params = {
-                levelId: state.levelId
+                levelId: this.level
             }
         }
 
         this.board = new Board(this.container, params, this.state.components);
+        this.board.assignHoverHandlers(this.state.components);
 
         // TODO: move somewhere else?
         switch (this.board.biome.name) {
@@ -175,8 +177,6 @@ class GameSystem extends MRSystem {
                 this.soundController.play('bandlandsSound');
                 break;
         }
-
-        this.board.assignHoverHandlers(this.state.components);
 
         // the tile elements (the floor) own all the events handling
         this.board.tileMap.forEach(row => {
@@ -193,81 +193,104 @@ class GameSystem extends MRSystem {
                     const cost = this.board.getProjectedCostFor(x, y);
                     const state = this.state.components.get('state');
 
-                    if (!targetEntity) {
-                        // there is nothing on the tile.
-                        if (cost <= state.actionPoints) {
-                            state.actionPoints -= cost;
-                            this.soundController.play('chessSound');
-                            this.board.movePlayer(x, y);
-                        } else {
-                            this.soundController.play('nopeSound');
-                        }
-
-                    } else {
-                        // there is an entity on the tile
-                        if (cost <= state.actionPoints &&
-                            this.board.distances[x][y] <= state.actionPoints) {
-                            this.interactWith(x, y, targetEntity, cost, state);
-                            if (targetEntity.type == "loot" ||
-                                targetEntity.type == "key" ||
-                                targetEntity.type == "weapon" ||
-                                targetEntity.type == "lore") {
-
+                    if (state.isPlayerTurn) {
+                        if (!targetEntity) {
+                            // there is nothing on the tile.
+                            if (cost <= state.actionPoints) {
                                 state.actionPoints -= cost;
                                 this.soundController.play('chessSound');
                                 this.board.movePlayer(x, y);
+                            } else {
+                                this.soundController.play('nopeSound');
                             }
+
                         } else {
-                            this.soundController.play('nopeSound');
+                            // there is an entity on the tile
+                            if (cost <= state.actionPoints &&
+                                this.board.distances[x][y] <= state.actionPoints) {
+                                this.interactWith(x, y, targetEntity, cost, state);
+
+                                // pickable items
+                                if (targetEntity.type == "loot" ||
+                                    targetEntity.type == "key" ||
+                                    targetEntity.type == "weapon" ||
+                                    targetEntity.type == "lore") {
+
+                                    // then move the player
+                                    state.actionPoints -= cost;
+                                    this.soundController.play('chessSound');
+                                    this.board.movePlayer(x, y);
+                                }
+
+                                // door
+                                if (targetEntity.type == "door") {
+                                    state.actionPoints -= cost;
+                                    this.soundController.play('chessSound');
+                                    this.board.movePlayer(x, y);
+
+                                    state.isPlayerTurn = false;
+                                    // this.isPlayerTurn = false;
+                                    setTimeout(() => {
+                                        // this.state.components.set('state', {
+                                        //   isPlayerTurn: true
+                                        // });
+                                        this.initialize();
+                                    }, 1000);
+
+                                }
+                            } else {
+                                this.soundController.play('nopeSound');
+                            }
                         }
+
+                        state.needsUpdate = true;
+                        this.state.components.set('state', state);
+
+                        // Automatically end the turn when the player runs out of action points
+                        if (this.autoEndTurn && state.actionPoints == 0) {
+                            this.endTurn();
+                        }
+
+                        this.needsUpdate = true;
                     }
-
-                    state.needsUpdate = true;
-                    this.state.components.set('state', state);
-
-                    // Automatically end the turn when the player runs out of action points
-                    if (this.autoEndTurn && state.actionPoints == 0) {
-                        this.endTurn();
-                    }
-
-                    this.needsUpdate = true;
                 });
             })
         })
 
-        this.gameIsStarted = true;
-        this.needsUpdate = true;
-
         this.state.components.set('state', {
             isPlayerTurn: true,
-            needsUpdate: true,
-            levelId: state.levelId + 1
+            needsUpdate: true
         });
+
+        console.log(this.level)
+        this.level++;
+        this.gameIsStarted = true;
+        this.needsUpdate = true;
     }
 
     addToInventory(entity, state) {
-        if (entity.el.dataset.type == "weapon") {
-            if (entity.el.dataset.subType == "melee" &&
-                entity.el.dataset.attack > state.meleeWeaponAttack) {
-                state.meleeWeaponName = entity.el.dataset.name;
-                state.meleeWeaponAttack = entity.el.dataset.attack;
-            }
-            if (entity.el.dataset.subType == "range" &&
-                entity.el.dataset.attack > state.rangeWeaponAttack) {
-                state.rangeWeaponName = entity.el.dataset.name;
-                state.rangeWeaponAttack = entity.el.dataset.attack;
-            }
-        }
-        // if (entity.type == "weapon") {
-        //     if (entity.subType == "melee" && entity.attack > state.meleeWeaponAttack) {
-        //         state.meleeWeaponName = entity.name;
-        //         state.meleeWeaponAttack = entity.attack;
+        // if (entity.el.dataset.type == "weapon") {
+        //     if (entity.el.dataset.subType == "melee" &&
+        //         entity.el.dataset.attack > state.meleeWeaponAttack) {
+        //         state.meleeWeaponName = entity.el.dataset.name;
+        //         state.meleeWeaponAttack = entity.el.dataset.attack;
         //     }
-        //     if (entity.subType == "range" && entity.attack > state.rangeWeaponAttack) {
-        //         state.rangeWeaponName = entity.name;
-        //         state.rangeWeaponAttack = entity.attack;
+        //     if (entity.el.dataset.subType == "range" &&
+        //         entity.el.dataset.attack > state.rangeWeaponAttack) {
+        //         state.rangeWeaponName = entity.el.dataset.name;
+        //         state.rangeWeaponAttack = entity.el.dataset.attack;
         //     }
         // }
+        if (entity.type == "weapon") {
+            if (entity.subType == "melee" && entity.attack > state.meleeWeaponAttack) {
+                state.meleeWeaponName = entity.name;
+                state.meleeWeaponAttack = entity.attack;
+            }
+            if (entity.subType == "range" && entity.attack > state.rangeWeaponAttack) {
+                state.rangeWeaponName = entity.name;
+                state.rangeWeaponAttack = entity.attack;
+            }
+        }
         if (entity.type == "key") {
             state.hasKey = true;
         }
@@ -313,26 +336,36 @@ class GameSystem extends MRSystem {
         this.soundController.play('analogSound');
     }
 
-    resetPlayer() {
-        const state = this.state.components.get('state');
-        // this.levelId = 0;
-
-        this.state.components.set('state', {
-            cycleId: state.cycleId + 1,
-            levelId: 0,
-            health: state.maxHealth,
-            range: state.maxRange,
-            needsUpdate: true
-        });
-
-        // TODO: this is were we could assign a random weapon
-        // at the beginning of each run
-    }
-
     endGame() {
         console.log('you ded');
 
-        this.resetPlayer()
+        this.level = 0;
+        this.cycle++;
+
+        const state = this.state.components.get('state');
+
+        this.state.components.set('state', {
+            health: state.maxHealth,
+            range: state.maxRange,
+            actionPoints: state.maxActionPoints,
+            projectedCost: 0,
+            hasKey: false,
+            meleeWeaponName: 'twig',
+            meleeWeaponAttack: 1,
+            rangeWeaponName: 'slingshot',
+            rangeWeaponAttack: 1,
+            selectedWeapon: "melee",
+            isPlayerTurn: true,
+            needsUpdate: true
+        });
+
+        // this.state.components.set('state', {
+        //     cycleId: state.cycleId + 1,
+        //     levelId: 0,
+        //     health: state.maxHealth,
+        //     range: state.maxRange,
+        //     needsUpdate: true
+        // });
 
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
@@ -459,7 +492,8 @@ class GameSystem extends MRSystem {
 
             case "door":
                 this.soundController.play('doorSound');
-                this.initialize();
+                this.board.removeEntityAt(x, y);
+                // this.initialize();
                 break;
         }
     }
@@ -515,15 +549,12 @@ class GameSystem extends MRSystem {
         // TODO: there should be only one "mr-weapon"
         // as an entity in the entitymap
         const weaponEl = document.createElement("mr-weapon");
-        weaponEl.dataset.levelId = state.levelId;
+        weaponEl.dataset.levelId = this.level;
         this.container.appendChild(weaponEl);
 
         const weapon = {
             el: weaponEl,
             type: 'weapon',
-            // subType: 'melee',
-            // name: name,
-            // attack: state.levelId + 1
         };
 
         this.board.entityMap[x][y] = weapon;

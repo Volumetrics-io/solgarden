@@ -40,16 +40,16 @@ class MRWeapon extends MREntity {
         this.el.style.pointerEvents = 'none';
 
         // unused yet
-        this.dataset.type = 'weapon';
-        this.dataset.subType = weapon.subtype;
-        this.dataset.name = weapon.name;
-        this.dataset.attack = levelId + 2;
+        // this.dataset.type = 'weapon';
+        // this.dataset.subType = weapon.subtype;
+        // this.dataset.name = weapon.name;
+        // this.dataset.attack = levelId + 2;
 
         // used for now
-        // this.type = 'weapon';
-        // this.subType = weapon.subtype;
-        // this.name = weapon.name;
-        // this.attack = levelId + 1;
+        this.type = 'weapon';
+        this.subType = weapon.subtype;
+        this.name = weapon.name;
+        this.attack = levelId + 2;
 
         // console.log(weapon)
 

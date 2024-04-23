@@ -95,9 +95,12 @@ class Board {
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
+
                 const el = document.createElement("mr-tile");
                 el.dataset.x = r;
                 el.dataset.y = c;
+
+                // TODO: pass the model directly
                 el.dataset.tileset = this.biome.tiles;
                 el.dataset.tilepath = this.biome.path;
 
@@ -187,9 +190,9 @@ class Board {
             this.addToMap({
                 el: weapon,
                 type: 'weapon',
-                // subType: 'melee',
-                // name: 'short-sword',
-                // attack: 2
+                subType: 'melee',
+                name: 'short-sword',
+                attack: 2
             }, this.entityMap);
         }
 
@@ -599,6 +602,7 @@ class Board {
                 }
 
             } else {
+                gaugeEl.updateBatteryLevel(0)
                 padEl.floorTile.style.visibility = "visible";
                 padEl.floorMaterial.color.setStyle("#fff");
 

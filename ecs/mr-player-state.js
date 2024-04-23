@@ -17,7 +17,9 @@ class StateSystem extends MRSystem {
                 el: document.createElement("mr-model"),
                 src: "models/weapon-shortSword1-UI.glb",
             },
-        ]
+        ];
+        this.meleeContainer = document.createElement("mr-div");
+        this.rangeContainer = document.createElement("mr-div");
 
         // range weapon
         this.rangeAttackValueEl = document.createElement("mr-text");
@@ -62,18 +64,19 @@ class StateSystem extends MRSystem {
                     transparent: true,
                     opacity: 1
                 }));
+            actionBall.position.z = -0.5;
             this.container.object3D.add(actionBall);
             this.actionBalls.push(actionBall);
         }
 
         // healthbar
         const healthBarGeo = new THREE.BoxGeometry(0.2, 0.1, 1);
-        // place the original so it scales to the right
-        healthBarGeo.translate(0.3, 0.1, 0.5);
+        // move origin point so it scales only to the right
+        healthBarGeo.translate(0.25, 0.05, 0.5);
         this.healthBar = new THREE.Mesh(
             healthBarGeo,
             new THREE.MeshPhongMaterial({
-                color: "#e72d75",
+                color: Colors.health,
                 transparent: true,
                 opacity: 1
             }));
@@ -83,11 +86,11 @@ class StateSystem extends MRSystem {
 
         // range bar
         const rangeBarGeo = new THREE.BoxGeometry(0.2, 0.1, 1);
-        rangeBarGeo.translate(0, 0.1, 0.5);
+        rangeBarGeo.translate(0, 0.05, 0.5);
         this.rangeBar = new THREE.Mesh(
             rangeBarGeo,
             new THREE.MeshPhongMaterial({
-                color: "#90ee90",
+                color: Colors.range,
                 transparent: true,
                 opacity: 1
             }));
@@ -95,32 +98,35 @@ class StateSystem extends MRSystem {
         this.container.object3D.add(this.rangeBar);
 
         // melee weapons
-        this.container.appendChild(this.meleeAttackValueEl);
+        this.container.appendChild(this.meleeContainer);
+        this.meleeContainer.dataset.position = "0 0 -2";
+        this.meleeContainer.appendChild(this.meleeAttackValueEl);
         this.meleeAttackValueEl.style.fontSize = '400px';
         this.meleeAttackValueEl.style.color = '#000';
         this.meleeAttackValueEl.textObj.position.setX((-this.meleeAttackValueEl.width / 2) / 0.005);
         this.meleeAttackValueEl.dataset.rotation = "270 0 270";
-        this.meleeAttackValueEl.dataset.position = "0 0.15 -2";
-
+        this.meleeAttackValueEl.dataset.position = "0 0.15 0";
         this.meleeWeapons.forEach((weapon, i) => {
-            this.container.appendChild(weapon.el);
+            this.meleeContainer.appendChild(weapon.el);
             weapon.el.setAttribute('src', weapon.src);
-            weapon.el.dataset.position = "0 0.05 -2";
+            weapon.el.dataset.position = "0 0.05 0";
             // weapon.el.style.pointerEvents = 'none';
         });
 
         // range weapons
-        this.container.appendChild(this.rangeAttackValueEl);
+        this.container.appendChild(this.rangeContainer);
+        this.rangeContainer.dataset.position = "0 0 -1.2";
+        this.rangeContainer.appendChild(this.rangeAttackValueEl);
         this.rangeAttackValueEl.style.fontSize = '400px';
         this.rangeAttackValueEl.style.color = '#000';
         this.rangeAttackValueEl.textObj.position.setX((-this.rangeAttackValueEl.width / 2) / 0.005);
         this.rangeAttackValueEl.dataset.rotation = "270 0 270";
-        this.rangeAttackValueEl.dataset.position = "0 0.15 -1.2";
+        this.rangeAttackValueEl.dataset.position = "0 0.15 0";
 
         this.rangeWeapons.forEach((weapon, i) => {
-            this.container.appendChild(weapon.el);
+            this.rangeContainer.appendChild(weapon.el);
             weapon.el.setAttribute('src', weapon.src);
-            weapon.el.dataset.position = "0 0.05 -1.2";
+            weapon.el.dataset.position = "0 0.05 0";
             // weapon.el.style.pointerEvents = 'none';
         });
 
