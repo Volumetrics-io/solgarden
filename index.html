@@ -5,12 +5,21 @@
     <meta charset="utf-8">
     <title>Sol Garden — The mini roguelike for your desk</title>
     <script src="dist/mr.js"></script>
-    <link rel="preload" href="JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin />
+    <!-- <link rel="preload" href="/fonts/JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin /> -->
+    <!-- <link rel="preload" href="/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin /> -->
+    <link rel="preload" href="/fonts/JetBrainsMono-Medium.ttf" as="font" type="font/truetype" crossorigin />
     <style>
+        /* @font-face {
+            font-family: 'JetBrains';
+            src: url('/fonts/JetBrainsMono.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+        } */
+
         @font-face {
             font-family: 'JetBrains';
-            src: url('JetBrainsMono.ttf') format('truetype');
-            font-weight: 100 900;
+            src: url('/fonts/JetBrainsMono-Medium.ttf') format('truetype');
+            font-weight: 400;
             font-style: normal;
         }
 
@@ -21,13 +30,10 @@
             /* font-family: monospace; */
         }
 
-        #game-panel {
-            /* background-color: moccasin; */
+        /* #game-panel {
             width: 300px;
             height: 110px;
             padding: 20px;
-            /* top: calc(50% - 500px); */
-            /* left: calc(50% - 150px); */
             display: flex;
             flex-flow: column nowrap;
             gap: 10px;
@@ -55,10 +61,9 @@
             gap: 10px;
             background-color: grey;
             padding: 10px;
-        }
+        } */
 
         .end-turn {
-            /* background-color: RebeccaPurple; */
             color: white;
             font-size: 200px;
             border-radius: 50px;
@@ -88,20 +93,8 @@
         <!-- <mr-light color="#ffbb7c" intensity="0.8" data-position="-0.5 0.5 -0.5"></mr-light> -->
         <!-- <mr-light color="#a4f1ff" intensity="0.8" data-position="0.5 0.1 0.5"></mr-light> -->
 
-
-
-        <!-- <mr-panel id="lore-panel">
-            <mr-text class="title">Lore text</mr-text>
-            <mr-text id="lore-text"></mr-text>
-            <mr-button>Close panel</mr-button>
-        </mr-panel> -->
-
         <!-- <mr-app debug="true" orbital="true"> -->
-        <mr-entity data-comp-game="" data-comp-anchor="type: plane; label: table">
-            <!-- <mr-panel id="game-panel" data-position="0 0 0">
-                <mr-text>HELLO WORLD</mr-text>
-            </mr-panel> -->
-
+        <mr-entity data-comp-game="autoEndTurn: true; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
             <mr-entity id="chess-sound" data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="analog-sound" data-comp-audio="src: ./audio/analog.mp3; loop: false; state: stop;"></mr-entity>
@@ -115,52 +108,43 @@
             <mr-entity id="farm-sound" data-comp-audio="src: ./audio/farm.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="badlands-sound" data-comp-audio="src: ./audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
         </mr-entity>
-
-
-        <!-- <mr-panel id="game-panel" data-comp-anchor="type: plane; label: table" data-position="0 -0.5 0">
-            <mr-text class="title">Inventory</mr-text>
-            <mr-div class="row">
-                <mr-text>Moves</mr-text>
-                <mr-text id="move-count">0</mr-text>
-            </mr-div>
-            <mr-div class="row">
-                <mr-text>Level</mr-text>
-                <mr-text id="room-count">0</mr-text>
-            </mr-div>
-            <mr-div class="row">
-                <mr-text>HP</mr-text>
-                <mr-text id="health-status"></mr-text>
-            </mr-div>
-            <mr-div class="column" id="inventory">
-                <mr-text data-item-id="1">Bronze wrench</mr-text>
-            </mr-div>
-        </mr-panel> -->
     </mr-app>
 
-    <script src="heightmap.js"></script>
-    <script src="pathfinder.js"></script>
-    <script src="board.js"></script>
+    <script>
+        const Colors = {
+            movement: "#00ffd1",
+            objects: "#ff7a00",
+            neutral: "#888",
+            hover: "#875dff",
+            health: "#e72d75"
+        }
+    </script>
+
+    <!-- Classes -->
+    <script src="/classes/pathfinder.js"></script>
+    <script src="/classes/board.js"></script>
+    <script src="/classes/sound-controller.js"></script>
 
     <!-- MRjs Systems -->
-    <script src="mr-player-state.js"></script>
-    <script src="mr-game.js"></script>
+    <script src="/ecs/mr-player-state.js"></script>
+    <script src="/ecs/mr-game.js"></script>
 
     <!-- Mrjs Entities -->
-    <script src="mr-tile.js"></script>
-    <script src="mr-player.js"></script>
-    <script src="mr-chest.js"></script>
-    <script src="mr-loot.js"></script>
-    <script src="mr-lore.js"></script>
-    <script src="mr-melee-weapon.js"></script>
-    <script src="mr-enemy.js"></script>
-    <script src="mr-goal.js"></script>
-    <script src="mr-key.js"></script>
-    <script src="mr-door.js"></script>
-    <script src="mr-prop.js"></script>
-    <script src="mr-charging-station.js"></script>
-    <script src="mr-ui-melee-weapon.js"></script>
-    <script src="mr-ui-range-weapon.js"></script>
-    
+    <script src="/entities/mr-tile.js"></script>
+    <script src="/entities/mr-player.js"></script>
+    <script src="/entities/mr-chest.js"></script>
+    <script src="/entities/mr-loot.js"></script>
+    <script src="/entities/mr-lore.js"></script>
+    <script src="/entities/mr-melee-weapon.js"></script>
+    <script src="/entities/mr-enemy.js"></script>
+    <script src="/entities/mr-goal.js"></script>
+    <script src="/entities/mr-key.js"></script>
+    <script src="/entities/mr-door.js"></script>
+    <script src="/entities/mr-prop.js"></script>
+    <script src="/entities/mr-charging-station.js"></script>
+    <script src="/entities/mr-ui-melee-weapon.js"></script>
+    <script src="/entities/mr-ui-range-weapon.js"></script>
+
 </body>
 
 </html>

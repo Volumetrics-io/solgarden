@@ -1,3 +1,4 @@
+#! /bin/bash
 # updating the build directly from github:MRjs:main's dist folder
 
 rm -rf dist
