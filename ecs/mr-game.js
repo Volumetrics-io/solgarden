@@ -112,8 +112,8 @@ class GameSystem extends MRSystem {
                 rowCount: 8,
                 colCount: 4,
                 enemyCount: 0,
-                propCount: 0,
-                blockCount: 5,
+                propCount: 6,
+                blockCount: 0,
                 isChest: false,
                 isLore: false,
                 biome: {
@@ -121,8 +121,8 @@ class GameSystem extends MRSystem {
                     path: "tiles/biome_cyan/",
                     audio: "/audio/fridge.mp3",
                     tiles: ["tilegrasscyan001.glb"],
-                    props: [],
-                    block: ["rockdesert001.glb", "rockdesert002.glb"]
+                    props: ["plant_01.glb", "plant_02.glb", "plant_03.glb"],
+                    block: []
                 },
                 entityMap: [
                     [0, 0, 0, 0],
@@ -208,6 +208,15 @@ class GameSystem extends MRSystem {
                         if (cost <= state.actionPoints &&
                             this.board.distances[x][y] <= state.actionPoints) {
                             this.interactWith(x, y, targetEntity, cost, state);
+                            if (targetEntity.type == "loot" ||
+                                targetEntity.type == "key" ||
+                                targetEntity.type == "weapon" ||
+                                targetEntity.type == "lore") {
+
+                                state.actionPoints -= cost;
+                                this.soundController.play('chessSound');
+                                this.board.movePlayer(x, y);
+                            }
                         } else {
                             this.soundController.play('nopeSound');
                         }
@@ -237,22 +246,28 @@ class GameSystem extends MRSystem {
     }
 
     addToInventory(entity, state) {
-        // if (entity.el.dataset.type == "weapon") {
-        //     if (entity.el.dataset.subType == "melee") {
-        //         if (entity.el.dataset.attack > state.meleeWeaponAttack) {
-        //             state.meleeWeaponName = entity.el.dataset.name;
-        //             state.meleeWeaponAttack = entity.el.dataset.attack;
-        //         }
-        //     }
-        // }
-        if (entity.type == "weapon") {
-            if (entity.subType == "melee") {
-                if (entity.attack > state.meleeWeaponAttack) {
-                    state.meleeWeaponName = entity.name;
-                    state.meleeWeaponAttack = entity.attack;
-                }
+        if (entity.el.dataset.type == "weapon") {
+            if (entity.el.dataset.subType == "melee" &&
+                entity.el.dataset.attack > state.meleeWeaponAttack) {
+                state.meleeWeaponName = entity.el.dataset.name;
+                state.meleeWeaponAttack = entity.el.dataset.attack;
+            }
+            if (entity.el.dataset.subType == "range" &&
+                entity.el.dataset.attack > state.rangeWeaponAttack) {
+                state.rangeWeaponName = entity.el.dataset.name;
+                state.rangeWeaponAttack = entity.el.dataset.attack;
             }
         }
+        // if (entity.type == "weapon") {
+        //     if (entity.subType == "melee" && entity.attack > state.meleeWeaponAttack) {
+        //         state.meleeWeaponName = entity.name;
+        //         state.meleeWeaponAttack = entity.attack;
+        //     }
+        //     if (entity.subType == "range" && entity.attack > state.rangeWeaponAttack) {
+        //         state.rangeWeaponName = entity.name;
+        //         state.rangeWeaponAttack = entity.attack;
+        //     }
+        // }
         if (entity.type == "key") {
             state.hasKey = true;
         }
@@ -407,46 +422,41 @@ class GameSystem extends MRSystem {
                 break;
 
             case "loot":
-                // state = targetEntity.el.applyEffect(state);
-
                 this.container.removeChild(entity.el);
                 this.board.removeEntityAt(x, y);
                 this.soundController.play('analogSound');
-
-                // check for and apply the effect of the loot
-                switch (entity.effect) {
-                    case "health":
-                        if (state.health < state.maxHealth) {
-                            state.health++;
-                        }
-                        console.log("increased health");
-                        break;
-                    case "range":
-                        if (state.range < state.maxRange) {
-                            state.range++;
-                        }
-                        console.log("increased range");
-                        break;
+                if (entity.effect == 'health' &&
+                    state.health < state.maxHealth) {
+                    state.health++;
+                }
+                if (entity.effect == 'range' &&
+                    state.range < state.maxRange) {
+                    state.range++;
                 }
                 break;
+
             case "lore":
                 entity.el.playLore();
-                entity.el.hideModel();
+                // entity.el.hideModel();
+                this.container.removeChild(entity.el);
                 this.board.removeEntityAt(x, y);
                 this.soundController.play('analogSound');
                 break;
+
             case "key":
                 this.addToInventory(entity, state);
                 this.container.removeChild(entity.el);
                 this.board.removeEntityAt(x, y);
                 this.soundController.play('analogSound');
                 break;
+
             case "weapon":
                 this.addToInventory(entity, state);
                 this.container.removeChild(entity.el);
                 this.board.removeEntityAt(x, y);
                 this.soundController.play('analogSound');
                 break;
+
             case "door":
                 this.soundController.play('doorSound');
                 this.initialize();
@@ -504,13 +514,13 @@ class GameSystem extends MRSystem {
 
         // TODO: there should be only one "mr-weapon"
         // as an entity in the entitymap
-        const weaponEl = document.createElement("mr-melee-weapon");
+        const weaponEl = document.createElement("mr-weapon");
         weaponEl.dataset.levelId = state.levelId;
         this.container.appendChild(weaponEl);
 
         const weapon = {
             el: weaponEl,
-            // type: 'weapon',
+            type: 'weapon',
             // subType: 'melee',
             // name: name,
             // attack: state.levelId + 1
@@ -582,7 +592,7 @@ class GameSystem extends MRSystem {
         this.state.dataset.rotation = `0 0 30`
 
         this.endTurnButton.className = 'end-turn';
-        this.endTurnButton.innerText = "End turn";
+        this.endTurnButton.innerText = "End";
         this.endTurnButton.dataset.position = "0 0.08 2";
         this.endTurnButton.dataset.rotation = "270 0 270";
         this.state.appendChild(this.endTurnButton);

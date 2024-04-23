@@ -15,7 +15,7 @@ class StateSystem extends MRSystem {
             {
                 name: "short-sword",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-shortSword01.glb",
+                src: "models/weapon-shortSword1-UI.glb",
             },
         ]
 

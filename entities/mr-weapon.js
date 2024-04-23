@@ -1,4 +1,4 @@
-class MRMeleeWeapon extends MREntity {
+class MRWeapon extends MREntity {
 
     constructor() {
         super()
@@ -10,14 +10,14 @@ class MRMeleeWeapon extends MREntity {
 
         const levelId = this.dataset.levelId ?? 0;
 
-        const randomWeapons = [{
+        const Weapons = [{
                 name: "twig",
                 model: "models/weapon-stick1.glb",
                 subtype: "melee"
             },
             {
                 name: "short-sword",
-                model: "models/weapon-shortSword01.glb",
+                model: "models/weapon-shortSword1-pickup.glb",
                 subtype: "melee"
             },
             {
@@ -32,21 +32,24 @@ class MRMeleeWeapon extends MREntity {
             },
         ]
 
-        const weapon = randomWeapons[Math.floor(Math.random() * randomWeapons.length)];
+        // const weapon = Weapons[Math.floor(Math.random() * Weapons.length)];
+        const weapon = Weapons[1];
 
         this.el.src = weapon.model;
+        this.el.dataset.compAnimation = "clip: 0; action: play;";
+        this.el.style.pointerEvents = 'none';
 
         // unused yet
         this.dataset.type = 'weapon';
         this.dataset.subType = weapon.subtype;
         this.dataset.name = weapon.name;
-        this.dataset.attack = levelId + 1;
+        this.dataset.attack = levelId + 2;
 
         // used for now
-        this.type = 'weapon';
-        this.subType = weapon.subtype;
-        this.name = weapon.name;
-        this.attack = levelId + 1;
+        // this.type = 'weapon';
+        // this.subType = weapon.subtype;
+        // this.name = weapon.name;
+        // this.attack = levelId + 1;
 
         // console.log(weapon)
 
@@ -67,4 +70,4 @@ class MRMeleeWeapon extends MREntity {
 
 }
 
-customElements.define('mr-melee-weapon', MRMeleeWeapon);
+customElements.define('mr-weapon', MRWeapon);

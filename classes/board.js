@@ -7,7 +7,7 @@ class Board {
         this.minColCount = params.minColCount ?? 4;
         this.minFlrCount = params.minFlrCount ?? 1;
 
-        this.maxRowCount = params.maxRowCount ?? 12;
+        this.maxRowCount = params.maxRowCount ?? 10;
         this.maxColCount = params.maxColCount ?? 4;
         this.maxFlrCount = params.maxFlrCount ?? 4;
 
@@ -182,14 +182,14 @@ class Board {
 
         // weapon
         if (this.levelId == 0) {
-            const weapon = document.createElement("mr-melee-weapon");
-            weapon.dataset.type = "short-sword";
+            const weapon = document.createElement("mr-weapon");
+            // weapon.dataset.type = "short-sword";
             this.addToMap({
                 el: weapon,
                 type: 'weapon',
-                subType: 'melee',
-                name: 'short-sword',
-                attack: 2
+                // subType: 'melee',
+                // name: 'short-sword',
+                // attack: 2
             }, this.entityMap);
         }
 
@@ -617,22 +617,29 @@ class Board {
     getProjectedCostFor(x, y) {
         let projectedCost = 0;
 
-        if (!this.entityMap[x][y].type) {
+        const entity = this.entityMap[x][y];
+
+        if (!entity.type ||
+            entity.type == "loot" ||
+            entity.type == "key" ||
+            entity.type == "weapon" ||
+            entity.type == "lore" ||
+            entity.type == "door"
+        ) {
             // the tile is empty, so cost is distance
             projectedCost = this.distances[x][y];
 
-        } else {
+        } else if (entity.type == 'enemy' && this.distances[x][y] <= 2) {
             // there is an entity on the tile
             // so it depends what
-            switch (this.entityMap[x][y].type) {
-                case "enemy":
-                    if (this.distances[x][y] <= 2) {
-                        projectedCost = 2;
-                        // TODO: highlight main weapon in the inventory
-                        console.log("a weapon would be highlighted");
-                    }
-                    break;
-            }
+            // switch (this.entityMap[x][y].type) {
+            // case "enemy":
+            // if (this.distances[x][y] <= 2) {
+            projectedCost = 2;
+            // TODO: highlight main weapon in the inventory
+            console.log("a weapon would be highlighted");
+            // }
+            // break;
         }
 
         return projectedCost;

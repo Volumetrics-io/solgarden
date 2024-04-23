@@ -67,6 +67,7 @@
             color: white;
             font-size: 200px;
             border-radius: 50px;
+            padding: 50px;
         }
 
         .text-label {
@@ -94,7 +95,7 @@
         <!-- <mr-light color="#a4f1ff" intensity="0.8" data-position="0.5 0.1 0.5"></mr-light> -->
 
         <!-- <mr-app debug="true" orbital="true"> -->
-        <mr-entity data-comp-game="autoEndTurn: true; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+        <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
             <mr-entity id="chess-sound" data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="analog-sound" data-comp-audio="src: ./audio/analog.mp3; loop: false; state: stop;"></mr-entity>
@@ -135,7 +136,7 @@
     <script src="/entities/mr-chest.js"></script>
     <script src="/entities/mr-loot.js"></script>
     <script src="/entities/mr-lore.js"></script>
-    <script src="/entities/mr-melee-weapon.js"></script>
+    <script src="/entities/mr-weapon.js"></script>
     <script src="/entities/mr-enemy.js"></script>
     <script src="/entities/mr-goal.js"></script>
     <script src="/entities/mr-key.js"></script>
