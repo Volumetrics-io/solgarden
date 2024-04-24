@@ -12,9 +12,9 @@ class MRWeapon extends MREntity {
         const model = this.dataset.model ?? "shortSword";
 
         const weaponModels = {
-            twig: "models/weapon-stick1.glb",
+            twig: "models/weapon-stick1-pickup.glb",
             shortSword: "models/weapon-shortSword1-pickup.glb",
-            slingshot: "models/weapon-slingshot-temp.glb",
+            slingshot: "models/weapon-slingshot1-pickup.glb",
             bow: "models/weapon-stick1.glb",
         }
 

@@ -185,6 +185,19 @@ class Board {
 
         // weapon
         if (this.levelId == 0) {
+
+            const twig = document.createElement("mr-weapon");
+            twig.dataset.model = "twig"
+
+            this.addToMap({
+                el: twig,
+                type: 'weapon',
+                subType: 'melee',
+                name: 'twig',
+                range: 1,
+                attack: 1
+            }, this.entityMap);
+
             const meleeWeapon = document.createElement("mr-weapon");
             meleeWeapon.dataset.model = "shortSword"
 
@@ -193,6 +206,7 @@ class Board {
                 type: 'weapon',
                 subType: 'melee',
                 name: 'short-sword',
+                range: 2,
                 attack: 2
             }, this.entityMap);
 
@@ -204,6 +218,7 @@ class Board {
                 type: 'weapon',
                 subType: 'range',
                 name: 'slingshot',
+                range: 5,
                 attack: 2
             }, this.entityMap);
         }
@@ -248,7 +263,31 @@ class Board {
             });
         });
 
+        this.attackRange = document.createElement("mr-model");
+
+        // this.attackRange.onload = () => {
+        this.attackRange.className = "attack-range";
+        this.attackRange.setAttribute('src', '/ui-models/attack-range.glb');
+        this.attackRange.style.pointerEvents = 'none';
+        // this.attackRange.dataset.rotation = `90 0 0`
+        this.attackRangeMesh = new THREE.Mesh(
+            // new THREE.TorusGeometry( 1, 0.1, 12, 48 ),
+            new THREE.CylinderGeometry( 1, 1, 0.5, 24 ),
+            new THREE.MeshPhongMaterial({
+                color: "#ff9900",
+                transparent: true,
+                opacity: 0.3
+            }));
+        this.attackRange.object3D.add(this.attackRangeMesh);
+        this.container.appendChild(this.attackRange);
+
+        // }
+
+        // position the attack range
+
+
         this.calcDistFromPlayer();
+        // this.setAttackRange();
 
 
         // Debug
@@ -257,6 +296,25 @@ class Board {
         // this.printArray("this.propMap", this.propMap);
         // this.printArray("this.distances", this.distances);
 
+    }
+
+    setAttackRange(state) {
+
+        const pos = this.getPlayerPos();
+
+        console.log(state.selectedWeapon);
+        if (state.selectedWeapon == "melee") {
+            this.attackRangeMesh.scale.set(state.meleeRange, 1, state.meleeRange);
+
+        } else if (state.selectedWeapon == "range") {
+            this.attackRangeMesh.scale.set(state.rangeRange, 1, state.rangeRange);
+        }
+
+        const x = pos.x - this.rowCount / 2 + 0.5;
+        const y = pos.y - this.colCount / 2 + 0.5;
+
+        this.attackRange.dataset.position = `${y} 0.5 ${x}`;
+        // this.attackRange = document.createElement("mr-entity");
     }
 
     // only used to debug
@@ -493,100 +551,141 @@ class Board {
         // no more playerpos
     }
 
-    updateFloor(state, timer, isPlayerTurn) {
+    updateFloor(state, timer) {
         this.tileMap.forEach(row => {
             row.forEach(tile => {
 
-                // const x = tile.pos.x;
-                // const y = tile.pos.y;
+                const x = tile.pos.x;
+                const y = tile.pos.y;
+                const el = tile.el;
 
-                const x = parseInt(tile.el.dataset.x);
-                const y = parseInt(tile.el.dataset.y);
-
-                const distance = this.distances[x][y];
-                const entity = this.getEntityAt(x, y);
+                // const x = parseInt(tile.el.dataset.x);
+                // const y = parseInt(tile.el.dataset.y);
 
                 this.project(tile, x, y, this.timer);
 
-                if (isPlayerTurn) {
+                if (state.isPlayerTurn) {
                     const distance = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
                     let attackRange;
 
                     if (state.selectedWeapon == 'melee') {
-                        attackRange = 1;
+                        attackRange = state.meleeRange;
+                    } else if (state.selectedWeapon == 'range') {
+                        attackRange = state.rangeRange;
                     } else {
-                        attackRange = 20
+                        console.error('state.selectedWeapon has an illegal value.')
                     }
+
+                    const isReachable = (distance != Infinity && distance <= state.action && distance > 0)
+
+                    if (!entity) {
+                        if (isReachable) {
+                            // the tile is floor, and in reach
+                            el.tileColor('white');
+                            el.setCostIndicator(distance);
+                        } else {
+                            // floor, but too far for current action points
+                            el.tileColor('neutral');
+                            el.setCostIndicator("");
+                        }
+
+                    } else if (entity.type == "loot" ||
+                        entity.type == "lore" ||
+                        entity.type == "key" ||
+                        entity.type == "weapon" ||
+                        entity.type == "chest" ||
+                        entity.type == "door"
+                    ) {
+                        if (isReachable) {
+
+                            // the tile is floor, and in reach
+                            el.tileColor('objects');
+                            el.setCostIndicator(distance);
+                        } else {
+                            // floor, but too far for current action points
+                            el.tileColor('neutral');
+                            el.setCostIndicator("");
+                        }
+
+
+                    } else if (entity.type == "enemy") {
+
+                        // if (entity.type == 'enemy') {
+                        if (distance <= attackRange) {
+                            el.tileColor('health');
+                            // el.showTile(entity.type);
+                            el.setCostIndicator(99);
+                        } else {
+                            el.tileColor('neutral');
+                            // el.showTile("enemy-nope");
+                            el.setCostIndicator("");
+                        }
+                        // }
+
+                    } else if (entity.type == "player") {
+                        el.hideTile();
+
+
+                    }
+
 
                     // TODO: show tile for all tiles
                     if (distance != Infinity &&
                         distance <= state.action &&
                         distance > 0) {
 
-                        if (!entity) {
-                            // let offsetY = distance * 40;
-                            // let opacity = distance / state.action;
-                            tile.el.showTile(entity.type);
-                            // tile.el.setTileColor(Colors.movement);
-                            // tile.el.setTileOpacity(opacity);
-                            tile.el.setCostIndicator(distance);
-                        } else {
-                            if (entity.type == "loot" ||
-                                entity.type == "lore" ||
-                                entity.type == "key" ||
-                                entity.type == "weapon" ||
-                                entity.type == "chest" ||
-                                entity.type == "door"
-                            ) {
-                                // interactible thing on the floor
-                                tile.el.showTile(entity.type);
-                                tile.el.setCostIndicator(distance);
-                                // tile.el.setTileColor(Colors.objects)
-                                // tile.el.setTileOpacity(0.65)
+                        // if (!entity) {
+                        //     // let offsetY = distance * 40;
+                        //     // let opacity = distance / state.action;
+                        //     tile.el.showTile(entity.type);
+                        //     // tile.el.setTileColor(Colors.movement);
+                        //     // tile.el.setTileOpacity(opacity);
+                        //     tile.el.setCostIndicator(distance);
+                        // } else {
+                        //     if (entity.type == "loot" ||
+                        //         entity.type == "lore" ||
+                        //         entity.type == "key" ||
+                        //         entity.type == "weapon" ||
+                        //         entity.type == "chest" ||
+                        //         entity.type == "door"
+                        //     ) {
+                        //         // interactible thing on the floor
+                        //         tile.el.showTile(entity.type);
+                        //         tile.el.setCostIndicator(distance);
+                        //         // tile.el.setTileColor(Colors.objects)
+                        //         // tile.el.setTileOpacity(0.65)
+                        //
+                        //         // } else if (entity.type == 'enemy') {
+                        //         //
+                        //         //     // enemy tile possibly in range of attack
+                        //         //
+                        //         //     // tile.el.setTileOpacity(0.65);
+                        //         //     if (distance <= attackRange) {
+                        //         //         tile.el.showTile(entity.type);
+                        //         //         tile.el.setCostIndicator(999);
+                        //         //
+                        //         //         // tile.el.setTileColor(Colors.debug)
+                        //         //     } else {
+                        //         //         tile.el.showTile("enemy-nope");
+                        //         //         tile.el.setCostIndicator("");
+                        //         //         // tile.el.setTileColor(Colors.neutral)
+                        //         //     }
+                        //
+                        //         // } else {
+                        //         //     tile.el.hideTile();
+                        //         // tile.el.setTileColor(Colors.neutral)
+                        //     }
+                        // }
 
-                                // } else if (entity.type == 'enemy') {
-                                //
-                                //     // enemy tile possibly in range of attack
-                                //
-                                //     // tile.el.setTileOpacity(0.65);
-                                //     if (distance <= attackRange) {
-                                //         tile.el.showTile(entity.type);
-                                //         tile.el.setCostIndicator(999);
-                                //
-                                //         // tile.el.setTileColor(Colors.debug)
-                                //     } else {
-                                //         tile.el.showTile("enemy-nope");
-                                //         tile.el.setCostIndicator("");
-                                //         // tile.el.setTileColor(Colors.neutral)
-                                //     }
 
-                            // } else {
-                            //     tile.el.hideTile();
-                                // tile.el.setTileColor(Colors.neutral)
-                            }
-                        }
-
-                        if (entity.type == 'enemy') {
-                            if (distance <= attackRange) {
-                                tile.el.showTile(entity.type);
-                                tile.el.setCostIndicator(99);
-
-                                // tile.el.setTileColor(Colors.debug)
-                            } else {
-                                tile.el.showTile("enemy-nope");
-                                tile.el.setCostIndicator("");
-                                // tile.el.setTileColor(Colors.neutral)
-                            }
-                        }
-
-                    } else {
-                        tile.el.setCostIndicator("");
-                        tile.el.hideTile();
+                        // } else {
+                        // el.setCostIndicator("");
+                        // el.hideTile();
                     }
                 } else {
-                    tile.el.setCostIndicator("");
-                    tile.el.hideTile();
+                    // el.setCostIndicator("");
+                    el.hideTile();
                 }
             })
         })
@@ -648,8 +747,8 @@ class Board {
             projectedCost = this.distances[x][y];
 
         } else if (entity.type == 'enemy' && this.distances[x][y] <= 2) {
-          // TODO: this is probably where we test for the weapon type
-          // and apply a different cost to melee and range
+            // TODO: this is probably where we test for the weapon type
+            // and apply a different cost to melee and range
 
             // there is an entity on the tile
             // so it depends what

@@ -12,7 +12,7 @@ class StateSystem extends MRSystem {
         this.meleeWeapons = [{
                 name: "twig",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-stick1.glb",
+                src: "models/weapon-stick1-UI.glb",
             },
             {
                 name: "short-sword",
@@ -26,7 +26,7 @@ class StateSystem extends MRSystem {
         this.rangeWeapons = [{
                 name: "slingshot",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-slingshot-temp.glb",
+                src: "models/weapon-slingshot1-UI.glb",
             },
             {
                 name: "short-bow",
@@ -126,7 +126,7 @@ class StateSystem extends MRSystem {
         this.meleeContainer.dataset.position = "0 0 -2";
         this.meleeContainer.appendChild(this.meleeAttackValueEl);
 
-        this.meleeAttackValueEl.style.fontSize = '400px';
+        this.meleeAttackValueEl.style.fontSize = '300px';
         this.meleeAttackValueEl.style.color = '#000';
         this.meleeAttackValueEl.textObj.position.setX((-this.meleeAttackValueEl.width / 2) / 0.005);
         this.meleeAttackValueEl.dataset.rotation = "270 0 270";
@@ -152,7 +152,7 @@ class StateSystem extends MRSystem {
         this.container.appendChild(this.rangeContainer);
         this.rangeContainer.dataset.position = "0 0 -1.2";
         this.rangeContainer.appendChild(this.rangeAttackValueEl);
-        this.rangeAttackValueEl.style.fontSize = '400px';
+        this.rangeAttackValueEl.style.fontSize = '300px';
         this.rangeAttackValueEl.style.color = '#000';
         this.rangeAttackValueEl.textObj.position.setX((-this.rangeAttackValueEl.width / 2) / 0.005);
         this.rangeAttackValueEl.dataset.rotation = "270 0 270";
@@ -215,7 +215,7 @@ class StateSystem extends MRSystem {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.meleeAttackValueEl.innerText = state.meleeAttack;
+                this.meleeAttackValueEl.innerText = state.meleeAttack + "/" + state.meleeRange;
 
                 this.rangeWeapons.forEach((weapon, i) => {
                     if (weapon.name == state.rangeName) {
@@ -224,7 +224,7 @@ class StateSystem extends MRSystem {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.rangeAttackValueEl.innerText = state.rangeAttack;
+                this.rangeAttackValueEl.innerText = state.rangeAttack + "/" + state.rangeRange;
 
                 if (state.selectedWeapon == 'melee') {
                     this.meleeSelection.material.opacity = 0.5;

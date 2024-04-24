@@ -8,6 +8,9 @@ class GameSystem extends MRSystem {
 
         // container to store board object references
         this.container = document.createElement("mr-div");
+        // TODO: need to do this at the DOM level
+        // and get element by id
+
         this.container.id = 'container'; // for DOM debugging
 
         // The state system dealing with player state and UI
@@ -23,16 +26,16 @@ class GameSystem extends MRSystem {
             hasKey: false,
             meleeName: 'twig',
             meleeAttack: 1,
+            meleeRange: 1,
             rangeName: 'slingshot',
             rangeAttack: 1,
+            rangeRange: 4,
             selectedWeapon: "melee",
             isPlayerTurn: true,
             // needsUpdate: false
         });
 
         this.endTurnButton = document.createElement("mr-button");
-        this.endTurnButton.className = "end-turn";
-
         this.soundController = new SoundController();
 
         // debug
@@ -330,10 +333,12 @@ class GameSystem extends MRSystem {
             if (entity.subType == "melee" && entity.attack > state.meleeAttack) {
                 state.meleeName = entity.name;
                 state.meleeAttack = entity.attack;
+                state.meleeRange = entity.range;
             }
             if (entity.subType == "range" && entity.attack > state.rangeAttack) {
                 state.rangeName = entity.name;
                 state.rangeAttack = entity.attack;
+                state.rangeRange = entity.range;
             }
         }
         if (entity.type == "key") {
@@ -616,7 +621,8 @@ class GameSystem extends MRSystem {
             type: 'weapon',
             subType: Weapons[randomId].subtype,
             name: Weapons[randomId].name,
-            attack: this.level + Math.ceil(Math.random() * this.level / 10)
+            attack: this.level + Math.ceil(Math.random() * this.level / 10),
+            range: Math.ceil(Math.random() * 5) + 1,
         };
 
         this.board.entityMap[x][y] = weapon;
@@ -627,7 +633,8 @@ class GameSystem extends MRSystem {
         const state = this.state.components.get('state');
 
         this.board.calcDistFromPlayer();
-        this.board.updateFloor(state, this.timer, state.isPlayerTurn);
+        this.board.updateFloor(state, this.timer);
+        this.board.setAttackRange(state, this.timer);
         this.board.projectEverything(this.timer);
 
         if (state.action == 0) {

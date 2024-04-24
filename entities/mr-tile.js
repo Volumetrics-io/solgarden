@@ -5,10 +5,10 @@ class MRTile extends MREntity {
 
         this.el = document.createElement("mr-model");
 
-        this.border = document.createElement("mr-model");
+        this.borderWhite = document.createElement("mr-model");
         this.borderObjects = document.createElement("mr-model");
-        this.borderEnemies = document.createElement("mr-model");
-        this.borderEnemiesNope = document.createElement("mr-model");
+        this.borderHealth = document.createElement("mr-model");
+        this.borderNeutral = document.createElement("mr-model");
 
         // this.prop = document.createElement("mr-model");
         this.floorTile = document.createElement("mr-entity");
@@ -37,25 +37,27 @@ class MRTile extends MREntity {
         // console.log(this.dataset);
         // console.log();
 
-        this.appendChild(this.border);
-        this.border.src = '/ui-models/borderObject-white.glb';
-        this.border.dataset.position = "0 0.2 0";
-        this.border.style.visibility = "hidden";
+        // TODO: automate this
+
+        this.appendChild(this.borderWhite);
+        this.borderWhite.src = '/ui-models/borderObject-white.glb';
+        this.borderWhite.dataset.position = "0 0.2 0";
+        this.borderWhite.style.visibility = "hidden";
 
         this.appendChild(this.borderObjects);
         this.borderObjects.src = '/ui-models/borderObject-objects.glb';
         this.borderObjects.dataset.position = "0 0.2 0";
         this.borderObjects.style.visibility = "hidden";
 
-        this.appendChild(this.borderEnemies);
-        this.borderEnemies.src = '/ui-models/borderObject-health.glb';
-        this.borderEnemies.dataset.position = "0 0.2 0";
-        this.borderEnemies.style.visibility = "hidden";
+        this.appendChild(this.borderHealth);
+        this.borderHealth.src = '/ui-models/borderObject-health.glb';
+        this.borderHealth.dataset.position = "0 0.2 0";
+        this.borderHealth.style.visibility = "hidden";
 
-        this.appendChild(this.borderEnemiesNope);
-        this.borderEnemiesNope.src = '/ui-models/borderObject-neutral.glb';
-        this.borderEnemiesNope.dataset.position = "0 0.2 0";
-        this.borderEnemiesNope.style.visibility = "hidden";
+        this.appendChild(this.borderNeutral);
+        this.borderNeutral.src = '/ui-models/borderObject-neutral.glb';
+        this.borderNeutral.dataset.position = "0 0.2 0";
+        this.borderNeutral.style.visibility = "hidden";
 
         this.appendChild(this.el);
         const tileset = this.dataset.tileset.split(',');
@@ -81,7 +83,7 @@ class MRTile extends MREntity {
         // this.appendChild(this.floorTile);
 
         // this.numberString.dataset.position = '-0.08 0.2 0';
-        this.numberString.dataset.position = '0.2 0.32 0';
+        this.numberString.dataset.position = '0.25 0.3 0';
         this.numberString.style.fontSize = "200px";
         this.numberContainer.appendChild(this.numberString);
 
@@ -97,61 +99,69 @@ class MRTile extends MREntity {
     }
 
     hideTile() {
-        this.border.style.visibility = "hidden";
+        this.borderWhite.style.visibility = "hidden";
         this.borderObjects.style.visibility = "hidden";
-        this.borderEnemies.style.visibility = "hidden";
-        this.borderEnemiesNope.style.visibility = "hidden";
+        this.borderHealth.style.visibility = "hidden";
+        this.borderNeutral.style.visibility = "hidden";
+        this.setCostIndicator("");
         // this.floorTile.style.visibility = "hidden";
     }
 
-    showTile(entityType) {
+    tileColor(color) {
         this.hideTile();
-
-        if (entityType == "loot" ||
-            entityType == "lore" ||
-            entityType == "key" ||
-            entityType == "weapon" ||
-            entityType == "chest" ||
-            entityType == "door"
-        ) {
-            //
-            this.borderObjects.style.visibility = "visible";
-            this.numberString.style.color = Colors.objects;
-
-            // tile.el.showTile(entity.type);
-
-        } else if (entityType == 'enemy') {
-
-            this.borderEnemies.style.visibility = "visible";
-            this.numberString.style.color = Colors.enemies;
-
-            // TODO: check if Dot can attack
-            // this.borderEnemiesNope.style.visibility = "hidden";
-
-            // tile.el.showTile(entity.type);
-            // tile.el.setCostIndicator("");
-
-        } else if (entityType == 'enemy-nope') {
-            this.borderEnemiesNope.style.visibility = "visible";
-            this.numberString.style.color = Colors.neutral;
-        } else {
-            this.border.style.visibility = "visible";
-
-            // this.border.object3D.material.baseColorFactor = [0, 0, 0, 1]
-
-            this.numberString.style.color = "#ffffff";
-            // tile.el.hideTile();
-            // tile.el.setTileColor(Colors.neutral)
+        switch (color) {
+            case 'neutral':
+                this.borderNeutral.style.visibility = "visible";
+                this.numberString.style.color = Colors.neutral;
+                break;
+            case 'white':
+                this.borderWhite.style.visibility = "visible";
+                this.numberString.style.color = Colors.white;
+                break;
+            case 'health':
+                this.borderHealth.style.visibility = "visible";
+                this.numberString.style.color = Colors.health;
+                break;
+            case 'objects':
+                this.borderObjects.style.visibility = "visible";
+                this.numberString.style.color = Colors.objects;
+                break;
         }
-        // console.log(entityType);
-        // if(entityType == '') {
-        //
-        // }
-        // this.border.style.visibility = "visible";
-        // this.borderObjects.style.visibility = "visible";
-
-        // this.floorTile.style.visibility = "visible";
     }
+
+    // showTile(entityType) {
+    //     this.hideTile();
+    //
+    //     if (entityType == "loot" ||
+    //         entityType == "lore" ||
+    //         entityType == "key" ||
+    //         entityType == "weapon" ||
+    //         entityType == "chest" ||
+    //         entityType == "door"
+    //     ) {
+    //         //
+    //         this.borderObjects.style.visibility = "visible";
+    //         this.numberString.style.color = Colors.objects;
+    //
+    //     } else if (entityType == 'enemy') {
+    //
+    //         this.borderEnemies.style.visibility = "visible";
+    //         this.numberString.style.color = Colors.enemies;
+    //
+    //         // TODO: check if Dot can attack
+    //         // this.borderEnemiesNope.style.visibility = "hidden";
+    //
+    //         // tile.el.showTile(entity.type);
+    //         // tile.el.setCostIndicator("");
+    //
+    //     } else if (entityType == 'enemy-nope') {
+    //         this.borderEnemiesNope.style.visibility = "visible";
+    //         this.numberString.style.color = Colors.neutral;
+    //     } else {
+    //         this.border.style.visibility = "visible";
+    //         this.numberString.style.color = "#ffffff";
+    //     }
+    // }
 
     // setTileColor(color) {
     //     this.floorMaterial.color.setStyle(color);
