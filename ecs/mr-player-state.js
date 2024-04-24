@@ -1,9 +1,11 @@
 class StateSystem extends MRSystem {
     constructor() {
         super()
+        this.isAttached = false;
         this.container = document.createElement("mr-div");
         this.container.id = 'ui-container'; // for DOM debugging
-        this.isAttached = false;
+        this.meleeContainer = document.createElement("mr-entity");
+        this.rangeContainer = document.createElement("mr-entity");
 
         // melee weapon
         this.meleeAttackValueEl = document.createElement("mr-text");
@@ -15,9 +17,9 @@ class StateSystem extends MRSystem {
             {
                 name: "short-sword",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-shortSword01.glb",
+                src: "models/weapon-shortSword1-UI.glb",
             },
-        ]
+        ];
 
         // range weapon
         this.rangeAttackValueEl = document.createElement("mr-text");
@@ -32,13 +34,18 @@ class StateSystem extends MRSystem {
                 src: "models/weapon-shortSword01.glb",
             },
         ]
+
+        // TODO: add a keyholder similar to range and melee
+        // with 2 preset, key and no key
     }
 
     attachedComponent(entity) {
         this.root = entity;
         this.root.appendChild(this.container);
 
-        this.state = entity.components.get('state');
+        this.root.needsUpdate = true;
+
+        // this.state = this.root.components.get('state');
 
         this.barLength = 2;
         this.actionBallCount = 7;
@@ -62,18 +69,19 @@ class StateSystem extends MRSystem {
                     transparent: true,
                     opacity: 1
                 }));
+            actionBall.position.z = -0.5;
             this.container.object3D.add(actionBall);
             this.actionBalls.push(actionBall);
         }
 
         // healthbar
         const healthBarGeo = new THREE.BoxGeometry(0.2, 0.1, 1);
-        // place the original so it scales to the right
-        healthBarGeo.translate(0.3, 0.1, 0.5);
+        // move origin point so it scales only to the right
+        healthBarGeo.translate(0.25, 0.05, 0.5);
         this.healthBar = new THREE.Mesh(
             healthBarGeo,
             new THREE.MeshPhongMaterial({
-                color: "#e72d75",
+                color: Colors.health,
                 transparent: true,
                 opacity: 1
             }));
@@ -83,59 +91,101 @@ class StateSystem extends MRSystem {
 
         // range bar
         const rangeBarGeo = new THREE.BoxGeometry(0.2, 0.1, 1);
-        rangeBarGeo.translate(0, 0.1, 0.5);
+        rangeBarGeo.translate(0, 0.05, 0.5);
         this.rangeBar = new THREE.Mesh(
             rangeBarGeo,
             new THREE.MeshPhongMaterial({
-                color: "#90ee90",
+                color: Colors.range,
                 transparent: true,
                 opacity: 1
             }));
         this.rangeBar.position.z = -0.5;
         this.container.object3D.add(this.rangeBar);
 
+        this.meleeContainer.addEventListener('touchend', () => {
+            // console.log('touched');
+            this.root.components.set('state', {
+                selectedWeapon: 'melee',
+                // needsUpdate: true
+            });
+            this.root.needsUpdate = true;
+        })
+
+        this.rangeContainer.addEventListener('touchend', () => {
+            // console.log('touched');
+            this.root.components.set('state', {
+                selectedWeapon: 'range',
+                // needsUpdate: true
+            });
+            this.root.needsUpdate = true;
+
+        })
+
         // melee weapons
-        this.container.appendChild(this.meleeAttackValueEl);
+        this.container.appendChild(this.meleeContainer);
+        this.meleeContainer.dataset.position = "0 0 -2";
+        this.meleeContainer.appendChild(this.meleeAttackValueEl);
+
         this.meleeAttackValueEl.style.fontSize = '400px';
         this.meleeAttackValueEl.style.color = '#000';
         this.meleeAttackValueEl.textObj.position.setX((-this.meleeAttackValueEl.width / 2) / 0.005);
         this.meleeAttackValueEl.dataset.rotation = "270 0 270";
-        this.meleeAttackValueEl.dataset.position = "0 0.15 -2";
-
+        this.meleeAttackValueEl.dataset.position = "0 0.15 0";
         this.meleeWeapons.forEach((weapon, i) => {
-            this.container.appendChild(weapon.el);
+            this.meleeContainer.appendChild(weapon.el);
             weapon.el.setAttribute('src', weapon.src);
-            weapon.el.dataset.position = "0 0.05 -2";
+            weapon.el.dataset.position = "0 0.05 0";
             // weapon.el.style.pointerEvents = 'none';
         });
 
+        this.meleeSelection = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 0.2, 0.8),
+            new THREE.MeshPhongMaterial({
+                color: Colors.objects,
+                transparent: true,
+                opacity: 0.5
+            }));
+        this.meleeContainer.object3D.add(this.meleeSelection);
+
+
         // range weapons
-        this.container.appendChild(this.rangeAttackValueEl);
+        this.container.appendChild(this.rangeContainer);
+        this.rangeContainer.dataset.position = "0 0 -1.2";
+        this.rangeContainer.appendChild(this.rangeAttackValueEl);
         this.rangeAttackValueEl.style.fontSize = '400px';
         this.rangeAttackValueEl.style.color = '#000';
         this.rangeAttackValueEl.textObj.position.setX((-this.rangeAttackValueEl.width / 2) / 0.005);
         this.rangeAttackValueEl.dataset.rotation = "270 0 270";
-        this.rangeAttackValueEl.dataset.position = "0 0.15 -1.2";
+        this.rangeAttackValueEl.dataset.position = "0 0.15 0";
 
         this.rangeWeapons.forEach((weapon, i) => {
-            this.container.appendChild(weapon.el);
+            this.rangeContainer.appendChild(weapon.el);
             weapon.el.setAttribute('src', weapon.src);
-            weapon.el.dataset.position = "0 0.05 -1.2";
+            weapon.el.dataset.position = "0 0.05 0";
             // weapon.el.style.pointerEvents = 'none';
         });
+
+        this.rangeSelection = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 0.2, 0.8),
+            new THREE.MeshPhongMaterial({
+                color: Colors.objects,
+                transparent: true,
+                opacity: 0.5
+            }));
+        this.rangeContainer.object3D.add(this.rangeSelection);
 
         this.isAttached = true;
     }
 
     update(deltaTime, frame) {
         if (this.isAttached) {
-            const state = this.root.components.get('state');
+            if (this.root.needsUpdate) {
+                const state = this.root.components.get('state');
 
-            if (state.needsUpdate) {
                 this.actionBalls.forEach((actionBall, i) => {
-                    if (i < state.maxActionPoints) {
+                    if (i < state.maxAction) {
                         actionBall.visible = true;
-                        if (i < state.actionPoints) {
+                        if (i < state.action) {
                             actionBall.material.color.setStyle(Colors.movement)
                             actionBall.material.opacity = 1;
                         } else {
@@ -159,27 +209,38 @@ class StateSystem extends MRSystem {
                 this.rangeBar.scale.set(1, 1, rangeRatio * this.barLength);
 
                 this.meleeWeapons.forEach((weapon, i) => {
-                    if (weapon.name == state.meleeWeaponName) {
+                    if (weapon.name == state.meleeName) {
                         weapon.el.style.visibility = "visible";
                     } else {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.meleeAttackValueEl.innerText = state.meleeWeaponAttack;
+                this.meleeAttackValueEl.innerText = state.meleeAttack;
 
                 this.rangeWeapons.forEach((weapon, i) => {
-                    if (weapon.name == state.rangeWeaponName) {
+                    if (weapon.name == state.rangeName) {
                         weapon.el.style.visibility = "visible";
                     } else {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.rangeAttackValueEl.innerText = state.rangeWeaponAttack;
+                this.rangeAttackValueEl.innerText = state.rangeAttack;
+
+                if (state.selectedWeapon == 'melee') {
+                    this.meleeSelection.material.opacity = 0.5;
+                    this.rangeSelection.material.opacity = 0;
+                } else {
+                    this.meleeSelection.material.opacity = 0;
+                    this.rangeSelection.material.opacity = 0.5;
+                }
 
                 // state.needsUpdate = false;
-                this.root.components.set('stats', {
-                    needsUpdate: false
-                });
+                // this.root.needsUpdate = false;
+
+                // console.log('did an update');
+                // this.root.components.set('stats', {
+                //     needsUpdate: false
+                // });
             }
 
 

@@ -9,7 +9,7 @@ class MRChargingStationI extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/battery-room/solarStation1-1.glb";
+        this.el.src = "biomes/battery-room/solarStation1-1.glb";
         this.el.style.pointerEvents = 'none';
     }
 }
@@ -26,7 +26,7 @@ class MRChargingStationII extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/battery-room/solarStation1-2.glb";
+        this.el.src = "biomes/battery-room/solarStation1-2.glb";
         this.el.style.pointerEvents = 'none';
     }
 }
@@ -43,7 +43,7 @@ class MRChargingStationIII extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/battery-room/solarStation1-3.glb";
+        this.el.src = "biomes/battery-room/solarStation1-3.glb";
         this.el.style.pointerEvents = 'none';
     }
 }
@@ -60,7 +60,7 @@ class MRChargingStationIV extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "tiles/battery-room/solarStation1-4.glb";
+        this.el.src = "biomes/battery-room/solarStation1-4.glb";
         this.el.style.pointerEvents = 'none';
     }
 

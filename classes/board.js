@@ -1,5 +1,5 @@
 class Board {
-    constructor(container, params, stateECS) {
+    constructor(container, params) {
         this.container = container;
         this.levelId = params.levelId ?? 0;
 
@@ -7,7 +7,7 @@ class Board {
         this.minColCount = params.minColCount ?? 4;
         this.minFlrCount = params.minFlrCount ?? 1;
 
-        this.maxRowCount = params.maxRowCount ?? 12;
+        this.maxRowCount = params.maxRowCount ?? 10;
         this.maxColCount = params.maxColCount ?? 4;
         this.maxFlrCount = params.maxFlrCount ?? 4;
 
@@ -19,7 +19,7 @@ class Board {
         this.biomes = [{
                 // plains
                 name: "plains",
-                path: "tiles/biome_plains/",
+                path: "biomes/plains/",
                 // audio: "/audio/farm.mp3",
                 tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
                 props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
@@ -28,7 +28,7 @@ class Board {
             {
                 // desert
                 name: "desert",
-                path: "tiles/biome_deserts/",
+                path: "biomes/deserts/",
                 // audio: "/audio/badlands.mp3",
                 tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
                 props: ["plant_05_to_test.glb"],
@@ -95,9 +95,12 @@ class Board {
         for (let r = 0; r < this.rowCount; r++) {
             const row = [];
             for (let c = 0; c < this.colCount; c++) {
+
                 const el = document.createElement("mr-tile");
                 el.dataset.x = r;
                 el.dataset.y = c;
+
+                // TODO: pass the model directly
                 el.dataset.tileset = this.biome.tiles;
                 el.dataset.tilepath = this.biome.path;
 
@@ -182,13 +185,25 @@ class Board {
 
         // weapon
         if (this.levelId == 0) {
-            const weapon = document.createElement("mr-melee-weapon");
-            weapon.dataset.type = "short-sword";
+            const meleeWeapon = document.createElement("mr-weapon");
+            meleeWeapon.dataset.model = "shortSword"
+
             this.addToMap({
-                el: weapon,
+                el: meleeWeapon,
                 type: 'weapon',
                 subType: 'melee',
                 name: 'short-sword',
+                attack: 2
+            }, this.entityMap);
+
+            const rangeWeapon = document.createElement("mr-weapon");
+            rangeWeapon.dataset.model = "slingshot"
+
+            this.addToMap({
+                el: rangeWeapon,
+                type: 'weapon',
+                subType: 'range',
+                name: 'slingshot',
                 attack: 2
             }, this.entityMap);
         }
@@ -203,7 +218,7 @@ class Board {
 
         // chests
         const isChest = params.isChest ?? true;
-        if (isChest && Math.random() < 0.1) {
+        if (isChest && Math.random() < 0.15) {
             const randomChest = document.createElement("mr-chest");
             this.addToMap({
                 el: randomChest,
@@ -415,9 +430,9 @@ class Board {
             const startTime = timer - entity.animation.timerStart;
 
             const t = startTime * duration;
-            // const p = this.Animator.fanOut(t);
-            const p = this.Animator.fanOut(t);
-            const h = this.Animator.jump(t);
+            // const p = Animator.fanOut(t);
+            const p = Animator.fanOut(t);
+            const h = Animator.jump(t);
 
             let distR = entity.animation.x + entity.animation.distX * p;
             let distC = entity.animation.y + entity.animation.distY * p;
@@ -496,25 +511,72 @@ class Board {
                 if (isPlayerTurn) {
                     const distance = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
+                    let attackRange;
 
+                    if (state.selectedWeapon == 'melee') {
+                        attackRange = 1;
+                    } else {
+                        attackRange = 20
+                    }
+
+                    // TODO: show tile for all tiles
                     if (distance != Infinity &&
-                        distance <= state.actionPoints &&
+                        distance <= state.action &&
                         distance > 0) {
 
                         if (!entity) {
                             // let offsetY = distance * 40;
-                            let opacity = distance / state.actionPoints;
-                            tile.el.showTile();
-                            tile.el.setTileColor(Colors.movement);
-                            tile.el.setTileOpacity(opacity);
+                            // let opacity = distance / state.action;
+                            tile.el.showTile(entity.type);
+                            // tile.el.setTileColor(Colors.movement);
+                            // tile.el.setTileOpacity(opacity);
                             tile.el.setCostIndicator(distance);
                         } else {
-                            if (entity.type != 'prop') {
-                                tile.el.showTile();
-                                tile.el.setTileColor(Colors.objects)
+                            if (entity.type == "loot" ||
+                                entity.type == "lore" ||
+                                entity.type == "key" ||
+                                entity.type == "weapon" ||
+                                entity.type == "chest" ||
+                                entity.type == "door"
+                            ) {
+                                // interactible thing on the floor
+                                tile.el.showTile(entity.type);
+                                tile.el.setCostIndicator(distance);
+                                // tile.el.setTileColor(Colors.objects)
+                                // tile.el.setTileOpacity(0.65)
+
+                                // } else if (entity.type == 'enemy') {
+                                //
+                                //     // enemy tile possibly in range of attack
+                                //
+                                //     // tile.el.setTileOpacity(0.65);
+                                //     if (distance <= attackRange) {
+                                //         tile.el.showTile(entity.type);
+                                //         tile.el.setCostIndicator(999);
+                                //
+                                //         // tile.el.setTileColor(Colors.debug)
+                                //     } else {
+                                //         tile.el.showTile("enemy-nope");
+                                //         tile.el.setCostIndicator("");
+                                //         // tile.el.setTileColor(Colors.neutral)
+                                //     }
+
+                            // } else {
+                            //     tile.el.hideTile();
+                                // tile.el.setTileColor(Colors.neutral)
+                            }
+                        }
+
+                        if (entity.type == 'enemy') {
+                            if (distance <= attackRange) {
+                                tile.el.showTile(entity.type);
+                                tile.el.setCostIndicator(99);
+
+                                // tile.el.setTileColor(Colors.debug)
                             } else {
-                                tile.el.hideTile();
-                                tile.el.setTileColor(Colors.neutral)
+                                tile.el.showTile("enemy-nope");
+                                tile.el.setCostIndicator("");
+                                // tile.el.setTileColor(Colors.neutral)
                             }
                         }
 
@@ -562,50 +624,6 @@ class Board {
         }
     }
 
-    checkBattery(state) {
-        if (this.biome.name == 'battery') {
-
-            // charging position
-            const padPos = {
-                x: 4,
-                y: 1
-            }
-
-            // charging indicator position
-            const gaugePos = {
-                x: 4,
-                y: 2
-            }
-
-            const gaugeEl = this.entityMap[gaugePos.x][gaugePos.y].el;
-            const padEl = this.tileMap[padPos.x][padPos.y].el;
-
-            if (this.playerPos.x == padPos.x &&
-                this.playerPos.y == padPos.y) {
-                if (state.range < state.maxRange) {
-
-                    // charging
-                    state.range += 0.04;
-                    gaugeEl.updateBatteryLevel(state.range / state.maxRange)
-                    padEl.floorTile.style.visibility = "visible";
-                    padEl.floorMaterial.color.setStyle("#f90");
-
-                } else {
-
-                    // charged
-                    state.range = state.maxRange;
-                    padEl.floorTile.style.visibility = "visible";
-                    padEl.floorMaterial.color.setStyle("#62ff42");
-                }
-
-            } else {
-                padEl.floorTile.style.visibility = "visible";
-                padEl.floorMaterial.color.setStyle("#fff");
-
-            }
-        }
-    }
-
     getEntityAt(r, c) {
         return this.entityMap[r][c];
     }
@@ -617,69 +635,35 @@ class Board {
     getProjectedCostFor(x, y) {
         let projectedCost = 0;
 
-        if (!this.entityMap[x][y].type) {
+        const entity = this.entityMap[x][y];
+
+        if (!entity.type ||
+            entity.type == "loot" ||
+            entity.type == "key" ||
+            entity.type == "weapon" ||
+            entity.type == "lore" ||
+            entity.type == "door"
+        ) {
             // the tile is empty, so cost is distance
             projectedCost = this.distances[x][y];
 
-        } else {
+        } else if (entity.type == 'enemy' && this.distances[x][y] <= 2) {
+          // TODO: this is probably where we test for the weapon type
+          // and apply a different cost to melee and range
+
             // there is an entity on the tile
             // so it depends what
-            switch (this.entityMap[x][y].type) {
-                case "enemy":
-                    if (this.distances[x][y] <= 2) {
-                        projectedCost = 2;
-                        // TODO: highlight main weapon in the inventory
-                        console.log("a weapon would be highlighted");
-                    }
-                    break;
-            }
+            // switch (this.entityMap[x][y].type) {
+            // case "enemy":
+            // if (this.distances[x][y] <= 2) {
+            projectedCost = 2;
+            // TODO: highlight main weapon in the inventory
+            console.log("a weapon would be highlighted");
+            // }
+            // break;
         }
 
         return projectedCost;
-    }
-
-    assignHoverHandlers(stateComponents) {
-        this.tileMap.forEach(row => {
-            row.forEach(tile => {
-
-                tile.el.addEventListener("mouseover", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
-
-                    // const x = parseInt(tile.el.dataset.x);
-                    // const y = parseInt(tile.el.dataset.y);
-
-                    tile.el.setTileColor(Colors.hover);
-                    stateComponents.set('state', {
-                        projectedCost: this.getProjectedCostFor(x, y),
-                        needsUpdate: true
-                    });
-                });
-
-                tile.el.addEventListener("mouseout", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
-
-                    // const x = parseInt(tile.el.dataset.x);
-                    // const y = parseInt(tile.el.dataset.y);
-
-                    stateComponents.set('state', {
-                        projectedCost: 0,
-                        needsUpdate: true
-                    });
-
-                    if (!this.getEntityAt(x, y)) {
-                        // it's a floor tile
-                        tile.el.setTileColor(Colors.movement);
-                    } else {
-                        // it's an entity
-                        tile.el.setTileColor(Colors.objects);
-                    }
-
-                });
-
-            })
-        })
     }
 
     /////////////////////////////////////////////////////////////
@@ -713,33 +697,4 @@ class Board {
     /////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////
 
-    // Various animation curves / timing functions
-    // Not all of them are used in this project
-
-    Animator = {
-        easeInOut: time => {
-            return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
-        },
-        easeOutBack: time => {
-            return Math.pow(time - 1, 2) * ((1.70158 + 1) * (time - 1) + 1.70158) + 1;
-        },
-        elastic: time => {
-            return Math.pow(2, -5 * time) * Math.sin(((time - 0.3 / 4) * (Math.PI * 2)) / 0.3) + 1;
-        },
-        fanOut: time => {
-            return 2 / (1 + Math.pow(1000, -time)) - 1;
-        },
-        rollercoaster: time => {
-            return (-1.15 * Math.sin(time * 7.7)) / (time * 7.7) + 1.15;
-        },
-        linear: time => {
-            return time;
-        },
-        jump: time => {
-            return -((2 * time - 1) * (2 * time - 1)) + 1;
-        },
-        softJump: time => {
-            return 1 - (Math.cos(time * 2 * Math.PI) / 2 + 0.5);
-        }
-    };
 }

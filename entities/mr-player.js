@@ -4,7 +4,7 @@ class MRPlayer extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
-        // this.light = document.createElement("mr-light");
+        this.light = document.createElement("mr-light");
 
         this.damageContainer = document.createElement("mr-div")
         this.damageValue = document.createElement("mr-text");
@@ -32,10 +32,10 @@ class MRPlayer extends MREntity {
 
         // this.dataset.rotation = `0 180 0`;
 
-        // this.appendChild(this.light);
-        // this.light.setAttribute('color', "#ffffff");
-        // this.light.setAttribute('intensity', 0.03);
-        // this.light.dataset.position = `0 0.6 0.3`;
+        this.appendChild(this.light);
+        this.light.setAttribute('color', "#ffffff");
+        this.light.setAttribute('intensity', 0.03);
+        this.light.dataset.position = `0 0.6 0.3`;
 
         this.appendChild(this.damageContainer);
         this.damageContainer.dataset.position = '0 2.5 0';
