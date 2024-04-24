@@ -1,5 +1,5 @@
 class Board {
-    constructor(container, params, stateECS) {
+    constructor(container, params) {
         this.container = container;
         this.levelId = params.levelId ?? 0;
 
@@ -19,7 +19,7 @@ class Board {
         this.biomes = [{
                 // plains
                 name: "plains",
-                path: "tiles/biome_plains/",
+                path: "biomes/plains/",
                 // audio: "/audio/farm.mp3",
                 tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
                 props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
@@ -28,7 +28,7 @@ class Board {
             {
                 // desert
                 name: "desert",
-                path: "tiles/biome_deserts/",
+                path: "biomes/deserts/",
                 // audio: "/audio/badlands.mp3",
                 tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
                 props: ["plant_05_to_test.glb"],
@@ -185,13 +185,25 @@ class Board {
 
         // weapon
         if (this.levelId == 0) {
-            const weapon = document.createElement("mr-weapon");
-            // weapon.dataset.type = "short-sword";
+            const meleeWeapon = document.createElement("mr-weapon");
+            meleeWeapon.dataset.model = "shortSword"
+
             this.addToMap({
-                el: weapon,
+                el: meleeWeapon,
                 type: 'weapon',
                 subType: 'melee',
                 name: 'short-sword',
+                attack: 2
+            }, this.entityMap);
+
+            const rangeWeapon = document.createElement("mr-weapon");
+            rangeWeapon.dataset.model = "slingshot"
+
+            this.addToMap({
+                el: rangeWeapon,
+                type: 'weapon',
+                subType: 'range',
+                name: 'slingshot',
                 attack: 2
             }, this.entityMap);
         }
@@ -206,7 +218,7 @@ class Board {
 
         // chests
         const isChest = params.isChest ?? true;
-        if (isChest && Math.random() < 0.1) {
+        if (isChest && Math.random() < 0.15) {
             const randomChest = document.createElement("mr-chest");
             this.addToMap({
                 el: randomChest,
@@ -499,6 +511,13 @@ class Board {
                 if (isPlayerTurn) {
                     const distance = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
+                    let attackRange;
+
+                    if (state.selectedWeapon == 'melee') {
+                        attackRange = 1;
+                    } else {
+                        attackRange = 20
+                    }
 
                     if (distance != Infinity &&
                         distance <= state.actionPoints &&
@@ -506,18 +525,57 @@ class Board {
 
                         if (!entity) {
                             // let offsetY = distance * 40;
-                            let opacity = distance / state.actionPoints;
-                            tile.el.showTile();
-                            tile.el.setTileColor(Colors.movement);
-                            tile.el.setTileOpacity(opacity);
+                            // let opacity = distance / state.actionPoints;
+                            tile.el.showTile(entity.type);
+                            // tile.el.setTileColor(Colors.movement);
+                            // tile.el.setTileOpacity(opacity);
                             tile.el.setCostIndicator(distance);
                         } else {
-                            if (entity.type != 'prop') {
-                                tile.el.showTile();
-                                tile.el.setTileColor(Colors.objects)
+                            if (entity.type == "loot" ||
+                                entity.type == "lore" ||
+                                entity.type == "key" ||
+                                entity.type == "weapon" ||
+                                entity.type == "chest" ||
+                                entity.type == "door"
+                            ) {
+                                // interactible thing on the floor
+                                tile.el.showTile(entity.type);
+                                tile.el.setCostIndicator(distance);
+                                // tile.el.setTileColor(Colors.objects)
+                                // tile.el.setTileOpacity(0.65)
+
+                                // } else if (entity.type == 'enemy') {
+                                //
+                                //     // enemy tile possibly in range of attack
+                                //
+                                //     // tile.el.setTileOpacity(0.65);
+                                //     if (distance <= attackRange) {
+                                //         tile.el.showTile(entity.type);
+                                //         tile.el.setCostIndicator(999);
+                                //
+                                //         // tile.el.setTileColor(Colors.debug)
+                                //     } else {
+                                //         tile.el.showTile("enemy-nope");
+                                //         tile.el.setCostIndicator("");
+                                //         // tile.el.setTileColor(Colors.neutral)
+                                //     }
+
+                            // } else {
+                            //     tile.el.hideTile();
+                                // tile.el.setTileColor(Colors.neutral)
+                            }
+                        }
+
+                        if (entity.type == 'enemy') {
+                            if (distance <= attackRange) {
+                                tile.el.showTile(entity.type);
+                                tile.el.setCostIndicator(99);
+
+                                // tile.el.setTileColor(Colors.debug)
                             } else {
-                                tile.el.hideTile();
-                                tile.el.setTileColor(Colors.neutral)
+                                tile.el.showTile("enemy-nope");
+                                tile.el.setCostIndicator("");
+                                // tile.el.setTileColor(Colors.neutral)
                             }
                         }
 
@@ -565,50 +623,57 @@ class Board {
         }
     }
 
-    checkBattery(state) {
-        if (this.biome.name == 'battery') {
-
-            // charging position
-            const padPos = {
-                x: 4,
-                y: 1
-            }
-
-            // charging indicator position
-            const gaugePos = {
-                x: 4,
-                y: 2
-            }
-
-            const gaugeEl = this.entityMap[gaugePos.x][gaugePos.y].el;
-            const padEl = this.tileMap[padPos.x][padPos.y].el;
-
-            if (this.playerPos.x == padPos.x &&
-                this.playerPos.y == padPos.y) {
-                if (state.range < state.maxRange) {
-
-                    // charging
-                    state.range += 0.04;
-                    gaugeEl.updateBatteryLevel(state.range / state.maxRange)
-                    padEl.floorTile.style.visibility = "visible";
-                    padEl.floorMaterial.color.setStyle("#f90");
-
-                } else {
-
-                    // charged
-                    state.range = state.maxRange;
-                    padEl.floorTile.style.visibility = "visible";
-                    padEl.floorMaterial.color.setStyle("#62ff42");
-                }
-
-            } else {
-                gaugeEl.updateBatteryLevel(0)
-                padEl.floorTile.style.visibility = "visible";
-                padEl.floorMaterial.color.setStyle("#fff");
-
-            }
-        }
-    }
+    // checkBattery(state) {
+    //     let hasFinishedCharging = false;
+    //     if (this.biome.name == 'battery') {
+    //
+    //         // charging position
+    //         const padPos = {
+    //             x: 4,
+    //             y: 1
+    //         }
+    //
+    //         // charging indicator position
+    //         const gaugePos = {
+    //             x: 4,
+    //             y: 2
+    //         }
+    //
+    //         const gaugeEl = this.entityMap[gaugePos.x][gaugePos.y].el;
+    //         const padEl = this.tileMap[padPos.x][padPos.y].el;
+    //
+    //
+    //         console.log(state.range / state.maxRange)
+    //
+    //         if (this.playerPos.x == padPos.x &&
+    //             this.playerPos.y == padPos.y) {
+    //
+    //             if (state.range < state.maxRange) {
+    //
+    //                 // charging
+    //                 state.range += 0.1;
+    //                 gaugeEl.updateBatteryLevel(state.range / state.maxRange)
+    //                 // padEl.floorTile.style.visibility = "visible";
+    //                 // padEl.floorMaterial.color.setStyle("#f90");
+    //
+    //             } else {
+    //
+    //                 // charged
+    //                 state.range = state.maxRange;
+    //                 // padEl.floorTile.style.visibility = "visible";
+    //                 // padEl.floorMaterial.color.setStyle("#62ff42");
+    //                 hasFinishedCharging = true;
+    //             }
+    //
+    //         } else {
+    //             gaugeEl.updateBatteryLevel(0)
+    //             // padEl.floorTile.style.visibility = "visible";
+    //             // padEl.floorMaterial.color.setStyle("#fff");
+    //
+    //         }
+    //     }
+    //     return hasFinishedCharging;
+    // }
 
     getEntityAt(r, c) {
         return this.entityMap[r][c];
@@ -647,50 +712,6 @@ class Board {
         }
 
         return projectedCost;
-    }
-
-    assignHoverHandlers(stateComponents) {
-        this.tileMap.forEach(row => {
-            row.forEach(tile => {
-
-                tile.el.addEventListener("mouseover", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
-
-                    // const x = parseInt(tile.el.dataset.x);
-                    // const y = parseInt(tile.el.dataset.y);
-
-                    tile.el.setTileColor(Colors.hover);
-                    stateComponents.set('state', {
-                        projectedCost: this.getProjectedCostFor(x, y),
-                        needsUpdate: true
-                    });
-                });
-
-                tile.el.addEventListener("mouseout", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
-
-                    // const x = parseInt(tile.el.dataset.x);
-                    // const y = parseInt(tile.el.dataset.y);
-
-                    stateComponents.set('state', {
-                        projectedCost: 0,
-                        needsUpdate: true
-                    });
-
-                    if (!this.getEntityAt(x, y)) {
-                        // it's a floor tile
-                        tile.el.setTileColor(Colors.movement);
-                    } else {
-                        // it's an entity
-                        tile.el.setTileColor(Colors.objects);
-                    }
-
-                });
-
-            })
-        })
     }
 
     /////////////////////////////////////////////////////////////

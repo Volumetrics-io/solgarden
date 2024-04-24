@@ -8,34 +8,42 @@ class MRWeapon extends MREntity {
     connected() {
         this.appendChild(this.el);
 
-        const levelId = this.dataset.levelId ?? 0;
+        // const levelId = this.dataset.levelId ?? 0;
+        const model = this.dataset.model ?? "shortSword";
 
-        const Weapons = [{
-                name: "twig",
-                model: "models/weapon-stick1.glb",
-                subtype: "melee"
-            },
-            {
-                name: "short-sword",
-                model: "models/weapon-shortSword1-pickup.glb",
-                subtype: "melee"
-            },
-            {
-                name: "slingshot",
-                model: "models/weapon-slingshot-temp.glb",
-                subtype: "range"
-            },
-            {
-                name: "bow",
-                model: "models/weapon-stick1.glb",
-                subtype: "range"
-            },
-        ]
+        const weaponModels = {
+            twig: "models/weapon-stick1.glb",
+            shortSword: "models/weapon-shortSword1-pickup.glb",
+            slingshot: "models/weapon-slingshot-temp.glb",
+            bow: "models/weapon-stick1.glb",
+        }
 
-        // const weapon = Weapons[Math.floor(Math.random() * Weapons.length)];
-        const weapon = Weapons[1];
+        // const Weapons = [{
+        //         name: "twig",
+        //         model: "models/weapon-stick1.glb",
+        //         subtype: "melee"
+        //     },
+        //     {
+        //         name: "short-sword",
+        //         model: "models/weapon-shortSword1-pickup.glb",
+        //         subtype: "melee"
+        //     },
+        //     {
+        //         name: "slingshot",
+        //         model: "models/weapon-slingshot-temp.glb",
+        //         subtype: "range"
+        //     },
+        //     {
+        //         name: "bow",
+        //         model: "models/weapon-stick1.glb",
+        //         subtype: "range"
+        //     },
+        // ]
+        // const randomId = Math.floor(Math.random() * Weapons.length);
+        // const weaponId = this.dataset.weaponId ?? randomId;
+        // const weapon = Weapons[weaponId];
 
-        this.el.src = weapon.model;
+        this.el.src = weaponModels[model];
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
 
@@ -46,10 +54,10 @@ class MRWeapon extends MREntity {
         // this.dataset.attack = levelId + 2;
 
         // used for now
-        this.type = 'weapon';
-        this.subType = weapon.subtype;
-        this.name = weapon.name;
-        this.attack = levelId + 2;
+        // this.type = 'weapon';
+        // this.subType = weapon.subtype;
+        // this.name = weapon.name;
+        // this.attack = levelId + 2;
 
         // console.log(weapon)
 
