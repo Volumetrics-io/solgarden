@@ -17,14 +17,14 @@ class GameSystem extends MRSystem {
             maxHealth: 20,
             range: 15,
             maxRange: 30,
-            actionPoints: 4,
-            maxActionPoints: 4,
+            action: 4,
+            maxAction: 4,
             projectedCost: 0,
             hasKey: false,
-            meleeWeaponName: 'twig',
-            meleeWeaponAttack: 1,
-            rangeWeaponName: 'slingshot',
-            rangeWeaponAttack: 1,
+            meleeName: 'twig',
+            meleeAttack: 1,
+            rangeName: 'slingshot',
+            rangeAttack: 1,
             selectedWeapon: "melee",
             isPlayerTurn: true,
             // needsUpdate: false
@@ -137,7 +137,12 @@ class GameSystem extends MRSystem {
                     path: "biomes/battery-room/",
                     audio: "/audio/fridge.mp3",
                     tiles: ["tilegrasscyan001.glb"],
-                    props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
+                    props: ["plant_01.glb",
+                        "plant_02.glb",
+                        "plant_03.glb",
+                        "plant_04.glb",
+                        "plant_05.glb"
+                    ],
                     block: []
                 },
                 entityMap: [
@@ -238,8 +243,8 @@ class GameSystem extends MRSystem {
                     if (state.isPlayerTurn) {
                         if (!targetEntity) {
                             // there is nothing on the tile.
-                            if (cost <= state.actionPoints) {
-                                state.actionPoints -= cost;
+                            if (cost <= state.action) {
+                                state.action -= cost;
                                 this.soundController.play('chessSound');
                                 this.board.movePlayer(x, y);
                             } else {
@@ -248,8 +253,8 @@ class GameSystem extends MRSystem {
 
                         } else {
                             // there is an entity on the tile
-                            if (cost <= state.actionPoints &&
-                                this.board.distances[x][y] <= state.actionPoints) {
+                            if (cost <= state.action &&
+                                this.board.distances[x][y] <= state.action) {
                                 this.interactWith(x, y, targetEntity, cost, state);
 
                                 console.log(targetEntity);
@@ -261,21 +266,21 @@ class GameSystem extends MRSystem {
                                     targetEntity.type == "lore") {
 
                                     // then move the player
-                                    state.actionPoints -= cost;
+                                    state.action -= cost;
                                     this.soundController.play('chessSound');
                                     this.board.movePlayer(x, y);
                                 }
 
                                 // door
                                 if (targetEntity.type == "door") {
-                                    state.actionPoints -= cost;
+                                    state.action -= cost;
                                     this.soundController.play('chessSound');
                                     this.board.movePlayer(x, y);
 
                                     state.isPlayerTurn = false;
 
                                     // free full bar if you reach the door
-                                    state.actionPoints = state.maxActionPoints;
+                                    state.action = state.maxAction;
 
                                     // this.isPlayerTurn = false;
                                     setTimeout(() => {
@@ -294,8 +299,9 @@ class GameSystem extends MRSystem {
                         // state.needsUpdate = true;
 
 
-                        // Automatically end the turn when the player runs out of action points
-                        if (this.autoEndTurn && state.actionPoints == 0) {
+                        // Automatically end the turn when the player
+                        // runs out of action points
+                        if (this.autoEndTurn && state.action == 0) {
                             this.endTurn();
                         }
 
@@ -320,26 +326,14 @@ class GameSystem extends MRSystem {
     }
 
     addToInventory(entity, state) {
-        // if (entity.el.dataset.type == "weapon") {
-        //     if (entity.el.dataset.subType == "melee" &&
-        //         entity.el.dataset.attack > state.meleeWeaponAttack) {
-        //         state.meleeWeaponName = entity.el.dataset.name;
-        //         state.meleeWeaponAttack = entity.el.dataset.attack;
-        //     }
-        //     if (entity.el.dataset.subType == "range" &&
-        //         entity.el.dataset.attack > state.rangeWeaponAttack) {
-        //         state.rangeWeaponName = entity.el.dataset.name;
-        //         state.rangeWeaponAttack = entity.el.dataset.attack;
-        //     }
-        // }
         if (entity.type == "weapon") {
-            if (entity.subType == "melee" && entity.attack > state.meleeWeaponAttack) {
-                state.meleeWeaponName = entity.name;
-                state.meleeWeaponAttack = entity.attack;
+            if (entity.subType == "melee" && entity.attack > state.meleeAttack) {
+                state.meleeName = entity.name;
+                state.meleeAttack = entity.attack;
             }
-            if (entity.subType == "range" && entity.attack > state.rangeWeaponAttack) {
-                state.rangeWeaponName = entity.name;
-                state.rangeWeaponAttack = entity.attack;
+            if (entity.subType == "range" && entity.attack > state.rangeAttack) {
+                state.rangeName = entity.name;
+                state.rangeAttack = entity.attack;
             }
         }
         if (entity.type == "key") {
@@ -377,7 +371,7 @@ class GameSystem extends MRSystem {
         const state = this.state.components.get('state');
 
         this.state.components.set('state', {
-            actionPoints: state.maxActionPoints,
+            action: state.maxAction,
             // needsUpdate: true,
             isPlayerTurn: true
         });
@@ -399,25 +393,17 @@ class GameSystem extends MRSystem {
         this.state.components.set('state', {
             health: state.maxHealth,
             range: state.maxRange,
-            actionPoints: state.maxActionPoints,
+            action: state.maxAction,
             projectedCost: 0,
             hasKey: false,
-            meleeWeaponName: 'twig',
-            meleeWeaponAttack: 1,
-            rangeWeaponName: 'slingshot',
-            rangeWeaponAttack: 1,
+            meleeName: 'twig',
+            meleeAttack: 1,
+            rangeName: 'slingshot',
+            rangeAttack: 1,
             selectedWeapon: "melee",
             isPlayerTurn: true,
             // needsUpdate: true
         });
-
-        // this.state.components.set('state', {
-        //     cycleId: state.cycleId + 1,
-        //     levelId: 0,
-        //     health: state.maxHealth,
-        //     range: state.maxRange,
-        //     needsUpdate: true
-        // });
 
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
@@ -492,10 +478,35 @@ class GameSystem extends MRSystem {
         }
     }
 
+    attack(entity, r, c) {
+        const state = this.state.components.get('state');
+
+        // TODO: move the sound where the player is
+        // this.soundController.moveSoundPosition('swooshSound', );
+        this.soundController.play('swooshSound');
+
+        // console.log(state.selectedWeapon)
+        let damage;
+        if (state.selectedWeapon == "melee") {
+            damage = state.meleeAttack;
+        } else {
+            damage = stage.rangeAttack;
+        }
+
+        entity.hp -= damage;
+        this.board.showDamageAt(r, c, damage);
+
+        if (entity.hp <= 0) {
+            this.container.removeChild(entity.el);
+            this.dropLoot(r, c);
+            this.needsUpdate = true;
+        }
+    }
+
     interactWith(x, y, entity, cost, state) {
         switch (entity.type) {
             case "enemy":
-                state.actionPoints -= cost;
+                state.action -= cost;
                 this.attack(entity, x, y);
                 break;
 
@@ -547,24 +558,6 @@ class GameSystem extends MRSystem {
                 this.board.removeEntityAt(x, y);
                 // this.initialize();
                 break;
-        }
-    }
-
-    attack(entity, r, c) {
-        const state = this.state.components.get('state');
-
-        // TODO: move the sound where the player is
-        // this.soundController.moveSoundPosition('swooshSound', );
-        this.soundController.play('swooshSound');
-
-        const damage = state.meleeWeaponAttack;
-        entity.hp -= damage;
-        this.board.showDamageAt(r, c, damage);
-
-        if (entity.hp <= 0) {
-            this.container.removeChild(entity.el);
-            this.dropLoot(r, c);
-            this.needsUpdate = true;
         }
     }
 
@@ -637,7 +630,7 @@ class GameSystem extends MRSystem {
         this.board.updateFloor(state, this.timer, state.isPlayerTurn);
         this.board.projectEverything(this.timer);
 
-        if (state.actionPoints == 0) {
+        if (state.action == 0) {
             this.endTurnButton.style.backgroundColor = Colors.hover;
         } else {
             this.endTurnButton.style.backgroundColor = Colors.health;

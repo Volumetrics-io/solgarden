@@ -430,9 +430,9 @@ class Board {
             const startTime = timer - entity.animation.timerStart;
 
             const t = startTime * duration;
-            // const p = this.Animator.fanOut(t);
-            const p = this.Animator.fanOut(t);
-            const h = this.Animator.jump(t);
+            // const p = Animator.fanOut(t);
+            const p = Animator.fanOut(t);
+            const h = Animator.jump(t);
 
             let distR = entity.animation.x + entity.animation.distX * p;
             let distC = entity.animation.y + entity.animation.distY * p;
@@ -519,13 +519,14 @@ class Board {
                         attackRange = 20
                     }
 
+                    // TODO: show tile for all tiles
                     if (distance != Infinity &&
-                        distance <= state.actionPoints &&
+                        distance <= state.action &&
                         distance > 0) {
 
                         if (!entity) {
                             // let offsetY = distance * 40;
-                            // let opacity = distance / state.actionPoints;
+                            // let opacity = distance / state.action;
                             tile.el.showTile(entity.type);
                             // tile.el.setTileColor(Colors.movement);
                             // tile.el.setTileOpacity(opacity);
@@ -623,58 +624,6 @@ class Board {
         }
     }
 
-    // checkBattery(state) {
-    //     let hasFinishedCharging = false;
-    //     if (this.biome.name == 'battery') {
-    //
-    //         // charging position
-    //         const padPos = {
-    //             x: 4,
-    //             y: 1
-    //         }
-    //
-    //         // charging indicator position
-    //         const gaugePos = {
-    //             x: 4,
-    //             y: 2
-    //         }
-    //
-    //         const gaugeEl = this.entityMap[gaugePos.x][gaugePos.y].el;
-    //         const padEl = this.tileMap[padPos.x][padPos.y].el;
-    //
-    //
-    //         console.log(state.range / state.maxRange)
-    //
-    //         if (this.playerPos.x == padPos.x &&
-    //             this.playerPos.y == padPos.y) {
-    //
-    //             if (state.range < state.maxRange) {
-    //
-    //                 // charging
-    //                 state.range += 0.1;
-    //                 gaugeEl.updateBatteryLevel(state.range / state.maxRange)
-    //                 // padEl.floorTile.style.visibility = "visible";
-    //                 // padEl.floorMaterial.color.setStyle("#f90");
-    //
-    //             } else {
-    //
-    //                 // charged
-    //                 state.range = state.maxRange;
-    //                 // padEl.floorTile.style.visibility = "visible";
-    //                 // padEl.floorMaterial.color.setStyle("#62ff42");
-    //                 hasFinishedCharging = true;
-    //             }
-    //
-    //         } else {
-    //             gaugeEl.updateBatteryLevel(0)
-    //             // padEl.floorTile.style.visibility = "visible";
-    //             // padEl.floorMaterial.color.setStyle("#fff");
-    //
-    //         }
-    //     }
-    //     return hasFinishedCharging;
-    // }
-
     getEntityAt(r, c) {
         return this.entityMap[r][c];
     }
@@ -699,6 +648,9 @@ class Board {
             projectedCost = this.distances[x][y];
 
         } else if (entity.type == 'enemy' && this.distances[x][y] <= 2) {
+          // TODO: this is probably where we test for the weapon type
+          // and apply a different cost to melee and range
+
             // there is an entity on the tile
             // so it depends what
             // switch (this.entityMap[x][y].type) {
@@ -745,33 +697,4 @@ class Board {
     /////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////
 
-    // Various animation curves / timing functions
-    // Not all of them are used in this project
-
-    Animator = {
-        easeInOut: time => {
-            return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
-        },
-        easeOutBack: time => {
-            return Math.pow(time - 1, 2) * ((1.70158 + 1) * (time - 1) + 1.70158) + 1;
-        },
-        elastic: time => {
-            return Math.pow(2, -5 * time) * Math.sin(((time - 0.3 / 4) * (Math.PI * 2)) / 0.3) + 1;
-        },
-        fanOut: time => {
-            return 2 / (1 + Math.pow(1000, -time)) - 1;
-        },
-        rollercoaster: time => {
-            return (-1.15 * Math.sin(time * 7.7)) / (time * 7.7) + 1.15;
-        },
-        linear: time => {
-            return time;
-        },
-        jump: time => {
-            return -((2 * time - 1) * (2 * time - 1)) + 1;
-        },
-        softJump: time => {
-            return 1 - (Math.cos(time * 2 * Math.PI) / 2 + 0.5);
-        }
-    };
 }

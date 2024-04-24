@@ -38,22 +38,22 @@ class MRTile extends MREntity {
         // console.log();
 
         this.appendChild(this.border);
-        this.border.src = '/models/border.glb';
+        this.border.src = '/ui-models/borderObject-white.glb';
         this.border.dataset.position = "0 0.2 0";
         this.border.style.visibility = "hidden";
 
         this.appendChild(this.borderObjects);
-        this.borderObjects.src = '/models/border-objects.glb';
+        this.borderObjects.src = '/ui-models/borderObject-objects.glb';
         this.borderObjects.dataset.position = "0 0.2 0";
         this.borderObjects.style.visibility = "hidden";
 
         this.appendChild(this.borderEnemies);
-        this.borderEnemies.src = '/models/border-enemies.glb';
+        this.borderEnemies.src = '/ui-models/borderObject-health.glb';
         this.borderEnemies.dataset.position = "0 0.2 0";
         this.borderEnemies.style.visibility = "hidden";
 
         this.appendChild(this.borderEnemiesNope);
-        this.borderEnemiesNope.src = '/models/border-enemies-nope.glb';
+        this.borderEnemiesNope.src = '/ui-models/borderObject-neutral.glb';
         this.borderEnemiesNope.dataset.position = "0 0.2 0";
         this.borderEnemiesNope.style.visibility = "hidden";
 
@@ -136,6 +136,9 @@ class MRTile extends MREntity {
             this.numberString.style.color = Colors.neutral;
         } else {
             this.border.style.visibility = "visible";
+
+            // this.border.object3D.material.baseColorFactor = [0, 0, 0, 1]
+
             this.numberString.style.color = "#ffffff";
             // tile.el.hideTile();
             // tile.el.setTileColor(Colors.neutral)

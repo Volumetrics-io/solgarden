@@ -183,9 +183,9 @@ class StateSystem extends MRSystem {
                 const state = this.root.components.get('state');
 
                 this.actionBalls.forEach((actionBall, i) => {
-                    if (i < state.maxActionPoints) {
+                    if (i < state.maxAction) {
                         actionBall.visible = true;
-                        if (i < state.actionPoints) {
+                        if (i < state.action) {
                             actionBall.material.color.setStyle(Colors.movement)
                             actionBall.material.opacity = 1;
                         } else {
@@ -209,22 +209,22 @@ class StateSystem extends MRSystem {
                 this.rangeBar.scale.set(1, 1, rangeRatio * this.barLength);
 
                 this.meleeWeapons.forEach((weapon, i) => {
-                    if (weapon.name == state.meleeWeaponName) {
+                    if (weapon.name == state.meleeName) {
                         weapon.el.style.visibility = "visible";
                     } else {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.meleeAttackValueEl.innerText = state.meleeWeaponAttack;
+                this.meleeAttackValueEl.innerText = state.meleeAttack;
 
                 this.rangeWeapons.forEach((weapon, i) => {
-                    if (weapon.name == state.rangeWeaponName) {
+                    if (weapon.name == state.rangeName) {
                         weapon.el.style.visibility = "visible";
                     } else {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.rangeAttackValueEl.innerText = state.rangeWeaponAttack;
+                this.rangeAttackValueEl.innerText = state.rangeAttack;
 
                 if (state.selectedWeapon == 'melee') {
                     this.meleeSelection.material.opacity = 0.5;
