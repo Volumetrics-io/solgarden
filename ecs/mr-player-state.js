@@ -103,22 +103,47 @@ class StateSystem extends MRSystem {
         this.container.object3D.add(this.rangeBar);
 
         this.meleeContainer.addEventListener('touchend', () => {
-            // console.log('touched');
             this.root.components.set('state', {
                 selectedWeapon: 'melee',
-                // needsUpdate: true
+                hoverMelee: false,
             });
             this.root.needsUpdate = true;
         })
 
-        this.rangeContainer.addEventListener('touchend', () => {
-            // console.log('touched');
+        this.meleeContainer.addEventListener('mouseover', () => {
             this.root.components.set('state', {
-                selectedWeapon: 'range',
-                // needsUpdate: true
+                hoverMelee: true,
             });
             this.root.needsUpdate = true;
+        })
 
+        this.meleeContainer.addEventListener('mouseout', () => {
+            this.root.components.set('state', {
+                hoverMelee: false,
+            });
+            this.root.needsUpdate = true;
+        })
+
+
+        this.rangeContainer.addEventListener('touchend', () => {
+            this.root.components.set('state', {
+                selectedWeapon: 'range',
+            });
+            this.root.needsUpdate = true;
+        });
+
+        this.rangeContainer.addEventListener('mouseover', () => {
+            this.root.components.set('state', {
+                hoverRange: true,
+            });
+            this.root.needsUpdate = true;
+        })
+
+        this.rangeContainer.addEventListener('mouseout', () => {
+            this.root.components.set('state', {
+                hoverRange: false,
+            });
+            this.root.needsUpdate = true;
         })
 
         // melee weapons
@@ -215,7 +240,9 @@ class StateSystem extends MRSystem {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.meleeAttackValueEl.innerText = state.meleeAttack + "/" + state.meleeRange;
+                if (state.meleeName) {
+                    this.meleeAttackValueEl.innerText = state.meleeAttack + "/" + state.meleeRange;
+                }
 
                 this.rangeWeapons.forEach((weapon, i) => {
                     if (weapon.name == state.rangeName) {
@@ -224,25 +251,21 @@ class StateSystem extends MRSystem {
                         weapon.el.style.visibility = "hidden";
                     }
                 });
-                this.rangeAttackValueEl.innerText = state.rangeAttack + "/" + state.rangeRange;
-
-                if (state.selectedWeapon == 'melee') {
-                    this.meleeSelection.material.opacity = 0.5;
-                    this.rangeSelection.material.opacity = 0;
-                } else {
-                    this.meleeSelection.material.opacity = 0;
-                    this.rangeSelection.material.opacity = 0.5;
+                if (state.rangeName) {
+                    this.rangeAttackValueEl.innerText = state.rangeAttack + "/" + state.rangeRange;
                 }
 
-                // state.needsUpdate = false;
-                // this.root.needsUpdate = false;
-
-                // console.log('did an update');
-                // this.root.components.set('stats', {
-                //     needsUpdate: false
-                // });
+                if (state.selectedWeapon == 'melee' && state.meleeName) {
+                    this.meleeSelection.material.opacity = 0.5;
+                    this.rangeSelection.material.opacity = 0;
+                } else if (state.selectedWeapon == 'range' && state.rangeName) {
+                    this.meleeSelection.material.opacity = 0;
+                    this.rangeSelection.material.opacity = 0.5;
+                } else {
+                    this.meleeSelection.material.opacity = 0;
+                    this.rangeSelection.material.opacity = 0;
+                }
             }
-
 
         }
     }

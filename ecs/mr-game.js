@@ -24,13 +24,15 @@ class GameSystem extends MRSystem {
             maxAction: 4,
             projectedCost: 0,
             hasKey: false,
-            meleeName: 'twig',
-            meleeAttack: 1,
+            meleeName: '',
+            meleeAttack: 0,
             meleeRange: 1,
-            rangeName: 'slingshot',
-            rangeAttack: 1,
-            rangeRange: 4,
+            rangeName: '',
+            rangeAttack: 0,
+            rangeRange: 0,
             selectedWeapon: "melee",
+            hoverMelee: false,
+            hoverRange: false,
             isPlayerTurn: true,
             // needsUpdate: false
         });
@@ -634,7 +636,7 @@ class GameSystem extends MRSystem {
 
         this.board.calcDistFromPlayer();
         this.board.updateFloor(state, this.timer);
-        this.board.setAttackRange(state, this.timer);
+        // this.board.setAttackRange(state, this.timer);
         this.board.projectEverything(this.timer);
 
         if (state.action == 0) {
@@ -654,6 +656,8 @@ class GameSystem extends MRSystem {
     update(deltaTime, frame) {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
+
+            // console.log(this.state.components.get('state').hoverMelee);
 
             if (this.needsUpdate || this.state.needsUpdate) {
                 console.log('updated at', this.timer);

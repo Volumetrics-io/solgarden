@@ -206,7 +206,7 @@ class Board {
                 type: 'weapon',
                 subType: 'melee',
                 name: 'short-sword',
-                range: 2,
+                range: 1.5,
                 attack: 2
             }, this.entityMap);
 
@@ -218,7 +218,7 @@ class Board {
                 type: 'weapon',
                 subType: 'range',
                 name: 'slingshot',
-                range: 5,
+                range: 3,
                 attack: 2
             }, this.entityMap);
         }
@@ -263,23 +263,22 @@ class Board {
             });
         });
 
-        this.attackRange = document.createElement("mr-model");
+        // this.attackRange = document.createElement("mr-model");
 
         // this.attackRange.onload = () => {
-        this.attackRange.className = "attack-range";
-        this.attackRange.setAttribute('src', '/ui-models/attack-range.glb');
-        this.attackRange.style.pointerEvents = 'none';
-        // this.attackRange.dataset.rotation = `90 0 0`
-        this.attackRangeMesh = new THREE.Mesh(
-            // new THREE.TorusGeometry( 1, 0.1, 12, 48 ),
-            new THREE.CylinderGeometry( 1, 1, 0.5, 24 ),
-            new THREE.MeshPhongMaterial({
-                color: "#ff9900",
-                transparent: true,
-                opacity: 0.3
-            }));
-        this.attackRange.object3D.add(this.attackRangeMesh);
-        this.container.appendChild(this.attackRange);
+        // this.attackRange.className = "attack-range";
+        // this.attackRange.setAttribute('src', '/ui-models/attack-range.glb');
+        // this.attackRange.style.pointerEvents = 'none';
+        // this.attackRangeMesh = new THREE.Mesh(
+        //     // new THREE.TorusGeometry( 1, 0.1, 12, 48 ),
+        //     new THREE.CylinderGeometry( 1, 1, 0.5, 24 ),
+        //     new THREE.MeshPhongMaterial({
+        //         color: "#ff9900",
+        //         transparent: true,
+        //         opacity: 0.3
+        //     }));
+        // this.attackRange.object3D.add(this.attackRangeMesh);
+        // this.container.appendChild(this.attackRange);
 
         // }
 
@@ -298,24 +297,24 @@ class Board {
 
     }
 
-    setAttackRange(state) {
-
-        const pos = this.getPlayerPos();
-
-        console.log(state.selectedWeapon);
-        if (state.selectedWeapon == "melee") {
-            this.attackRangeMesh.scale.set(state.meleeRange, 1, state.meleeRange);
-
-        } else if (state.selectedWeapon == "range") {
-            this.attackRangeMesh.scale.set(state.rangeRange, 1, state.rangeRange);
-        }
-
-        const x = pos.x - this.rowCount / 2 + 0.5;
-        const y = pos.y - this.colCount / 2 + 0.5;
-
-        this.attackRange.dataset.position = `${y} 0.5 ${x}`;
-        // this.attackRange = document.createElement("mr-entity");
-    }
+    // setAttackRange(state) {
+    //
+    //     const pos = this.getPlayerPos();
+    //
+    //     console.log(state.selectedWeapon);
+    //     if (state.selectedWeapon == "melee") {
+    //         this.attackRangeMesh.scale.set(state.meleeRange, 1, state.meleeRange);
+    //
+    //     } else if (state.selectedWeapon == "range") {
+    //         this.attackRangeMesh.scale.set(state.rangeRange, 1, state.rangeRange);
+    //     }
+    //
+    //     const x = pos.x - this.rowCount / 2 + 0.5;
+    //     const y = pos.y - this.colCount / 2 + 0.5;
+    //
+    //     this.attackRange.dataset.position = `${y} 0.5 ${x}`;
+    //     // this.attackRange = document.createElement("mr-entity");
+    // }
 
     // only used to debug
     printArray(string, array) {
@@ -551,7 +550,15 @@ class Board {
         // no more playerpos
     }
 
+    distanceBetween(x1, y1, x2, y2) {
+        var distX = x1 - x2;
+        var distY = y1 - y2;
+        return Math.sqrt(distX * distX + distY * distY);
+    }
+
     updateFloor(state, timer) {
+        const ppos = this.getPlayerPos();
+
         this.tileMap.forEach(row => {
             row.forEach(tile => {
 
@@ -567,8 +574,8 @@ class Board {
                 if (state.isPlayerTurn) {
                     const distance = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
-                    let attackRange;
 
+                    let attackRange;
                     if (state.selectedWeapon == 'melee') {
                         attackRange = state.meleeRange;
                     } else if (state.selectedWeapon == 'range') {
@@ -577,7 +584,7 @@ class Board {
                         console.error('state.selectedWeapon has an illegal value.')
                     }
 
-                    const isReachable = (distance != Infinity && distance <= state.action && distance > 0)
+                    const isReachable = (distance != Infinity && distance <= state.action && distance > 0);
 
                     if (!entity) {
                         if (isReachable) {
@@ -586,8 +593,7 @@ class Board {
                             el.setCostIndicator(distance);
                         } else {
                             // floor, but too far for current action points
-                            el.tileColor('neutral');
-                            el.setCostIndicator("");
+                            el.hideTile();
                         }
 
                     } else if (entity.type == "loot" ||
@@ -598,7 +604,6 @@ class Board {
                         entity.type == "door"
                     ) {
                         if (isReachable) {
-
                             // the tile is floor, and in reach
                             el.tileColor('objects');
                             el.setCostIndicator(distance);
@@ -608,83 +613,40 @@ class Board {
                             el.setCostIndicator("");
                         }
 
-
                     } else if (entity.type == "enemy") {
 
-                        // if (entity.type == 'enemy') {
                         if (distance <= attackRange) {
                             el.tileColor('health');
-                            // el.showTile(entity.type);
                             el.setCostIndicator(99);
                         } else {
                             el.tileColor('neutral');
-                            // el.showTile("enemy-nope");
                             el.setCostIndicator("");
                         }
-                        // }
 
                     } else if (entity.type == "player") {
                         el.hideTile();
-
-
                     }
 
-
-                    // TODO: show tile for all tiles
-                    if (distance != Infinity &&
-                        distance <= state.action &&
-                        distance > 0) {
-
-                        // if (!entity) {
-                        //     // let offsetY = distance * 40;
-                        //     // let opacity = distance / state.action;
-                        //     tile.el.showTile(entity.type);
-                        //     // tile.el.setTileColor(Colors.movement);
-                        //     // tile.el.setTileOpacity(opacity);
-                        //     tile.el.setCostIndicator(distance);
-                        // } else {
-                        //     if (entity.type == "loot" ||
-                        //         entity.type == "lore" ||
-                        //         entity.type == "key" ||
-                        //         entity.type == "weapon" ||
-                        //         entity.type == "chest" ||
-                        //         entity.type == "door"
-                        //     ) {
-                        //         // interactible thing on the floor
-                        //         tile.el.showTile(entity.type);
-                        //         tile.el.setCostIndicator(distance);
-                        //         // tile.el.setTileColor(Colors.objects)
-                        //         // tile.el.setTileOpacity(0.65)
-                        //
-                        //         // } else if (entity.type == 'enemy') {
-                        //         //
-                        //         //     // enemy tile possibly in range of attack
-                        //         //
-                        //         //     // tile.el.setTileOpacity(0.65);
-                        //         //     if (distance <= attackRange) {
-                        //         //         tile.el.showTile(entity.type);
-                        //         //         tile.el.setCostIndicator(999);
-                        //         //
-                        //         //         // tile.el.setTileColor(Colors.debug)
-                        //         //     } else {
-                        //         //         tile.el.showTile("enemy-nope");
-                        //         //         tile.el.setCostIndicator("");
-                        //         //         // tile.el.setTileColor(Colors.neutral)
-                        //         //     }
-                        //
-                        //         // } else {
-                        //         //     tile.el.hideTile();
-                        //         // tile.el.setTileColor(Colors.neutral)
-                        //     }
-                        // }
-
-
-                        // } else {
-                        // el.setCostIndicator("");
-                        // el.hideTile();
+                    // If either melee or range weapon is hovered
+                    const rawDistance = this.distanceBetween(x, y, this.playerPos.x, this.playerPos.y);
+                    if (state.hoverMelee) {
+                        if (rawDistance <= state.meleeRange) {
+                            el.tileColor('health');
+                            el.setCostIndicator('');
+                        } else {
+                            el.hideTile();
+                        }
                     }
+                    if (state.hoverRange) {
+                        if (rawDistance <= state.rangeRange) {
+                            el.tileColor('health');
+                            el.setCostIndicator('');
+                        } else {
+                            el.hideTile();
+                        }
+                    }
+
                 } else {
-                    // el.setCostIndicator("");
                     el.hideTile();
                 }
             })
