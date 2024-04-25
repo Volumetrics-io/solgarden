@@ -3,6 +3,8 @@ class Board {
         this.container = container;
         this.levelId = params.levelId ?? 0;
 
+        this.isDebug = params.isDebug ?? false;
+
         this.minRowCount = params.minRowCount ?? 5;
         this.minColCount = params.minColCount ?? 4;
         this.minFlrCount = params.minFlrCount ?? 1;
@@ -144,8 +146,8 @@ class Board {
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
             const el = document.createElement("mr-enemy");
-            const hp = this.levelId / 4 + 1 - Math.random() * 2;
-            const attack = Math.ceil(Math.random() * 4) + this.levelId;
+            const hp = this.levelId / 4 + Math.random() * this.levelId / 4;
+            const attack = Math.floor(Math.random() * 2 + 1);
             el.dataset.hp = hp;
             el.dataset.attack = attack;
             const enemy = {
@@ -155,6 +157,8 @@ class Board {
                 attack: attack
             };
             this.addToMap(enemy, this.entityMap);
+
+            if (this.isDebug) console.log(enemy);
         }
 
         // props
@@ -184,6 +188,7 @@ class Board {
         }
 
 
+        // This is the spawn room
         if (this.levelId == 0) {
 
             // weapon
@@ -198,30 +203,6 @@ class Board {
                 range: 1,
                 attack: 1
             }, this.entityMap);
-
-            // const meleeWeapon = document.createElement("mr-weapon");
-            // meleeWeapon.dataset.model = "shortSword"
-            //
-            // this.addToMap({
-            //     el: meleeWeapon,
-            //     type: 'weapon',
-            //     subType: 'melee',
-            //     name: 'short-sword',
-            //     range: 1.5,
-            //     attack: 2
-            // }, this.entityMap);
-            //
-            // const rangeWeapon = document.createElement("mr-weapon");
-            // rangeWeapon.dataset.model = "slingshot"
-            //
-            // this.addToMap({
-            //     el: rangeWeapon,
-            //     type: 'weapon',
-            //     subType: 'range',
-            //     name: 'slingshot',
-            //     range: 3,
-            //     attack: 2
-            // }, this.entityMap);
 
             // key
             // TODO: expose isKey
@@ -239,6 +220,19 @@ class Board {
             this.addToMap({
                 el: randomChest,
                 type: 'chest'
+            }, this.entityMap);
+        }
+
+        // Health drop in the battery room
+        if (this.biome.name == 'battery') {
+            const healthLoot = document.createElement("mr-loot");
+            healthLoot.dataset.effect = "health";
+
+            // twig.dataset.model = "twig"
+            this.addToMap({
+                el: healthLoot,
+                type: 'loot',
+                effect: "health"
             }, this.entityMap);
         }
 
@@ -264,58 +258,15 @@ class Board {
             });
         });
 
-        // this.attackRange = document.createElement("mr-model");
-
-        // this.attackRange.onload = () => {
-        // this.attackRange.className = "attack-range";
-        // this.attackRange.setAttribute('src', '/ui-models/attack-range.glb');
-        // this.attackRange.style.pointerEvents = 'none';
-        // this.attackRangeMesh = new THREE.Mesh(
-        //     // new THREE.TorusGeometry( 1, 0.1, 12, 48 ),
-        //     new THREE.CylinderGeometry( 1, 1, 0.5, 24 ),
-        //     new THREE.MeshPhongMaterial({
-        //         color: "#ff9900",
-        //         transparent: true,
-        //         opacity: 0.3
-        //     }));
-        // this.attackRange.object3D.add(this.attackRangeMesh);
-        // this.container.appendChild(this.attackRange);
-
-        // }
-
-        // position the attack range
-
-
         this.calcDistFromPlayer();
-        // this.setAttackRange();
 
-
-        // Debug
-        // this.printArray("this.heightMap", this.heightMap);
-        // this.printArray("this.entityMap", this.entityMap);
-        // this.printArray("this.propMap", this.propMap);
-        // this.printArray("this.distances", this.distances);
-
+        if (this.isDebug) {
+            this.printArray("this.heightMap", this.heightMap);
+            this.printArray("this.entityMap", this.entityMap);
+            this.printArray("this.propMap", this.propMap);
+            this.printArray("this.distances", this.distances);
+        }
     }
-
-    // setAttackRange(state) {
-    //
-    //     const pos = this.getPlayerPos();
-    //
-    //     console.log(state.selectedWeapon);
-    //     if (state.selectedWeapon == "melee") {
-    //         this.attackRangeMesh.scale.set(state.meleeRange, 1, state.meleeRange);
-    //
-    //     } else if (state.selectedWeapon == "range") {
-    //         this.attackRangeMesh.scale.set(state.rangeRange, 1, state.rangeRange);
-    //     }
-    //
-    //     const x = pos.x - this.rowCount / 2 + 0.5;
-    //     const y = pos.y - this.colCount / 2 + 0.5;
-    //
-    //     this.attackRange.dataset.position = `${y} 0.5 ${x}`;
-    //     // this.attackRange = document.createElement("mr-entity");
-    // }
 
     // only used to debug
     printArray(string, array) {

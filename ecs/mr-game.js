@@ -16,7 +16,7 @@ class GameSystem extends MRSystem {
         this.state = document.createElement("mr-entity");
         this.defaultState = {
             health: 20,
-            range: 15,
+            range: 30,
             action: 4,
             projectedCost: 0,
             hasKey: false,
@@ -86,6 +86,67 @@ class GameSystem extends MRSystem {
                 this.needsUpdate = true;
                 this.state.needsUpdate = true;
                 console.log('isDebug is now ', this.isDebug);
+            }
+
+            // W FOR WEAPON
+            if(event.key === 'w') {
+                event.preventDefault();
+
+                const twig = document.createElement("mr-weapon");
+                twig.dataset.model = "twig";
+                this.container.appendChild(twig);
+
+                const pos = this.board.addToMap({
+                    el: twig,
+                    type: 'weapon',
+                    subType: 'melee',
+                    name: 'twig',
+                    range: 10,
+                    attack: 10
+                }, this.board.entityMap);
+                console.log('Weapon dropped at ', pos);
+
+                this.needsUpdate = true;
+                this.state.needsUpdate = true;
+            }
+
+            // R FOR RANGE
+            if(event.key === 'r') {
+                event.preventDefault();
+
+                const range = document.createElement("mr-weapon");
+                range.dataset.model = "slingshot";
+                this.container.appendChild(range);
+
+                const pos = this.board.addToMap({
+                    el: range,
+                    type: 'weapon',
+                    subType: 'range',
+                    name: 'slingshot',
+                    range: 10,
+                    attack: 10
+                }, this.board.entityMap);
+                console.log('Weapon dropped at ', pos);
+
+                this.needsUpdate = true;
+                this.state.needsUpdate = true;
+            }
+
+            // C FOR CHEST
+            if(event.key === 'c') {
+                event.preventDefault();
+
+                const chest = document.createElement("mr-chest");
+                this.container.appendChild(chest);
+
+                const pos = this.board.addToMap({
+                    el: chest,
+                    type: 'chest',
+                }, this.board.entityMap);
+                console.log('Chest dropped at ', pos);
+
+                this.needsUpdate = true;
+                this.state.needsUpdate = true;
             }
         });
 
@@ -206,8 +267,8 @@ class GameSystem extends MRSystem {
             }
         }
 
+        params.isDebug = this.isDebug;
         this.board = new Board(this.container, params);
-        // this.board.assignHoverHandlers(this.state.components);
 
         // TODO: move somewhere else?
         switch (this.board.biome.name) {
@@ -613,8 +674,6 @@ class GameSystem extends MRSystem {
             }
         }
 
-        // console.log('enemyCount', enemyCount)
-
         let state = this.state.components.get("state");
         let loot;
         if (enemyCount == 1 && !state.hasKey) {
@@ -690,10 +749,12 @@ class GameSystem extends MRSystem {
         // random attack and random range
         let attack = this.level + Math.ceil(Math.random() * this.level / 10);
         let range;
-        if (weapon.subType == 'melee') {
+        if (weapon.subtype == 'melee') {
             range = 1.5;
-        } else {
+        } else if (weapon.subtype == 'range') {
             range = 3 + this.level / 10
+        } else {
+            console.error("Illegal type for weapon.subType");
         }
 
         this.board.entityMap[x][y] = {
