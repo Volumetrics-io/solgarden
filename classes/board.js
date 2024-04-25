@@ -183,9 +183,10 @@ class Board {
             this.addToMap(prop, this.entityMap);
         }
 
-        // weapon
+
         if (this.levelId == 0) {
 
+            // weapon
             const twig = document.createElement("mr-weapon");
             twig.dataset.model = "twig"
 
@@ -221,15 +222,15 @@ class Board {
             //     range: 3,
             //     attack: 2
             // }, this.entityMap);
-        }
 
-        // key
-        // TODO: expose isKey
-        // const key = document.createElement("mr-key");
-        // this.addToMap({
-        //     el: key,
-        //     type: 'key'
-        // }, this.entityMap);
+            // key
+            // TODO: expose isKey
+            const key = document.createElement("mr-key");
+            this.addToMap({
+                el: key,
+                type: 'key'
+            }, this.entityMap);
+        }
 
         // chests
         const isChest = params.isChest ?? true;
@@ -696,7 +697,7 @@ class Board {
         this.entityMap[r][c] = 0;
     }
 
-    getProjectedCostFor(x, y, state) {
+    getCostFor(x, y, state) {
         let projectedCost = 0;
 
         const entity = this.entityMap[x][y];
@@ -718,7 +719,7 @@ class Board {
             // console.log(dist)
             // if(dist <= state.getWeaponRange)
             if (state.selectedWeapon == 'melee' && dist <= state.meleeRange) {
-                projectedCost = 2;
+                projectedCost = 1;
             } else if (state.selectedWeapon == 'range' && dist <= state.rangeRange) {
                 projectedCost = 3;
             }

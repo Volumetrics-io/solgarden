@@ -1,6 +1,6 @@
 /////////////////////
 // I
-class MRChargingStationI extends MREntity {
+class MRBatteryI extends MREntity {
 
     constructor() {
         super()
@@ -13,11 +13,11 @@ class MRChargingStationI extends MREntity {
         this.el.style.pointerEvents = 'none';
     }
 }
-customElements.define('mr-charging-station-i', MRChargingStationI);
+customElements.define('mr-battery-i', MRBatteryI);
 
 /////////////////////
 // II
-class MRChargingStationII extends MREntity {
+class MRBatteryII extends MREntity {
 
     constructor() {
         super()
@@ -30,11 +30,11 @@ class MRChargingStationII extends MREntity {
         this.el.style.pointerEvents = 'none';
     }
 }
-customElements.define('mr-charging-station-ii', MRChargingStationII);
+customElements.define('mr-battery-ii', MRBatteryII);
 
 /////////////////////
 // III
-class MRChargingStationIII extends MREntity {
+class MRBatteryIII extends MREntity {
 
     constructor() {
         super()
@@ -47,11 +47,11 @@ class MRChargingStationIII extends MREntity {
         this.el.style.pointerEvents = 'none';
     }
 }
-customElements.define('mr-charging-station-iii', MRChargingStationIII);
+customElements.define('mr-battery-iii', MRBatteryIII);
 
 /////////////////////
 // *IV
-class MRChargingStationIV extends MREntity {
+class MRBatteryIV extends MREntity {
 
     constructor() {
         super()
@@ -64,7 +64,7 @@ class MRChargingStationIV extends MREntity {
         this.el.style.pointerEvents = 'none';
     }
 
-    updateBatteryLevel(value) {
+    updateLevel(value) {
         this.el.object3D.traverse(object => {
             if (object.isMesh && object.morphTargetInfluences) {
                 object.morphTargetInfluences[0] = value;
@@ -72,4 +72,4 @@ class MRChargingStationIV extends MREntity {
         })
     }
 }
-customElements.define('mr-charging-station-iv', MRChargingStationIV);
+customElements.define('mr-battery-iv', MRBatteryIV);

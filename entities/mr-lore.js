@@ -3,15 +3,10 @@ class MRLore extends MREntity {
     constructor() {
         super()
         this.el = document.createElement("mr-model");
-        // this.audioEntity = document.createElement("mr-entity");
-
-        // data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
-
     }
 
     connected() {
         this.appendChild(this.el);
-        // this.effect = this.dataset.effect ?? "health";
         this.el.src = "models/item-memoryCard01.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
@@ -138,26 +133,12 @@ class MRLore extends MREntity {
             }
         ];
 
-        // this.appendChild(this.audioEntity);
         const randomId = Math.floor(Math.random() * loreEntries.length);
-        // this.components.set('audio', {
-        //     src: `./audio/voices_test/${randomId}.mp3`,
-        //     state: 'pause',
-        //     loop: 'false'
-        // });
-
         this.loreEntry = loreEntries[randomId];
-        // this.loreText = loreEntry.text;
-        // this.loreOrigin = loreEntry.origin;
-
-
     }
 
     playLore() {
-        console.log(this.loreEntry);
-        // this.components.set('audio', {
-        //     state: 'play'
-        // });
+        // console.log(this.loreEntry);
     }
 
     hideModel() {
