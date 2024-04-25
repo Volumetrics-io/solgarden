@@ -221,6 +221,8 @@ class StateSystem extends MRSystem {
                         // recolor the ball if it's a projected cost
                         if (i < state.projectedCost) {
                             actionBall.material.color.setStyle(Colors.hover)
+                        } else if (state.projectedCost == Infinity) {
+                            actionBall.material.color.setStyle(Colors.neutral)
                         }
                     } else {
                         actionBall.visible = false;
@@ -241,7 +243,7 @@ class StateSystem extends MRSystem {
                     }
                 });
                 if (state.meleeName) {
-                    this.meleeAttackValueEl.innerText = state.meleeAttack + "/" + state.meleeRange;
+                    this.meleeAttackValueEl.innerText = state.meleeAttack;
                 }
 
                 this.rangeWeapons.forEach((weapon, i) => {
@@ -252,7 +254,7 @@ class StateSystem extends MRSystem {
                     }
                 });
                 if (state.rangeName) {
-                    this.rangeAttackValueEl.innerText = state.rangeAttack + "/" + state.rangeRange;
+                    this.rangeAttackValueEl.innerText = state.rangeAttack;
                 }
 
                 if (state.selectedWeapon == 'melee' && state.meleeName) {

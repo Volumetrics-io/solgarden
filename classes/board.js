@@ -144,7 +144,7 @@ class Board {
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
             const el = document.createElement("mr-enemy");
-            const hp = Math.ceil(Math.random() * 4) + this.levelId;
+            const hp = this.levelId / 4 + 1 - Math.random() * 2;
             const attack = Math.ceil(Math.random() * 4) + this.levelId;
             el.dataset.hp = hp;
             el.dataset.attack = attack;
@@ -198,29 +198,29 @@ class Board {
                 attack: 1
             }, this.entityMap);
 
-            const meleeWeapon = document.createElement("mr-weapon");
-            meleeWeapon.dataset.model = "shortSword"
-
-            this.addToMap({
-                el: meleeWeapon,
-                type: 'weapon',
-                subType: 'melee',
-                name: 'short-sword',
-                range: 1.5,
-                attack: 2
-            }, this.entityMap);
-
-            const rangeWeapon = document.createElement("mr-weapon");
-            rangeWeapon.dataset.model = "slingshot"
-
-            this.addToMap({
-                el: rangeWeapon,
-                type: 'weapon',
-                subType: 'range',
-                name: 'slingshot',
-                range: 3,
-                attack: 2
-            }, this.entityMap);
+            // const meleeWeapon = document.createElement("mr-weapon");
+            // meleeWeapon.dataset.model = "shortSword"
+            //
+            // this.addToMap({
+            //     el: meleeWeapon,
+            //     type: 'weapon',
+            //     subType: 'melee',
+            //     name: 'short-sword',
+            //     range: 1.5,
+            //     attack: 2
+            // }, this.entityMap);
+            //
+            // const rangeWeapon = document.createElement("mr-weapon");
+            // rangeWeapon.dataset.model = "slingshot"
+            //
+            // this.addToMap({
+            //     el: rangeWeapon,
+            //     type: 'weapon',
+            //     subType: 'range',
+            //     name: 'slingshot',
+            //     range: 3,
+            //     attack: 2
+            // }, this.entityMap);
         }
 
         // key
@@ -550,7 +550,7 @@ class Board {
         // no more playerpos
     }
 
-    distanceBetween(x1, y1, x2, y2) {
+    distBetween(x1, y1, x2, y2) {
         var distX = x1 - x2;
         var distY = y1 - y2;
         return Math.sqrt(distX * distX + distY * distY);
@@ -572,7 +572,7 @@ class Board {
                 this.project(tile, x, y, this.timer);
 
                 if (state.isPlayerTurn) {
-                    const distance = this.distances[x][y];
+                    const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
 
                     let attackRange;
@@ -584,13 +584,13 @@ class Board {
                         console.error('state.selectedWeapon has an illegal value.')
                     }
 
-                    const isReachable = (distance != Infinity && distance <= state.action && distance > 0);
+                    const isReachable = (dist != Infinity && dist <= state.action && dist > 0);
 
                     if (!entity) {
                         if (isReachable) {
                             // the tile is floor, and in reach
                             el.tileColor('white');
-                            el.setCostIndicator(distance);
+                            el.setCostIndicator(dist);
                         } else {
                             // floor, but too far for current action points
                             el.hideTile();
@@ -606,7 +606,7 @@ class Board {
                         if (isReachable) {
                             // the tile is floor, and in reach
                             el.tileColor('objects');
-                            el.setCostIndicator(distance);
+                            el.setCostIndicator(dist);
                         } else {
                             // floor, but too far for current action points
                             el.tileColor('neutral');
@@ -615,7 +615,7 @@ class Board {
 
                     } else if (entity.type == "enemy") {
 
-                        if (distance <= attackRange) {
+                        if (dist <= attackRange) {
                             el.tileColor('health');
                             el.setCostIndicator(99);
                         } else {
@@ -625,12 +625,15 @@ class Board {
 
                     } else if (entity.type == "player") {
                         el.hideTile();
+                    } else if (entity.type == "prop") {
+                        el.hideTile();
                     }
 
                     // If either melee or range weapon is hovered
-                    const rawDistance = this.distanceBetween(x, y, this.playerPos.x, this.playerPos.y);
+                    const ppos = this.getPlayerPos();
+                    const rawDist = this.distBetween(x, y, ppos.x, ppos.y);
                     if (state.hoverMelee) {
-                        if (rawDistance <= state.meleeRange) {
+                        if (rawDist <= state.meleeRange) {
                             el.tileColor('health');
                             el.setCostIndicator('');
                         } else {
@@ -638,7 +641,7 @@ class Board {
                         }
                     }
                     if (state.hoverRange) {
-                        if (rawDistance <= state.rangeRange) {
+                        if (rawDist <= state.rangeRange) {
                             el.tileColor('health');
                             el.setCostIndicator('');
                         } else {
@@ -693,7 +696,7 @@ class Board {
         this.entityMap[r][c] = 0;
     }
 
-    getProjectedCostFor(x, y) {
+    getProjectedCostFor(x, y, state) {
         let projectedCost = 0;
 
         const entity = this.entityMap[x][y];
@@ -708,20 +711,17 @@ class Board {
             // the tile is empty, so cost is distance
             projectedCost = this.distances[x][y];
 
-        } else if (entity.type == 'enemy' && this.distances[x][y] <= 2) {
-            // TODO: this is probably where we test for the weapon type
-            // and apply a different cost to melee and range
+        } else if (entity.type == 'enemy') {
+            const ppos = this.getPlayerPos();
+            const dist = this.distBetween(x, y, ppos.x, ppos.y);
 
-            // there is an entity on the tile
-            // so it depends what
-            // switch (this.entityMap[x][y].type) {
-            // case "enemy":
-            // if (this.distances[x][y] <= 2) {
-            projectedCost = 2;
-            // TODO: highlight main weapon in the inventory
-            console.log("a weapon would be highlighted");
-            // }
-            // break;
+            // console.log(dist)
+            // if(dist <= state.getWeaponRange)
+            if (state.selectedWeapon == 'melee' && dist <= state.meleeRange) {
+                projectedCost = 2;
+            } else if (state.selectedWeapon == 'range' && dist <= state.rangeRange) {
+                projectedCost = 3;
+            }
         }
 
         return projectedCost;

@@ -15,13 +15,32 @@ class GameSystem extends MRSystem {
 
         // The state system dealing with player state and UI
         this.state = document.createElement("mr-entity");
-        this.state.components.set('state', {
-            health: 10,
-            maxHealth: 20,
+        // this.state.components.set('state', {
+        //     health: 10,
+        //     maxHealth: 20,
+        //     range: 15,
+        //     maxRange: 30,
+        //     action: 4,
+        //     maxAction: 4,
+        //     projectedCost: 0,
+        //     hasKey: false,
+        //     meleeName: '',
+        //     meleeAttack: 0,
+        //     meleeRange: 1,
+        //     rangeName: '',
+        //     rangeAttack: 0,
+        //     rangeRange: 0,
+        //     selectedWeapon: "melee",
+        //     hoverMelee: false,
+        //     hoverRange: false,
+        //     isPlayerTurn: true,
+        //     // needsUpdate: false
+        // });
+
+        this.defaultState = {
+            health: 20,
             range: 15,
-            maxRange: 30,
             action: 4,
-            maxAction: 4,
             projectedCost: 0,
             hasKey: false,
             meleeName: '',
@@ -31,11 +50,33 @@ class GameSystem extends MRSystem {
             rangeAttack: 0,
             rangeRange: 0,
             selectedWeapon: "melee",
+            isPlayerTurn: true,
+        }
+
+        this.state.components.set('state', this.defaultState);
+
+        this.state.components.set('state', {
+            maxHealth: 20,
+            maxRange: 30,
+            maxAction: 4,
             hoverMelee: false,
             hoverRange: false,
-            isPlayerTurn: true,
-            // needsUpdate: false
         });
+
+
+        // this.state.components.set('state', {
+        //     health: state.maxHealth,
+        //     range: state.maxRange,
+        //     action: state.maxAction,
+        //     projectedCost: 0,
+        //     hasKey: false,
+        //     meleeName: 'twig',
+        //     meleeAttack: 1,
+        //     rangeName: 'slingshot',
+        //     rangeAttack: 1,
+        //     selectedWeapon: "melee",
+        //     isPlayerTurn: true,
+        // });
 
         this.endTurnButton = document.createElement("mr-button");
         this.soundController = new SoundController();
@@ -118,8 +159,8 @@ class GameSystem extends MRSystem {
             }
         } else if (
             // this.levelId == 1 ||
-            this.level == 2 ||
-            this.level == 4 ||
+            // this.level == 2 ||
+            this.level == 3 ||
             this.level == 8 ||
             this.level == 13 ||
             this.level == 21 ||
@@ -141,7 +182,7 @@ class GameSystem extends MRSystem {
                     name: 'battery',
                     path: "biomes/battery-room/",
                     audio: "/audio/fridge.mp3",
-                    tiles: ["tilegrasscyan001.glb"],
+                    tiles: ["tilegrass001.glb"],
                     props: ["plant_01.glb",
                         "plant_02.glb",
                         "plant_03.glb",
@@ -212,8 +253,10 @@ class GameSystem extends MRSystem {
                     const y = tile.pos.y;
 
                     // tile.el.setTileColor(Colors.hover);
+                    const state = this.state.components.get('state');
+
                     this.state.components.set('state', {
-                        projectedCost: this.board.getProjectedCostFor(x, y),
+                        projectedCost: this.board.getProjectedCostFor(x, y, state),
                     });
                     this.state.needsUpdate = true;
                 });
@@ -241,9 +284,9 @@ class GameSystem extends MRSystem {
                     const x = tile.pos.x;
                     const y = tile.pos.y;
 
-                    const targetEntity = this.board.getEntityAt(x, y);
-                    const cost = this.board.getProjectedCostFor(x, y);
                     const state = this.state.components.get('state');
+                    const targetEntity = this.board.getEntityAt(x, y);
+                    const cost = this.board.getProjectedCostFor(x, y, state);
 
                     if (state.isPlayerTurn) {
                         if (!targetEntity) {
@@ -262,7 +305,7 @@ class GameSystem extends MRSystem {
                                 this.board.distances[x][y] <= state.action) {
                                 this.interactWith(x, y, targetEntity, cost, state);
 
-                                console.log(targetEntity);
+                                // console.log(targetEntity);
 
                                 // pickable items
                                 if (targetEntity.type == "loot" ||
@@ -278,6 +321,8 @@ class GameSystem extends MRSystem {
 
                                 // door
                                 if (targetEntity.type == "door") {
+
+                                    // move the player to the door
                                     state.action -= cost;
                                     this.soundController.play('chessSound');
                                     this.board.movePlayer(x, y);
@@ -287,17 +332,39 @@ class GameSystem extends MRSystem {
                                     // free full bar if you reach the door
                                     state.action = state.maxAction;
 
-                                    // this.isPlayerTurn = false;
                                     setTimeout(() => {
-                                        // this.state.components.set('state', {
-                                        //   isPlayerTurn: true
-                                        // });
                                         this.initialize();
                                     }, 1000);
 
                                 }
                             } else {
                                 this.soundController.play('nopeSound');
+                            }
+
+                            // enemies
+                            if(targetEntity.type == "enemy") {
+                                const ppos = this.board.getPlayerPos();
+                                const dist = this.board.distBetween(x, y, ppos.x, ppos.y);
+                                const type = state.selectedWeapon;
+                                let range = this.getWeaponRange();
+
+                                if(dist <= range && cost <= state.action ) {
+                                    state.action -= cost;
+                                    this.attack(targetEntity, x, y);
+                                } else {
+                                    this.soundController.play('nopeSound');
+                                }
+
+                                // let cost;
+                                // if(type == 'melee') {
+                                //     cost = 2;
+                                // } else if(type == 'range') {
+                                //     cost = 3;
+                                // }
+
+                                // console.log(ppos, dist, range);
+                                // state.action -= cost;
+                                // this.attack(targetEntity, x, y);
                             }
                         }
 
@@ -320,14 +387,32 @@ class GameSystem extends MRSystem {
 
         this.state.components.set('state', {
             isPlayerTurn: true,
-            // needsUpdate: true
         });
 
-        // console.log(this.level)
         this.level++;
         this.gameIsStarted = true;
         this.needsUpdate = true;
         this.state.needsUpdate = true;
+    }
+
+    getWeaponRange() {
+        const state = this.state.components.get('state');
+
+        if(state.selectedWeapon == 'melee') {
+            return state.meleeRange;
+        } else if(state.selectedWeapon == 'range') {
+            return state.rangeRange;
+        }
+    }
+
+    getWeaponDamage() {
+        const state = this.state.components.get('state');
+
+        if(state.selectedWeapon == 'melee') {
+            return state.meleeAttack;
+        } else if(state.selectedWeapon == 'range') {
+            return state.rangeAttack;
+        }
     }
 
     addToInventory(entity, state) {
@@ -395,22 +480,23 @@ class GameSystem extends MRSystem {
         this.level = 0;
         this.cycle++;
 
-        const state = this.state.components.get('state');
+        this.state.components.set('state', this.defaultState);
 
-        this.state.components.set('state', {
-            health: state.maxHealth,
-            range: state.maxRange,
-            action: state.maxAction,
-            projectedCost: 0,
-            hasKey: false,
-            meleeName: 'twig',
-            meleeAttack: 1,
-            rangeName: 'slingshot',
-            rangeAttack: 1,
-            selectedWeapon: "melee",
-            isPlayerTurn: true,
-            // needsUpdate: true
-        });
+        // const state = this.state.components.get('state');
+        //
+        // this.state.components.set('state', {
+        //     health: state.maxHealth,
+        //     range: state.maxRange,
+        //     action: state.maxAction,
+        //     projectedCost: 0,
+        //     hasKey: false,
+        //     meleeName: 'twig',
+        //     meleeAttack: 1,
+        //     rangeName: 'slingshot',
+        //     rangeAttack: 1,
+        //     selectedWeapon: "melee",
+        //     isPlayerTurn: true,
+        // });
 
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
@@ -475,8 +561,8 @@ class GameSystem extends MRSystem {
         const health = state.health - attacker.attack;
         this.state.components.set('state', {
             health: health,
-            needsUpdate: true
         });
+        this.state.needsUpdate = true;
 
         this.board.showDamageAt(playerPos.x, playerPos.y, attacker.attack);
 
@@ -488,6 +574,8 @@ class GameSystem extends MRSystem {
     attack(entity, r, c) {
         const state = this.state.components.get('state');
 
+        console.log(entity)
+
         // TODO: move the sound where the player is
         // this.soundController.moveSoundPosition('swooshSound', );
         this.soundController.play('swooshSound');
@@ -497,7 +585,7 @@ class GameSystem extends MRSystem {
         if (state.selectedWeapon == "melee") {
             damage = state.meleeAttack;
         } else {
-            damage = stage.rangeAttack;
+            damage = state.rangeAttack;
         }
 
         entity.hp -= damage;
@@ -512,10 +600,10 @@ class GameSystem extends MRSystem {
 
     interactWith(x, y, entity, cost, state) {
         switch (entity.type) {
-            case "enemy":
-                state.action -= cost;
-                this.attack(entity, x, y);
-                break;
+            // case "enemy":
+            //     state.action -= cost;
+            //     this.attack(entity, x, y);
+            //     break;
 
             case "chest":
                 this.container.removeChild(entity.el);
@@ -561,9 +649,10 @@ class GameSystem extends MRSystem {
                 break;
 
             case "door":
+                // remove the door from the entity map
+                // so that the player can occupy the cell
                 this.soundController.play('doorSound');
                 this.board.removeEntityAt(x, y);
-                // this.initialize();
                 break;
         }
     }
@@ -593,41 +682,60 @@ class GameSystem extends MRSystem {
 
     dropWeapon(x, y) {
 
-        const Weapons = [{
-                name: "twig",
-                subtype: "melee"
-            },
+        // const Weapons = [{
+        //         name: "twig",
+        //         subtype: "melee"
+        //     },
+        //     {
+        //         name: "shortSword",
+        //         subtype: "melee"
+        //     },
+        //     {
+        //         name: "slingshot",
+        //         subtype: "range"
+        //     },
+        //     {
+        //         name: "bow",
+        //         subtype: "range"
+        //     },
+        // ]
+
+        const Weapons = [
             {
-                name: "short-sword",
+                name: "shortSword",
                 subtype: "melee"
             },
             {
                 name: "slingshot",
                 subtype: "range"
-            },
-            {
-                name: "bow",
-                subtype: "range"
-            },
+            }
         ]
 
         // TODO: there should be only one "mr-weapon"
         // as an entity in the entitymap
         const randomId = Math.floor(Math.random() * Weapons.length);
+        const weapon = Weapons[randomId];
         const el = document.createElement("mr-weapon");
-        el.dataset.name = Weapons[randomId].name;
+        el.dataset.model = weapon.name;
         this.container.appendChild(el);
 
-        const weapon = {
+        // random attack and random range
+        let attack = this.level + Math.ceil(Math.random() * this.level / 10);
+        let range;
+        if(weapon.subType == 'melee') {
+            range = 1.5;
+        } else {
+            range =  3 + this.level / 10
+        }
+
+        this.board.entityMap[x][y] = {
             el: el,
             type: 'weapon',
-            subType: Weapons[randomId].subtype,
-            name: Weapons[randomId].name,
-            attack: this.level + Math.ceil(Math.random() * this.level / 10),
-            range: Math.ceil(Math.random() * 5) + 1,
+            subType: weapon.subtype,
+            name: weapon.name,
+            attack: attack,
+            range: range,
         };
-
-        this.board.entityMap[x][y] = weapon;
         this.needsUpdate = true;
     }
 
