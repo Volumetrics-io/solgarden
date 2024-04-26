@@ -23,11 +23,19 @@ class MREnemy extends MREntity {
     }
 
     connected() {
+
+        const subtype = this.dataset.subtype ?? "aimless";
+
+        const enemyModels = {
+            static: "models/enemy-static1.glb",
+            homing: "models/enemy-floater1.glb",
+            aimless: "models/enemy-aimless1.glb",
+            // horse: "models/enemy-horse1.glb",
+        }
+
         this.appendChild(this.el);
-        this.el.src = "models/enemy-floater1.glb";
+        this.el.src = enemyModels[subtype]
         this.el.dataset.compAnimation = "clip: 0; action: play;";
-        // this.el.src = "models/enemy_temp.glb";
-        // this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.dataset.rotation = `0 180 0`
         this.el.style.pointerEvents = 'none';
 

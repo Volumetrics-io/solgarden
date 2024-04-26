@@ -145,14 +145,29 @@ class Board {
 
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
+            const EnemySubtypes = [
+                'static',
+                'homing',
+                'aimless',
+                // 'horse'
+            ]
+
+            const rand = Math.floor(Math.random() * EnemySubtypes.length);
+            const subtype = EnemySubtypes[rand];
+
             const el = document.createElement("mr-enemy");
             const hp = this.levelId / 4 + Math.random() * this.levelId / 4;
             const attack = Math.floor(Math.random() * 2 + 1);
-            el.dataset.hp = hp;
-            el.dataset.attack = attack;
+
+            // console.log(subtype);
+
+            // el.dataset.hp = hp;
+            // el.dataset.attack = attack;
+            el.dataset.subtype = subtype;
             const enemy = {
                 el: el,
                 type: 'enemy',
+                subtype: subtype,
                 hp: hp,
                 attack: attack
             };
@@ -198,7 +213,7 @@ class Board {
             this.addToMap({
                 el: twig,
                 type: 'weapon',
-                subType: 'melee',
+                subtype: 'melee',
                 name: 'twig',
                 range: 1,
                 attack: 1
@@ -435,10 +450,10 @@ class Board {
         }
 
         if (entity.animation) {
-            const duration = 3; // seconds
+            const speed = 3;
             const startTime = timer - entity.animation.timerStart;
 
-            const t = startTime * duration;
+            const t = startTime * speed;
             // const p = Animator.fanOut(t);
             const p = Animator.fanOut(t);
             const h = Animator.jump(t);
@@ -448,8 +463,17 @@ class Board {
             let distF;
 
             if (entity.type == "enemy") {
-                distF = 0;
+                if(entity.subtype == 'homing') {
+                    distF = 0;
+                } else if(entity.subtype == 'aimless') {
+                    distF = h * 0.7;
+                } else {
+                    distF = 0;
+                }
+
             } else {
+
+                // this is the player
                 distF = h * 0.8;
             }
 
@@ -526,6 +550,16 @@ class Board {
                 if (state.isPlayerTurn) {
                     const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
+                    const ppos = this.getPlayerPos();
+
+                    // is the tile reachable by walking (pathfinder distance)
+                    const isReachable = (
+                        dist != Infinity &&
+                        dist <= state.action &&
+                        dist > 0);
+
+                    //  combat related distances are Euclidean
+                    const rawDist = this.distBetween(x, y, ppos.x, ppos.y);
 
                     let attackRange;
                     if (state.selectedWeapon == 'melee') {
@@ -533,10 +567,8 @@ class Board {
                     } else if (state.selectedWeapon == 'range') {
                         attackRange = state.rangeRange;
                     } else {
-                        console.error('state.selectedWeapon has an illegal value.')
+                        console.error('Illegal value for selectedWeapon.');
                     }
-
-                    const isReachable = (dist != Infinity && dist <= state.action && dist > 0);
 
                     if (!entity) {
                         if (isReachable) {
@@ -552,12 +584,11 @@ class Board {
                         entity.type == "lore" ||
                         entity.type == "key" ||
                         entity.type == "weapon" ||
-                        entity.type == "chest" ||
-                        entity.type == "door"
+                        entity.type == "chest"
                     ) {
                         if (isReachable) {
                             // the tile is floor, and in reach
-                            el.tileColor('objects');
+                            el.tileColor('glow-white');
                             el.setCostIndicator(dist);
                         } else {
                             // floor, but too far for current action points
@@ -565,14 +596,26 @@ class Board {
                             el.setCostIndicator("");
                         }
 
-                    } else if (entity.type == "enemy") {
+                    } else if (entity.type == "door") {
 
-                        if (dist <= attackRange) {
+                        if (state.hasKey && isReachable) {
+                            el.tileColor('range');
+                        } else if(isReachable) {
                             el.tileColor('health');
-                            el.setCostIndicator(99);
                         } else {
                             el.tileColor('neutral');
-                            el.setCostIndicator("");
+                        }
+                        el.setCostIndicator("");
+
+                    } else if (entity.type == "enemy") {
+
+                        // if the enemy is in attack range
+                        if (rawDist <= attackRange) {
+                            el.tileColor('health');
+                            el.setCostIndicator("×");
+                        } else {
+                            el.tileColor('neutral');
+                            el.setCostIndicator("×");
                         }
 
                     } else if (entity.type == "player") {
@@ -582,8 +625,6 @@ class Board {
                     }
 
                     // If either melee or range weapon is hovered
-                    const ppos = this.getPlayerPos();
-                    const rawDist = this.distBetween(x, y, ppos.x, ppos.y);
                     if (state.hoverMelee) {
                         if (rawDist <= state.meleeRange) {
                             el.tileColor('health');
@@ -641,7 +682,21 @@ class Board {
     }
 
     getEntityAt(r, c) {
-        return this.entityMap[r][c];
+        // this is on the map
+        if (r >= 0 && r < this.rowCount &&
+            c >= 0 && c < this.colCount) {
+
+            if (this.entityMap[r]) {
+                if (this.entityMap[r][c]) {
+                    return this.entityMap[r][c];
+                }
+                return false;
+            }
+            return false;
+        }
+        // if the cell is not on the board
+        // we return a special value
+        return "offmap";
     }
 
     removeEntityAt(r, c) {

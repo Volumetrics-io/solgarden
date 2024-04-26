@@ -4,6 +4,7 @@ class MRKey extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
+        // this.glow = document.createElement("mr-model");
 
         // this.el.onLoad = () => {
         //     this.el.object3D.traverse(object => {
@@ -24,6 +25,10 @@ class MRKey extends MREntity {
         this.el.src = "models/key_01.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
+
+        // this.appendChild(this.glow);
+        // this.glow.src = '/ui-models/tileHighlight1.glb';
+        // this.glow.style.pointerEvents = 'none';
     }
 
 }

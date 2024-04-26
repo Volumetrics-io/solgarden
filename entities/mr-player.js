@@ -10,8 +10,6 @@ class MRPlayer extends MREntity {
         this.damageValue = document.createElement("mr-text");
         this.damageValueBackface = document.createElement("mr-text");
 
-        // this.attackRange = document.createElement("mr-entity");
-
         this.el.onLoad = () => {
             this.el.object3D.traverse(object => {
                 if (object.isMesh) {
@@ -29,10 +27,7 @@ class MRPlayer extends MREntity {
     connected() {
         this.appendChild(this.el);
         this.el.src = "models/mainCharacter_wip.glb";
-        // this.el.src = "models/enemy_temp.glb";
         this.el.style.pointerEvents = 'none';
-
-        // this.dataset.rotation = `0 180 0`;
 
         this.appendChild(this.light);
         this.light.setAttribute('color', "#ffffff");
@@ -61,18 +56,6 @@ class MRPlayer extends MREntity {
         this.damageValueBackface.textObj.position.setX((-this.damageValueBackface.width / 2) / 0.005);
         this.damageValueBackface.dataset.rotation = "0 180 0";
         this.damageValueBackface.dataset.position = "0 0 -0.001";
-
-
-        // this.appendChild(this.attackRange);
-        // this.attackRange.className = "attack-range";
-        // this.attackRange.dataset.position = `0 1 0`
-        // this.attackRangeMesh = new THREE.Mesh(
-        //     new THREE.CylinderGeometry( 1, 1, 0.25, 12 ),
-        //     new THREE.MeshPhongMaterial({
-        //         color: "hsl(0, 100%, 50%)",
-        //     }));
-        // this.attackRange.object3D.add(this.attackRangeMesh);
-
     }
 
     showDamage(string) {
@@ -88,9 +71,6 @@ class MRPlayer extends MREntity {
         }, 500);
     }
 
-    // setAttackRange(range) {
-    //
-    // }
 }
 
 customElements.define('mr-player', MRPlayer);

@@ -5,10 +5,15 @@ class MRTile extends MREntity {
 
         this.el = document.createElement("mr-model");
 
+        this.borderContainer = document.createElement('mr-div');
+
         this.borderWhite = document.createElement("mr-model");
         this.borderObjects = document.createElement("mr-model");
         this.borderHealth = document.createElement("mr-model");
         this.borderNeutral = document.createElement("mr-model");
+        this.borderRange = document.createElement("mr-model");
+
+        this.glowWhite = document.createElement("mr-model");
 
         this.numberContainer = document.createElement("mr-div");
         this.numberString = document.createElement("mr-text");
@@ -32,26 +37,43 @@ class MRTile extends MREntity {
 
     connected() {
 
+        this.appendChild(this.borderContainer);
+        this.borderContainer.dataset.position = "0 0.2 0";
+        this.borderContainer.style.pointerEvents = 'none';
+
         // TODO: automate this
-        this.appendChild(this.borderWhite);
+        this.borderContainer.appendChild(this.borderWhite);
         this.borderWhite.src = '/ui-models/borderObject-white.glb';
-        this.borderWhite.dataset.position = "0 0.2 0";
         this.borderWhite.style.visibility = "hidden";
 
-        this.appendChild(this.borderObjects);
+        this.borderContainer.appendChild(this.borderObjects);
         this.borderObjects.src = '/ui-models/borderObject-objects.glb';
-        this.borderObjects.dataset.position = "0 0.2 0";
         this.borderObjects.style.visibility = "hidden";
 
-        this.appendChild(this.borderHealth);
+        this.borderContainer.appendChild(this.borderHealth);
         this.borderHealth.src = '/ui-models/borderObject-health.glb';
-        this.borderHealth.dataset.position = "0 0.2 0";
         this.borderHealth.style.visibility = "hidden";
 
-        this.appendChild(this.borderNeutral);
+        this.borderContainer.appendChild(this.borderNeutral);
         this.borderNeutral.src = '/ui-models/borderObject-neutral.glb';
-        this.borderNeutral.dataset.position = "0 0.2 0";
         this.borderNeutral.style.visibility = "hidden";
+
+        this.borderContainer.appendChild(this.borderRange);
+        this.borderRange.src = '/ui-models/borderObject-range.glb';
+        this.borderRange.style.visibility = "hidden";
+
+        this.borderContainer.appendChild(this.glowWhite);
+        // this.glowWhite.src = '/ui-models/borderObject-range.glb';
+        this.glowWhite.src = '/ui-models/tileHighlight1.glb';
+        // this.borderRange.dataset.position = "0 0.2 0";
+        this.glowWhite.style.visibility = "hidden";
+        this.glowWhite.onLoad = () => {
+            this.glowWhite.object3D.traverse(object => {
+                if (object.isMesh) {
+                    object.material.opacity = 0.4;
+                }
+            })
+        }
 
         this.appendChild(this.el);
         const tileset = this.dataset.tileset.split(',');
@@ -83,6 +105,10 @@ class MRTile extends MREntity {
         this.borderObjects.style.visibility = "hidden";
         this.borderHealth.style.visibility = "hidden";
         this.borderNeutral.style.visibility = "hidden";
+        this.borderRange.style.visibility = "hidden";
+
+        this.glowWhite.style.visibility = "hidden";
+
         this.setCostIndicator("");
     }
 
@@ -104,6 +130,15 @@ class MRTile extends MREntity {
             case 'objects':
                 this.borderObjects.style.visibility = "visible";
                 this.numberString.style.color = Colors.objects;
+                break;
+            case 'range':
+                this.borderRange.style.visibility = "visible";
+                this.numberString.style.color = Colors.range;
+                break;
+            case 'glow-white':
+                this.borderWhite.style.visibility = "visible";
+                this.glowWhite.style.visibility = "visible";
+                this.numberString.style.color = Colors.white;
                 break;
         }
     }

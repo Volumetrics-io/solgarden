@@ -89,7 +89,7 @@ class GameSystem extends MRSystem {
             }
 
             // W FOR WEAPON
-            if(event.key === 'w') {
+            if (event.key === 'w') {
                 event.preventDefault();
 
                 const twig = document.createElement("mr-weapon");
@@ -99,7 +99,7 @@ class GameSystem extends MRSystem {
                 const pos = this.board.addToMap({
                     el: twig,
                     type: 'weapon',
-                    subType: 'melee',
+                    subtype: 'melee',
                     name: 'twig',
                     range: 10,
                     attack: 10
@@ -111,7 +111,7 @@ class GameSystem extends MRSystem {
             }
 
             // R FOR RANGE
-            if(event.key === 'r') {
+            if (event.key === 'r') {
                 event.preventDefault();
 
                 const range = document.createElement("mr-weapon");
@@ -121,10 +121,10 @@ class GameSystem extends MRSystem {
                 const pos = this.board.addToMap({
                     el: range,
                     type: 'weapon',
-                    subType: 'range',
+                    subtype: 'range',
                     name: 'slingshot',
-                    range: 10,
-                    attack: 10
+                    range: 3,
+                    attack: 3
                 }, this.board.entityMap);
                 console.log('Weapon dropped at ', pos);
 
@@ -133,7 +133,7 @@ class GameSystem extends MRSystem {
             }
 
             // C FOR CHEST
-            if(event.key === 'c') {
+            if (event.key === 'c') {
                 event.preventDefault();
 
                 const chest = document.createElement("mr-chest");
@@ -144,6 +144,15 @@ class GameSystem extends MRSystem {
                     type: 'chest',
                 }, this.board.entityMap);
                 console.log('Chest dropped at ', pos);
+
+                this.needsUpdate = true;
+                this.state.needsUpdate = true;
+            }
+
+            // H FOR HEALTH & RANGE
+            if (event.key === 'h') {
+                event.preventDefault();
+                this.state.components.set("state", this.defaultState);
 
                 this.needsUpdate = true;
                 this.state.needsUpdate = true;
@@ -290,6 +299,9 @@ class GameSystem extends MRSystem {
                     const x = tile.pos.x;
                     const y = tile.pos.y;
 
+                    // TODO: GROSS
+                    tile.el.borderContainer.dataset.position = "0 0.15 0";
+
                     const state = this.state.components.get('state');
 
                     this.state.components.set('state', {
@@ -302,6 +314,9 @@ class GameSystem extends MRSystem {
                 tile.el.addEventListener("mouseout", () => {
                     const x = tile.pos.x;
                     const y = tile.pos.y;
+
+                    // TODO: GROSS
+                    tile.el.borderContainer.dataset.position = "0 0.2 0";
 
                     this.state.components.set('state', {
                         projectedCost: 0,
@@ -318,6 +333,8 @@ class GameSystem extends MRSystem {
                     const state = this.state.components.get('state');
                     const targetEntity = this.board.getEntityAt(x, y);
                     const cost = this.board.getCostFor(x, y, state);
+
+                    if (this.isDebug) console.log("Tapped entity", targetEntity);
 
                     if (state.isPlayerTurn) {
                         if (!targetEntity) {
@@ -395,7 +412,10 @@ class GameSystem extends MRSystem {
                         // Automatically end the turn when the player
                         // runs out of action points
                         if (this.autoEndTurn && state.action == 0) {
-                            this.endTurn();
+                            setTimeout(() => {
+                                this.endTurn();
+                            }, 800);
+                            // this.endTurn();
                         }
 
                         this.needsUpdate = true;
@@ -438,15 +458,18 @@ class GameSystem extends MRSystem {
 
     addToInventory(entity, state) {
         if (entity.type == "weapon") {
-            if (entity.subType == "melee" && entity.attack > state.meleeAttack) {
+            if (entity.subtype == "melee" && entity.attack > state.meleeAttack) {
                 state.meleeName = entity.name;
                 state.meleeAttack = entity.attack;
                 state.meleeRange = entity.range;
             }
-            if (entity.subType == "range" && entity.attack > state.rangeAttack) {
+            if (entity.subtype == "range" && entity.attack > state.rangeAttack) {
                 state.rangeName = entity.name;
                 state.rangeAttack = entity.attack;
                 state.rangeRange = entity.range;
+            }
+            if (state.selectedWeapon == '') {
+                state.selectedWeapon = entity.subtype;
             }
         }
         if (entity.type == "key") {
@@ -474,7 +497,7 @@ class GameSystem extends MRSystem {
                 }
             }
 
-            // Dot get to live another day
+            // Dot still has battery left
             range--;
             this.opponentTurn();
         } else {
@@ -492,6 +515,10 @@ class GameSystem extends MRSystem {
         this.needsUpdate = true;
         this.state.needsUpdate = true;
         this.soundController.play('analogSound');
+
+        if (this.isDebug) {
+            console.log("Turn has ended. Combat queue", this.combatQueue);
+        }
     }
 
     endGame() {
@@ -514,30 +541,60 @@ class GameSystem extends MRSystem {
 
             // console.log('entry',entry);
             const entity = entry.entity;
+            const subtype = entity.subtype;
             const r = entry.r;
             const c = entry.c;
             const x = this.board.playerPos.x;
             const y = this.board.playerPos.y;
 
-            // remove origin and target from the entity map
-            // otherwise the pathfinding can't work
-            const blockmap = this.board.entityMap.map(function(arr) {
-                return arr.slice();
-            });
-            blockmap[r][c] = 0;
-            blockmap[x][y] = 0;
+            // Movements for different enemy types
+            if (subtype == 'aimless') {
+                //  this unit wanders randomly
+                let Moves = [];
+                ;[[-1, 0],[1, 0],[0, -1],[0, 1]].forEach((move, i) => {
+                    const cell = this.board.getEntityAt(r + move[0], c + move[1]);
+                    if (!cell && cell != "offmap") {
+                        Moves.push(move);
+                    }
+                });
+                if(Moves.length > 0) {
+                    const rand = Math.floor(Math.random() * Moves.length);
+                    const next = Moves[rand];
+                    this.board.moveEntity(r, c, r + next[0], c + next[1]);
+                }
 
-            const pf = new PathFinder(blockmap);
-            const path = pf.findPath([r, c], [x, y]);
+            } else if (subtype == 'static') {
+                // this unit doesn't move
+                // this is a turet, or a tower
 
-            // if path[1] is undefined, the path has no solution
-            const nextMove = (!path[1]) ? [r, c] : path[1];
+            } else if (subtype == 'homing') {
 
-            if (this.board.distances[r][c] <= 1) {
-                this.attackPlayer(entity);
-            } else {
-                // TODO: enemies move one step at the time
+                // this unit follows the player
+                // and always aim to get closer
+
+                // the path finder needs an obstacle map
+                // we can just copy the entity map
+                const blockmap = this.board.entityMap.map(function(arr) {
+                    return arr.slice();
+                });
+                // remove origin and target from copy
+                // otherwise the pathfinding can't work
+                blockmap[r][c] = 0;
+                blockmap[x][y] = 0;
+
+                const pf = new PathFinder(blockmap);
+                const path = pf.findPath([r, c], [x, y]);
+
+                // if path[1] is undefined, the path has no solution
+                const nextMove = (!path[1]) ? [r, c] : path[1];
+
                 this.board.moveEntity(r, c, nextMove[0], nextMove[1]);
+            }
+
+            // after moving, attack if in range
+            // TODO: different attacks based on enemy subtype
+            if (this.board.distances[r][c] <= 2) {
+                this.attackPlayer(entity);
             }
 
             setTimeout(() => {
@@ -712,33 +769,37 @@ class GameSystem extends MRSystem {
     dropWeapon(x, y) {
 
         // TODO: what kind of weapons can drop?
+        const Weapons = [{
+                name: "twig",
+                subtype: "melee",
+                range: 1
+            },
+            {
+                name: "shortsword",
+                subtype: "melee",
+                range: 1.5
+            },
+            {
+                name: "slingshot",
+                subtype: "range",
+                range: 2
+            },
+            {
+                name: "bow",
+                subtype: "range",
+                range: 3
+            },
+        ]
+
         // const Weapons = [{
-        //         name: "twig",
-        //         subtype: "melee"
-        //     },
-        //     {
-        //         name: "shortSword",
+        //         name: "shortsword",
         //         subtype: "melee"
         //     },
         //     {
         //         name: "slingshot",
         //         subtype: "range"
-        //     },
-        //     {
-        //         name: "bow",
-        //         subtype: "range"
-        //     },
+        //     }
         // ]
-
-        const Weapons = [{
-                name: "shortSword",
-                subtype: "melee"
-            },
-            {
-                name: "slingshot",
-                subtype: "range"
-            }
-        ]
 
         const randomId = Math.floor(Math.random() * Weapons.length);
         const weapon = Weapons[randomId];
@@ -747,20 +808,24 @@ class GameSystem extends MRSystem {
         this.container.appendChild(el);
 
         // random attack and random range
-        let attack = this.level + Math.ceil(Math.random() * this.level / 10);
+        let attack;
         let range;
         if (weapon.subtype == 'melee') {
             range = 1.5;
+            attack = 1 + Math.ceil(this.level / 5);
         } else if (weapon.subtype == 'range') {
-            range = 3 + this.level / 10
+            range = 3;
+            attack = 1 + Math.ceil(this.level / 5);
         } else {
-            console.error("Illegal type for weapon.subType");
+            console.error("Illegal type for weapon.subtype");
         }
+
+        console.log('dropped weapon', attack, range, weapon.name, weapon.subtype);
 
         this.board.entityMap[x][y] = {
             el: el,
             type: 'weapon',
-            subType: weapon.subtype,
+            subtype: weapon.subtype,
             name: weapon.name,
             attack: attack,
             range: range,
