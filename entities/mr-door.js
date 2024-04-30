@@ -39,26 +39,34 @@ class MRDoor extends MREntity {
             state: "stop"
         })
 
+        this.ui.components.set('animation', {
+            clip: 0,
+            action: "stop",
+            loop: false,
+            clampWhenFinished: true,
+        })
+
+        this.el.components.set('animation', {
+            clip: 0,
+            action: "stop",
+            loop: false,
+            clampWhenFinished: true,
+        })
+
         if (this.dataset.hasKey !== undefined) {
             this.ui.components.set('animation', {
-                clip: 0,
                 action: "play",
-                loop: false
             })
 
             this.el.components.set('animation', {
-                clip: 0,
                 action: "play",
-                loop: false
             })
         }
     }
 
     open() {
         this.ui.components.set('animation', {
-            clip: 0,
             action: "play",
-            loop: false
         })
 
         setTimeout(() => {
@@ -70,9 +78,7 @@ class MRDoor extends MREntity {
 
         setTimeout(() => {
             this.el.components.set('animation', {
-                clip: 0,
                 action: "play",
-                loop: false
             })
 
         }, 1000);

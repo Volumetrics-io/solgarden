@@ -17,6 +17,17 @@ class Board {
         this.isLore = params.isLore ?? true;
         this.isDoor = params.isDoor ?? false;
 
+        this.isQuake = false;
+        this.quakeProgress = 0;
+        this.quakeTimerStart = 0;
+        this.quakeSpeed = 3;
+        this.quakeForce = 0.2; // 0.5
+        this.quakeHasStarted = false;
+        this.quakePos = {
+            x: 0,
+            y: 0
+        }
+
         // TODO: biome soundtrack sound be here
         this.biomes = [{
                 // plains
@@ -132,7 +143,7 @@ class Board {
 
         // door
         const door = document.createElement("mr-door");
-        if(this.biome.name == 'battery') door.dataset.hasKey = true;
+        if (this.biome.name == 'battery') door.dataset.hasKey = true;
         this.doorPos = this.addToMap({
             el: door,
             type: 'door'
@@ -294,6 +305,15 @@ class Board {
         array.forEach(row => {
             console.log(row);
         })
+    }
+
+    startQuakeAt(x, y) {
+        this.quakePos = {
+            x: x,
+            y: y
+        };
+        this.isQuake = true;
+        this.quakeHasStarted = false;
     }
 
     addToMap(entity, map) {
@@ -458,6 +478,38 @@ class Board {
     project(entity, r, c, timer) {
 
         let coor;
+        let floorY;
+
+        if (this.isQuake) {
+
+            const startTime = timer - this.quakeTimerStart;
+
+            const t = startTime * this.quakeSpeed;
+            const x = this.quakePos.x;
+            const y = this.quakePos.y;
+
+            const dx = r - x;
+            const dy = c - y;
+
+            // distance between tile and player
+            const dist = Math.sqrt(dx * dx + dy * dy) + 1;
+
+            const falloff = 1 / (t + 0.5) - 0.3;
+
+            // the value to change to make the move more or less violent
+            // const force = 0.5;
+            const wavePeriod = 4;
+            const amplitude = -Math.sin(t * wavePeriod) * this.quakeForce * falloff;
+
+            // Y difference at the point
+            // https://www.youtube.com/watch?v=ciUNizDgiOs
+            const wave = Math.sin(dist * 2 + t * 3) * amplitude / dist;
+
+            // The base floor Y used for the rest of the calculations.
+            floorY = this.heightMap[r][c] * 0.35 + 0.3 + wave;
+        } else {
+            floorY = this.heightMap[r][c] * 0.35 + 0.3;
+        }
 
         if (entity.animation && !entity.animation.started) {
             entity.animation.started = true;
@@ -489,6 +541,9 @@ class Board {
             } else if (entity.type == "projectile") {
                 // projectiles
                 distF = 0;
+
+                // projectiles move linearly
+                // so we use t instead of p for the progress
                 distR = entity.animation.x + entity.animation.distX * t;
                 distC = entity.animation.y + entity.animation.distY * t;
 
@@ -499,29 +554,30 @@ class Board {
 
             coor = {
                 x: distC,
-                y: this.heightMap[r][c] * 0.35 + 0.3 + distF,
+                y: floorY + distF,
                 z: distR
             };
 
             if (t > 1) {
                 coor = {
                     x: c,
-                    y: this.heightMap[r][c] * 0.35 + 0.3,
+                    y: floorY,
                     z: r
                 };
                 delete entity.animation;
             }
 
         } else {
+            // console.log("is this a tile?")
             coor = {
                 x: c,
-                y: this.heightMap[r][c] * 0.35 + 0.3,
+                y: floorY,
                 z: r
             };
         }
 
+        // the offset is to center the board in the table
         entity.el.object3D.position.x = coor.x - this.colCount / 2 + 0.5;
-        // entity.el.object3D.position.y = coor.y + this.waveDeltaYAt(r, c, timer);
         entity.el.object3D.position.y = coor.y;
         entity.el.object3D.position.z = coor.z - this.rowCount / 2 + 0.5;
     }
@@ -548,19 +604,19 @@ class Board {
         })
     }
 
-    projectCoordinates(r, c) {
-        return {
-            x: c - this.colCount / 2,
-            y: this.heightMap[r][c] * 0.35 + 0.3,
-            z: r - this.rowCount / 2
-        }
-    }
+    // projectCoordinates(r, c) {
+    //     return {
+    //         x: c - this.colCount / 2,
+    //         y: this.heightMap[r][c] * 0.35 + 0.3,
+    //         z: r - this.rowCount / 2
+    //     }
+    // }
 
-    waveDeltaYAt(r, c, timer) {
-        // return 0;
-        // return Math.sin(timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 100;
-        return Math.sin(timer + this.heightMap[r][c] / 1.1 + r / 1.1 + c / 1.1) / 100;
-    }
+    // waveDeltaYAt(r, c, timer) {
+    //     // return 0;
+    //     // return Math.sin(timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 100;
+    //     return Math.sin(timer + this.heightMap[r][c] / 1.1 + r / 1.1 + c / 1.1) / 100;
+    // }
 
     getPlayerPos() {
         return this.playerPos;
@@ -575,6 +631,22 @@ class Board {
     updateFloor(state, timer) {
         const ppos = this.getPlayerPos();
 
+        // Quake is about to start
+        if (this.isQuake && !this.quakeHasStarted) {
+            this.quakeHasStarted = true;
+            this.quakeTimerStart = timer;
+        }
+
+        // Quake is running
+        if (this.isQuake &&
+            this.quakeHasStarted &&
+            timer - this.quakeTimerStart > 1) {
+
+            // if (timer - this.quakeTimerStart > 1) {
+            this.isQuake = false;
+            // }
+        }
+
         this.tileMap.forEach(row => {
             row.forEach(tile => {
 
@@ -585,7 +657,7 @@ class Board {
                 // const x = parseInt(tile.el.dataset.x);
                 // const y = parseInt(tile.el.dataset.y);
 
-                this.project(tile, x, y, this.timer);
+                this.project(tile, x, y, timer);
 
                 if (state.isPlayerTurn) {
                     const dist = this.distances[x][y];

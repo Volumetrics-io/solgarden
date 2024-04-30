@@ -47,31 +47,31 @@ class GameSystem extends MRSystem {
 
         document.addEventListener("keydown", (event) => {
 
-            // I FOR INITIALIZE
+            // I for Initialize a new room
             if (event.key === "i") {
                 event.preventDefault();
                 this.initialize();
             }
 
-            // E FOR END
+            // E for End game
             if (event.key === "e") {
                 event.preventDefault();
                 this.endGame();
             }
 
-            // S FOR STATE
+            // S for State
             if (event.key === 's') {
                 event.preventDefault();
                 console.log(this.state.components.get('state'));
             }
 
-            // M FOR MAP
+            // M for Map
             if (event.key === 'm') {
                 event.preventDefault();
                 this.printArray("this.board.entityMap", this.board.entityMap);
             }
 
-            // U FOR UPDATE
+            // U for Update
             if (event.key === "i") {
                 event.preventDefault();
                 this.needsUpdate = true;
@@ -79,7 +79,7 @@ class GameSystem extends MRSystem {
                 console.log('triggered an update')
             }
 
-            // D FOR DEBUG
+            // D for Debug
             if (event.key === "d") {
                 event.preventDefault();
                 this.isDebug = !this.isDebug;
@@ -88,7 +88,7 @@ class GameSystem extends MRSystem {
                 console.log('isDebug is now ', this.isDebug);
             }
 
-            // W FOR WEAPON
+            // W for Weapon
             if (event.key === 'w') {
                 event.preventDefault();
 
@@ -110,7 +110,7 @@ class GameSystem extends MRSystem {
                 this.state.needsUpdate = true;
             }
 
-            // R FOR RANGE
+            // R for Range
             if (event.key === 'r') {
                 event.preventDefault();
 
@@ -132,7 +132,7 @@ class GameSystem extends MRSystem {
                 this.state.needsUpdate = true;
             }
 
-            // C FOR CHEST
+            // C for Chest
             if (event.key === 'c') {
                 event.preventDefault();
 
@@ -149,7 +149,7 @@ class GameSystem extends MRSystem {
                 this.state.needsUpdate = true;
             }
 
-            // H FOR HEALTH & RANGE
+            // H for Health reset
             if (event.key === 'h') {
                 event.preventDefault();
                 this.state.components.set("state", this.defaultState);
@@ -158,48 +158,29 @@ class GameSystem extends MRSystem {
                 this.state.needsUpdate = true;
             }
 
-            // P FOR PARTICLE
+            // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
 
                 this.board.projectileTo(this.board.playerPos, this.board.doorPos);
 
-                // const particle = document.createElement("mr-lore");
-                // particle.dataset.foo = "bar";
-                // this.container.appendChild(particle);
-                //
-                // this.board.effectList.push({
-                //     el: particle,
-                //     type: 'projectile',
-                //     r: this.board.playerPos.x,
-                //     c: this.board.playerPos.y,
-                //     animation: {
-                //         started: false,
-                //         x: this.board.playerPos.x,
-                //         y: this.board.playerPos.y,
-                //         distX: this.board.doorPos.x - this.board.playerPos.x,
-                //         distY: this.board.doorPos.y - this.board.playerPos.y
-                //     }
-                // })
-
-                // const pos = this.board.addToMap(, this.board.entityMap);
-
-                // console.log('Particle dropped at ', pos);
-
                 this.needsUpdate = true;
                 this.state.needsUpdate = true;
             }
 
-            // O FOR OPEN DOOR
-            if(event.key ===  'o') {
+            // O for Open door
+            if (event.key === 'o') {
                 event.preventDefault();
 
                 this.board.openDoor();
+            }
 
-                // const x = this.board.doorPos.x;
-                // const y = this.board.doorPos.y;
-                //
-                // this.board.entityMap[x][y].el.open();
+            // Q for Quake
+            if (event.key === 'q') {
+                event.preventDefault();
+                this.board.startQuakeAt(this.board.playerPos.x, this.board.playerPos.y);
+                // this.board.isQuake = true;
+                // this.board.quakeProgress = 1;
             }
 
 
@@ -412,7 +393,7 @@ class GameSystem extends MRSystem {
                                     this.board.movePlayer(x, y);
                                 }
 
-                                if(targetEntity.type == "key") {
+                                if (targetEntity.type == "key") {
                                     this.board.openDoor();
                                     // this.soundController.play('doorSound');
                                 }
@@ -681,6 +662,8 @@ class GameSystem extends MRSystem {
             y: c
         }, playerPos);
 
+        this.board.startQuakeAt(playerPos.x, playerPos.y);
+
         const health = state.health - attacker.attack;
         this.state.components.set('state', {
             health: health,
@@ -705,6 +688,8 @@ class GameSystem extends MRSystem {
             x: r,
             y: c
         });
+
+        this.board.startQuakeAt(r, c);
 
         // TODO: move the sound where the player is
         // this.soundController.moveSoundPosition('swooshSound', );
@@ -927,9 +912,10 @@ class GameSystem extends MRSystem {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
 
-            // console.log(this.state.components.get('state').hoverMelee);
+            if (this.needsUpdate ||
+                this.state.needsUpdate ||
+                this.board.isQuake) {
 
-            if (this.needsUpdate || this.state.needsUpdate) {
                 if (this.isDebug) {
                     console.log('updated at', this.timer);
                 }
@@ -975,9 +961,11 @@ class GameSystem extends MRSystem {
 
                     }
                 }
-            } else {
-                this.board.projectAnimatedEntities(this.timer);
+            // } else {
+            //     this.board.projectAnimatedEntities(this.timer);
             }
+
+            this.board.projectAnimatedEntities(this.timer);
         }
     }
 
