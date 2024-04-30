@@ -157,6 +157,52 @@ class GameSystem extends MRSystem {
                 this.needsUpdate = true;
                 this.state.needsUpdate = true;
             }
+
+            // P FOR PARTICLE
+            if (event.key === 'p') {
+                event.preventDefault();
+
+                this.board.projectileTo(this.board.playerPos, this.board.doorPos);
+
+                // const particle = document.createElement("mr-lore");
+                // particle.dataset.foo = "bar";
+                // this.container.appendChild(particle);
+                //
+                // this.board.effectList.push({
+                //     el: particle,
+                //     type: 'projectile',
+                //     r: this.board.playerPos.x,
+                //     c: this.board.playerPos.y,
+                //     animation: {
+                //         started: false,
+                //         x: this.board.playerPos.x,
+                //         y: this.board.playerPos.y,
+                //         distX: this.board.doorPos.x - this.board.playerPos.x,
+                //         distY: this.board.doorPos.y - this.board.playerPos.y
+                //     }
+                // })
+
+                // const pos = this.board.addToMap(, this.board.entityMap);
+
+                // console.log('Particle dropped at ', pos);
+
+                this.needsUpdate = true;
+                this.state.needsUpdate = true;
+            }
+
+            // O FOR OPEN DOOR
+            if(event.key ===  'o') {
+                event.preventDefault();
+
+                this.board.openDoor();
+
+                // const x = this.board.doorPos.x;
+                // const y = this.board.doorPos.y;
+                //
+                // this.board.entityMap[x][y].el.open();
+            }
+
+
         });
 
     }
@@ -269,7 +315,8 @@ class GameSystem extends MRSystem {
             // there are no enemies in the room
             this.state.components.set('state', {
                 hasKey: true
-            })
+            });
+
         } else {
             params = {
                 levelId: this.level
@@ -365,11 +412,16 @@ class GameSystem extends MRSystem {
                                     this.board.movePlayer(x, y);
                                 }
 
+                                if(targetEntity.type == "key") {
+                                    this.board.openDoor();
+                                    // this.soundController.play('doorSound');
+                                }
+
                                 // door
                                 if (targetEntity.type == "door") {
 
                                     if (state.hasKey) {
-                                        this.soundController.play('doorSound');
+                                        // this.soundController.play('doorSound');
                                         this.board.removeEntityAt(x, y);
 
                                         // move the player to the door
@@ -550,14 +602,19 @@ class GameSystem extends MRSystem {
             // Movements for different enemy types
             if (subtype == 'aimless') {
                 //  this unit wanders randomly
-                let Moves = [];
-                ;[[-1, 0],[1, 0],[0, -1],[0, 1]].forEach((move, i) => {
+                let Moves = [];;
+                [
+                    [-1, 0],
+                    [1, 0],
+                    [0, -1],
+                    [0, 1]
+                ].forEach((move, i) => {
                     const cell = this.board.getEntityAt(r + move[0], c + move[1]);
                     if (!cell && cell != "offmap") {
                         Moves.push(move);
                     }
                 });
-                if(Moves.length > 0) {
+                if (Moves.length > 0) {
                     const rand = Math.floor(Math.random() * Moves.length);
                     const next = Moves[rand];
                     this.board.moveEntity(r, c, r + next[0], c + next[1]);
@@ -594,7 +651,7 @@ class GameSystem extends MRSystem {
             // after moving, attack if in range
             // TODO: different attacks based on enemy subtype
             if (this.board.distances[r][c] <= 2) {
-                this.attackPlayer(entity);
+                this.attackPlayer(entity, r, c);
             }
 
             setTimeout(() => {
@@ -610,13 +667,19 @@ class GameSystem extends MRSystem {
         this.needsUpdate = true;
     }
 
-    attackPlayer(attacker) {
+    attackPlayer(attacker, r, c) {
         const state = this.state.components.get('state');
         const playerPos = this.board.getPlayerPos();
 
         // TODO: move the sound where the attacker is
         // this.soundController.moveSound()
         this.soundController.play('clashSound');
+
+        // console.log(attacker);
+        this.board.projectileTo({
+            x: r,
+            y: c
+        }, playerPos);
 
         const health = state.health - attacker.attack;
         this.state.components.set('state', {
@@ -637,6 +700,11 @@ class GameSystem extends MRSystem {
         if (this.isDebug) {
             console.log(entity);
         }
+
+        this.board.projectileTo(this.board.getPlayerPos(), {
+            x: r,
+            y: c
+        });
 
         // TODO: move the sound where the player is
         // this.soundController.moveSoundPosition('swooshSound', );
@@ -741,7 +809,7 @@ class GameSystem extends MRSystem {
                 el: key,
                 type: 'key'
             };
-        } else if (enemyCount > 1 && !state.hasKey && Math.random > 0.5) {
+        } else if (enemyCount > 1 && !state.hasKey && Math.random() > 0.5) {
             // not last enemy and no key. Key could drop
             const key = document.createElement("mr-key");
             this.container.appendChild(key);

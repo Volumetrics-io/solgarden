@@ -13,7 +13,7 @@ class MRWeapon extends MREntity {
             twig: "models/weapon-stick1-pickup.glb",
             shortsword: "models/weapon-shortSword1-pickup.glb",
             slingshot: "models/weapon-slingshot1-pickup.glb",
-            bow: "models/weapon-stick1.glb",
+            bow: "models/weapon-bow1-pickup.glb",
         }
 
         this.el.src = weaponModels[model];

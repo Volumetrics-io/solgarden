@@ -76,20 +76,21 @@ class MRTile extends MREntity {
         }
 
         this.appendChild(this.el);
-        const tileset = this.dataset.tileset.split(',');
-        const tilepath = this.dataset.tilepath;
+
+        // const tileset = this.dataset.tileset.split(',');
+        // const tilepath = this.dataset.tilepath;
 
         let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
         this.dataset.rotation = `0 ${randomRotation} 0`;
 
-        let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
-        this.el.src = tilepath + randomModel;
+        // let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
+        this.el.src = this.dataset.model;
 
-        this.numberString.dataset.position = '0.25 0.3 0';
+        this.numberString.dataset.position = '0.15 0.3 0';
         this.numberString.style.fontSize = "200px";
         this.numberContainer.appendChild(this.numberString);
 
-        this.numberContainer.dataset.position = '0 0.2 0'
+        // this.numberContainer.dataset.position = '0 0.2 0'
         this.numberContainer.dataset.rotation = `270 0 -${randomRotation + 90}`
         // this.numberContainer.dataset.rotation = `270 0 0`;
         Object.assign(this.numberContainer.style, {
@@ -97,7 +98,7 @@ class MRTile extends MREntity {
             height: "300px",
         })
 
-        this.appendChild(this.numberContainer);
+        this.borderContainer.appendChild(this.numberContainer);
     }
 
     hideTile() {

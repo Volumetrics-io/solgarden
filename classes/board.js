@@ -86,11 +86,19 @@ class Board {
         //   [tile,   tile,  tile ]]
         this.tileMap = params.tileMap ?? [];
 
-        const numberOfAvailableSpots = this.rowCount * this.colCount;
-        this.propCount = params.propCount ?? Math.ceil(numberOfAvailableSpots / 8);
-        this.blockCount = params.blockCount ?? Math.ceil(numberOfAvailableSpots / 8);
+        const availSpots = this.rowCount * this.colCount;
+        this.propCount = params.propCount ?? Math.ceil(availSpots / 8);
+        this.blockCount = params.blockCount ?? Math.ceil(availSpots / 8);
 
-        // console.log(`Floor: ${this.flrCount}; Rows: ${this.rowCount}; Cols: ${this.colCount}`);
+        // will hold all the visual effect elements
+        // like poofs, projectiles, etc.
+        this.effectList = [];
+
+        if (this.isDebug) {
+            console.log(`Floor: ${this.flrCount}`);
+            console.log(`Rows: ${this.rowCount}`);
+            console.log(`Cols: ${this.colCount}`);
+        }
 
         // generate all the random floor tiles
         // based on the random tile set
@@ -99,12 +107,9 @@ class Board {
             for (let c = 0; c < this.colCount; c++) {
 
                 const el = document.createElement("mr-tile");
-                el.dataset.x = r;
-                el.dataset.y = c;
-
-                // TODO: pass the model directly
-                el.dataset.tileset = this.biome.tiles;
-                el.dataset.tilepath = this.biome.path;
+                const rand = Math.floor(Math.random() * this.biome.tiles.length);
+                const tilemodel = this.biome.tiles[rand];
+                el.dataset.model = this.biome.path + this.biome.tiles[rand];
 
                 const tile = {
                     el: el,
@@ -127,6 +132,7 @@ class Board {
 
         // door
         const door = document.createElement("mr-door");
+        if(this.biome.name == 'battery') door.dataset.hasKey = true;
         this.doorPos = this.addToMap({
             el: door,
             type: 'door'
@@ -220,7 +226,6 @@ class Board {
             }, this.entityMap);
 
             // key
-            // TODO: expose isKey
             const key = document.createElement("mr-key");
             this.addToMap({
                 el: key,
@@ -308,6 +313,9 @@ class Board {
                 randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1);
 
                 // make a copy of the entity map
+                // this temporary array is used to determine
+                // if there would still be a solution if we
+                // add the element at the random position.
                 let tempMap = map.map(function(arr) {
                     return arr.slice();
                 });
@@ -317,8 +325,8 @@ class Board {
 
                 // calc distances with the entity
                 // and see if there is a possible solution
-                let tempDistance = this.calcDist(this.playerPos.y, this.playerPos.x, tempMap);
-                distanceToDoor = tempDistance[this.doorPos.x][this.doorPos.y];
+                let dist = this.calcDist(this.playerPos.y, this.playerPos.x, tempMap);
+                distanceToDoor = dist[this.doorPos.x][this.doorPos.y];
             }
 
             if (entity.type == "player" ||
@@ -353,6 +361,7 @@ class Board {
 
         // TODO: this probably should be an ECS?
         this.entityMap[x2][y2].animation = {
+            speed: 3,
             started: false,
             x: x1,
             y: y1,
@@ -373,6 +382,12 @@ class Board {
 
     showDamageAt(r, c, damage) {
         this.entityMap[r][c].el.showDamage(damage);
+    }
+
+    openDoor() {
+        const x = this.doorPos.x;
+        const y = this.doorPos.y;
+        this.entityMap[x][y].el.open();
     }
 
     calcDistFromPlayer() {
@@ -450,10 +465,10 @@ class Board {
         }
 
         if (entity.animation) {
-            const speed = 3;
+            // const speed = 3;
             const startTime = timer - entity.animation.timerStart;
 
-            const t = startTime * speed;
+            const t = startTime * entity.animation.speed;
             // const p = Animator.fanOut(t);
             const p = Animator.fanOut(t);
             const h = Animator.jump(t);
@@ -463,16 +478,21 @@ class Board {
             let distF;
 
             if (entity.type == "enemy") {
-                if(entity.subtype == 'homing') {
+                if (entity.subtype == 'homing') {
                     distF = 0;
-                } else if(entity.subtype == 'aimless') {
+                } else if (entity.subtype == 'aimless') {
                     distF = h * 0.7;
                 } else {
                     distF = 0;
                 }
 
-            } else {
+            } else if (entity.type == "projectile") {
+                // projectiles
+                distF = 0;
+                distR = entity.animation.x + entity.animation.distX * t;
+                distC = entity.animation.y + entity.animation.distY * t;
 
+            } else {
                 // this is the player
                 distF = h * 0.8;
             }
@@ -506,6 +526,28 @@ class Board {
         entity.el.object3D.position.z = coor.z - this.rowCount / 2 + 0.5;
     }
 
+    projectileTo(startPos, endPos) {
+
+        const particle = document.createElement("mr-projectile");
+        particle.dataset.foo = "bar";
+        this.container.appendChild(particle);
+
+        this.effectList.push({
+            el: particle,
+            type: 'projectile',
+            r: startPos.x,
+            c: startPos.y,
+            animation: {
+                speed: 10,
+                started: false,
+                x: startPos.x,
+                y: startPos.y,
+                distX: endPos.x - startPos.x,
+                distY: endPos.y - startPos.y
+            }
+        })
+    }
+
     projectCoordinates(r, c) {
         return {
             x: c - this.colCount / 2,
@@ -522,8 +564,6 @@ class Board {
 
     getPlayerPos() {
         return this.playerPos;
-        // TODO: find and return the player position
-        // no more playerpos
     }
 
     distBetween(x1, y1, x2, y2) {
@@ -600,7 +640,7 @@ class Board {
 
                         if (state.hasKey && isReachable) {
                             el.tileColor('range');
-                        } else if(isReachable) {
+                        } else if (isReachable) {
                             el.tileColor('health');
                         } else {
                             el.tileColor('neutral');
@@ -650,6 +690,7 @@ class Board {
     }
 
     projectEverything(timer) {
+        // all the elements that are on the board
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
                 const entity = this.entityMap[r][c];
@@ -677,6 +718,32 @@ class Board {
                 if (entity != 0 && entity.animation) {
                     this.project(entity, r, c, timer);
                 }
+            }
+        }
+
+        // all the elements that don't care about the
+        // board positon, like visual effects
+        // for (let i = 0; i < this.effectList.length; i++) {
+        //     const entity = this.effectList[i];
+        //     if (entity.animation) {
+        //         this.project(entity, entity.r, entity.c, timer);
+        //     } else {
+        //         // if .animation was removed, it means
+        //         // the animation was completed.
+        //         // Now we need to remove the entity from the array
+        //     }
+        // }
+
+        // Remove the elements with a completed animation
+        // and animate the other ones.
+        for (let i = this.effectList.length - 1; i >= 0; i--) {
+            const entity = this.effectList[i];
+            if (entity.animation) {
+                this.project(entity, entity.r, entity.c, timer);
+            } else {
+                // Remove the entity from the array since its animation is completed
+                this.effectList.splice(i, 1);
+                entity.el.remove();
             }
         }
     }

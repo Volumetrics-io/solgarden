@@ -31,7 +31,7 @@ class StateSystem extends MRSystem {
             {
                 name: "bow",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-slingshot-temp.glb",
+                src: "models/weapon-bow1-UI.glb",
             },
         ]
 
