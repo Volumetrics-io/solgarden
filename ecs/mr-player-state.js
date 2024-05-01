@@ -2,7 +2,7 @@ class StateSystem extends MRSystem {
     constructor() {
         super()
         this.isAttached = false;
-        this.container = document.createElement("mr-div");
+        this.container = document.createElement("mr-entity");
         this.container.id = 'ui-container'; // for DOM debugging
         this.meleeContainer = document.createElement("mr-entity");
         this.rangeContainer = document.createElement("mr-entity");
@@ -35,8 +35,10 @@ class StateSystem extends MRSystem {
             },
         ]
 
-        // TODO: add a keyholder similar to range and melee
-        // with 2 preset, key and no key
+        // this.meleeContainer = document.createElement("mr-entity");
+
+        this.healthValueEl = document.createElement("mr-text");
+        this.rangeValueEl = document.createElement("mr-text");
     }
 
     attachedComponent(entity) {
@@ -88,6 +90,20 @@ class StateSystem extends MRSystem {
         // position the object
         this.healthBar.position.z = -0.5;
         this.container.object3D.add(this.healthBar);
+
+        this.container.appendChild(this.healthValueEl);
+        this.healthValueEl.innerText = "99";
+        this.healthValueEl.style.fontSize = '200px';
+        this.healthValueEl.style.color = '#000';
+        this.healthValueEl.dataset.rotation = "270 0 270";
+        this.healthValueEl.dataset.position = "0.28 0.08 -0.65";
+
+        this.container.appendChild(this.rangeValueEl);
+        this.rangeValueEl.innerText = "99";
+        this.rangeValueEl.style.fontSize = '200px';
+        this.rangeValueEl.style.color = '#000';
+        this.rangeValueEl.dataset.rotation = "270 0 270";
+        this.rangeValueEl.dataset.position = "0.03 0.08 -0.65";
 
         // range bar
         const rangeBarGeo = new THREE.BoxGeometry(0.2, 0.1, 1);
@@ -160,7 +176,6 @@ class StateSystem extends MRSystem {
             this.meleeContainer.appendChild(weapon.el);
             weapon.el.setAttribute('src', weapon.src);
             weapon.el.dataset.position = "0 0.05 0";
-            // weapon.el.style.pointerEvents = 'none';
         });
 
         this.meleeSelection = new THREE.Mesh(
@@ -231,9 +246,12 @@ class StateSystem extends MRSystem {
 
                 const healthRatio = state.health / state.maxHealth;
                 this.healthBar.scale.set(1, 1, healthRatio * this.barLength);
-                //
+                this.healthValueEl.innerText = Math.round(state.health);
+
                 const rangeRatio = state.range / state.maxRange;
                 this.rangeBar.scale.set(1, 1, rangeRatio * this.barLength);
+                this.rangeValueEl.innerText = Math.round(state.range);
+
 
                 this.meleeWeapons.forEach((weapon, i) => {
                     if (weapon.name == state.meleeName) {

@@ -952,7 +952,7 @@ class GameSystem extends MRSystem {
                             this.state.components.set('state', {
                                 range: state.range + 0.1
                             })
-                            gaugeEl.updateLevel(state.range / state.maxRange);
+                            gaugeEl.updateLevel(parseInt(state.range) / state.maxRange);
                             this.needsUpdate = true;
                             this.state.needsUpdate = true;
                         } else {
