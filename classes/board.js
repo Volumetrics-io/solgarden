@@ -18,15 +18,14 @@ class Board {
         this.isDoor = params.isDoor ?? false;
 
         this.isQuake = false;
-        this.quakeProgress = 0;
-        this.quakeTimerStart = 0;
-        this.quakeSpeed = 3;
-        this.quakeForce = 0.2; // 0.5
-        this.quakeHasStarted = false;
-        this.quakePos = {
-            x: 0,
-            y: 0
-        }
+        // this.quakeTimerStart = 0;
+        // this.quakeHasStarted = false;
+        // this.quakePos = {
+        //     x: 0,
+        //     y: 0
+        // }
+        // this.quakeSpeed = 3;
+        // this.quakeForce = 0.2; // 0.5
 
         // TODO: biome soundtrack sound be here
         this.biomes = [{
@@ -307,13 +306,27 @@ class Board {
         })
     }
 
-    startQuakeAt(x, y) {
+    startQuakeAt(x, y, force, frequence, duration) {
+
+
         this.quakePos = {
             x: x,
             y: y
         };
         this.isQuake = true;
         this.quakeHasStarted = false;
+        this.quakeDuration = duration;
+        this.quakeForce = force;
+        this.quakeFrequence = frequence;
+
+        // this.quakeTimerStart = 0;
+        // this.quakeHasStarted = false;
+        // this.quakePos = {
+        //     x: 0,
+        //     y: 0
+        // }
+        // this.quakeSpeed = 3;
+        // this.quakeForce = 0.2; // 0.5
     }
 
     addToMap(entity, map) {
@@ -484,29 +497,32 @@ class Board {
 
             const startTime = timer - this.quakeTimerStart;
 
-            const t = startTime * this.quakeSpeed;
+            const t = startTime / this.quakeDuration;
             const x = this.quakePos.x;
             const y = this.quakePos.y;
 
             const dx = r - x;
             const dy = c - y;
 
+            // const scale = 2;
+
             // distance between tile and player
-            const dist = Math.sqrt(dx * dx + dy * dy) + 1;
+            const dist = Math.sqrt(dx * dx + dy * dy + t) + 1;
 
-            const falloff = 1 / (t + 0.5) - 0.3;
+            // a hyperbolic function crashing the amplitude to 0
+            const falloff = 1 / (10 * t + 1) - 0.0909;
 
-            // the value to change to make the move more or less violent
-            // const force = 0.5;
-            const wavePeriod = 4;
-            const amplitude = -Math.sin(t * wavePeriod) * this.quakeForce * falloff;
-
-            // Y difference at the point
+            // a cool looking function that simulate a wave propagating
             // https://www.youtube.com/watch?v=ciUNizDgiOs
-            const wave = Math.sin(dist * 2 + t * 3) * amplitude / dist;
+            // the amplitude decreases with the distance
+            const amplitude = Math.sin(dist + t * this.quakeFrequence) / (dist * 3);
+
+            // the Y offset, product of the amplitude and the falloff
+            // the -1 is for the motion to go down first, like it got hit
+            const offsetY = -1 * amplitude * falloff * this.quakeForce;
 
             // The base floor Y used for the rest of the calculations.
-            floorY = this.heightMap[r][c] * 0.35 + 0.3 + wave;
+            floorY = this.heightMap[r][c] * 0.35 + 0.3 + offsetY * 2;
         } else {
             floorY = this.heightMap[r][c] * 0.35 + 0.3;
         }
@@ -638,13 +654,12 @@ class Board {
         }
 
         // Quake is running
-        if (this.isQuake &&
-            this.quakeHasStarted &&
-            timer - this.quakeTimerStart > 1) {
+        if (this.isQuake && this.quakeHasStarted) {
 
-            // if (timer - this.quakeTimerStart > 1) {
-            this.isQuake = false;
-            // }
+            if (timer - this.quakeTimerStart > this.quakeDuration) {
+                console.log("quake is over")
+                this.isQuake = false;
+            }
         }
 
         this.tileMap.forEach(row => {

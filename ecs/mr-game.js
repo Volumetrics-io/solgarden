@@ -178,11 +178,16 @@ class GameSystem extends MRSystem {
             // Q for Quake
             if (event.key === 'q') {
                 event.preventDefault();
-                this.board.startQuakeAt(this.board.playerPos.x, this.board.playerPos.y);
-                // this.board.isQuake = true;
-                // this.board.quakeProgress = 1;
+                this.board.startQuakeAt(
+                    this.board.playerPos.x,
+                    this.board.playerPos.y, 0.8, 40, 2);
             }
-
+            if (event.key === 'a') {
+                event.preventDefault();
+                this.board.startQuakeAt(
+                    this.board.playerPos.x,
+                    this.board.playerPos.y, 1, 10, 0.5);
+            }
 
         });
 
@@ -662,7 +667,7 @@ class GameSystem extends MRSystem {
             y: c
         }, playerPos);
 
-        this.board.startQuakeAt(playerPos.x, playerPos.y);
+        this.board.startQuakeAt(playerPos.x, playerPos.y, 1, 10, 0.5);
 
         const health = state.health - attacker.attack;
         this.state.components.set('state', {
@@ -689,7 +694,7 @@ class GameSystem extends MRSystem {
             y: c
         });
 
-        this.board.startQuakeAt(r, c);
+        this.board.startQuakeAt(r, c, 1, 10, 0.5);
 
         // TODO: move the sound where the player is
         // this.soundController.moveSoundPosition('swooshSound', );
