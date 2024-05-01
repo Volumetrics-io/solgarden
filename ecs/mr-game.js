@@ -180,13 +180,13 @@ class GameSystem extends MRSystem {
                 event.preventDefault();
                 this.board.startQuakeAt(
                     this.board.playerPos.x,
-                    this.board.playerPos.y, 0.8, 40, 2);
+                    this.board.playerPos.y, 1.5, 40, 3);
             }
             if (event.key === 'a') {
                 event.preventDefault();
                 this.board.startQuakeAt(
                     this.board.playerPos.x,
-                    this.board.playerPos.y, 1, 10, 0.5);
+                    this.board.playerPos.y, 1, 15, 0.5);
             }
 
         });

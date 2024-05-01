@@ -515,7 +515,7 @@ class Board {
             // a cool looking function that simulate a wave propagating
             // https://www.youtube.com/watch?v=ciUNizDgiOs
             // the amplitude decreases with the distance
-            const amplitude = Math.sin(dist + t * this.quakeFrequence) / (dist * 3);
+            const amplitude = Math.sin(dist + t * this.quakeFrequence) / (dist * 10);
 
             // the Y offset, product of the amplitude and the falloff
             // the -1 is for the motion to go down first, like it got hit
