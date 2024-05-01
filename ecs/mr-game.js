@@ -566,6 +566,11 @@ class GameSystem extends MRSystem {
         this.cycle++;
         this.state.components.set('state', this.defaultState);
 
+        console.log("health:",
+            this.state.components.get('state').health,
+            "range",
+            this.state.components.get('state').range);
+
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
         this.initialize();
@@ -642,7 +647,7 @@ class GameSystem extends MRSystem {
 
             setTimeout(() => {
                 this.opponentTurn();
-            }, 1000)
+            }, 3000)
         } else {
             this.state.components.set('state', {
                 isPlayerTurn: true,
@@ -667,7 +672,9 @@ class GameSystem extends MRSystem {
             y: c
         }, playerPos);
 
-        this.board.startQuakeAt(playerPos.x, playerPos.y, 1, 10, 0.5);
+        setTimeout(() => {
+            this.board.startQuakeAt(playerPos.x, playerPos.y, 1, 10, 0.5);
+        }, 500);
 
         const health = state.health - attacker.attack;
         this.state.components.set('state', {
@@ -694,7 +701,9 @@ class GameSystem extends MRSystem {
             y: c
         });
 
-        this.board.startQuakeAt(r, c, 1, 10, 0.5);
+        setTimeout(() => {
+            this.board.startQuakeAt(r, c, 1, 10, 0.5);
+        }, 500);
 
         // TODO: move the sound where the player is
         // this.soundController.moveSoundPosition('swooshSound', );
@@ -712,9 +721,11 @@ class GameSystem extends MRSystem {
         this.board.showDamageAt(r, c, damage);
 
         if (entity.hp <= 0) {
-            this.container.removeChild(entity.el);
-            this.dropLoot(r, c);
-            this.needsUpdate = true;
+            setTimeout(() => {
+                this.container.removeChild(entity.el);
+                this.dropLoot(r, c);
+                this.needsUpdate = true;
+            }, 500);
         }
     }
 
@@ -952,7 +963,7 @@ class GameSystem extends MRSystem {
                             this.state.components.set('state', {
                                 range: state.range + 0.1
                             })
-                            gaugeEl.updateLevel(parseInt(state.range) / state.maxRange);
+                            gaugeEl.updateLevel(state.range / state.maxRange);
                             this.needsUpdate = true;
                             this.state.needsUpdate = true;
                         } else {

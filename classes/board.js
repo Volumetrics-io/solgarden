@@ -307,8 +307,6 @@ class Board {
     }
 
     startQuakeAt(x, y, force, frequence, duration) {
-
-
         this.quakePos = {
             x: x,
             y: y
@@ -318,15 +316,6 @@ class Board {
         this.quakeDuration = duration;
         this.quakeForce = force;
         this.quakeFrequence = frequence;
-
-        // this.quakeTimerStart = 0;
-        // this.quakeHasStarted = false;
-        // this.quakePos = {
-        //     x: 0,
-        //     y: 0
-        // }
-        // this.quakeSpeed = 3;
-        // this.quakeForce = 0.2; // 0.5
     }
 
     addToMap(entity, map) {
@@ -556,7 +545,7 @@ class Board {
 
             } else if (entity.type == "projectile") {
                 // projectiles
-                distF = 0;
+                distF = h * 2;
 
                 // projectiles move linearly
                 // so we use t instead of p for the progress
@@ -610,7 +599,7 @@ class Board {
             r: startPos.x,
             c: startPos.y,
             animation: {
-                speed: 10,
+                speed: 2,
                 started: false,
                 x: startPos.x,
                 y: startPos.y,
