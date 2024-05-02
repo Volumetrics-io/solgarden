@@ -419,9 +419,37 @@ class Board {
 
     calcDist(x, y, blockmap) {
 
+        this.printArray("blockmap", blockmap);
+
+        // STEP 1: make a copy of the blockmap array to not mess it up
+        // let tempmap = blockmap.map(function(arr) {
+        //     return arr.slice();
+        // });
+        //
+        // this.printArray("blockmap before", blockmap);
+        // this.printArray("tempmap before", tempmap);
+        //
+        // // STEP 2: add the enemies as blocking tiles
+        // for (let r = 0; r < this.rowCount; r++) {
+        //     for (let c = 0; c < this.colCount; c++) {
+        //         const entity = this.entityMap[r][c];
+        //         // console.log(entity);
+        //         if (entity.type == 'enemy') {
+        //             tempmap[r][c] = entity;
+        //         }
+        //     }
+        // }
+        //
+        // this.printArray("blockmap after", blockmap);
+        // this.printArray("tempmap after", tempmap);
+
+
         // https://codepen.io/lobau/pen/XWQqVwy/6a4c88328ccf9f08befa5463af05708a
         const width = blockmap[0].length;
         const height = blockmap.length;
+
+        // const width = this.colCount;
+        // const height = this.rownCount;
 
         // Initialize distances array with Infinity for unvisited cells
         const distances = Array.from({
@@ -460,13 +488,18 @@ class Board {
                     newX < width &&
                     newY >= 0 &&
                     newY < height &&
-                    (blockmap[newY][newX] === 0 || blockmap[newY][newX].type != "prop")
+                    (blockmap[newY][newX] === 0 ||
+                        blockmap[newY][newX].type != "prop")
                 ) {
+                    // console.log(blockmap[newY][newX].type);
                     // Calculate potential new distance
                     const newDistance = distances[currentY][currentX] + 1;
 
                     // Update distance if newDistance is smaller
-                    if (newDistance < distances[newY][newX]) {
+                    // and effectively make enemies block the player
+                    if (newDistance < distances[newY][newX] &&
+                        blockmap[newY][newX].type != "enemy") {
+
                         distances[newY][newX] = newDistance;
                         queue.push([newX, newY]);
                     }
@@ -573,7 +606,6 @@ class Board {
             }
 
         } else {
-            // console.log("is this a tile?")
             coor = {
                 x: c,
                 y: floorY,
@@ -609,20 +641,6 @@ class Board {
         })
     }
 
-    // projectCoordinates(r, c) {
-    //     return {
-    //         x: c - this.colCount / 2,
-    //         y: this.heightMap[r][c] * 0.35 + 0.3,
-    //         z: r - this.rowCount / 2
-    //     }
-    // }
-
-    // waveDeltaYAt(r, c, timer) {
-    //     // return 0;
-    //     // return Math.sin(timer + this.heightMap[r][c] / 1.5 + r / 10.5 + c / 1.5) / 100;
-    //     return Math.sin(timer + this.heightMap[r][c] / 1.1 + r / 1.1 + c / 1.1) / 100;
-    // }
-
     getPlayerPos() {
         return this.playerPos;
     }
@@ -657,9 +675,6 @@ class Board {
                 const x = tile.pos.x;
                 const y = tile.pos.y;
                 const el = tile.el;
-
-                // const x = parseInt(tile.el.dataset.x);
-                // const y = parseInt(tile.el.dataset.y);
 
                 this.project(tile, x, y, timer);
 
@@ -796,19 +811,6 @@ class Board {
                 }
             }
         }
-
-        // all the elements that don't care about the
-        // board positon, like visual effects
-        // for (let i = 0; i < this.effectList.length; i++) {
-        //     const entity = this.effectList[i];
-        //     if (entity.animation) {
-        //         this.project(entity, entity.r, entity.c, timer);
-        //     } else {
-        //         // if .animation was removed, it means
-        //         // the animation was completed.
-        //         // Now we need to remove the entity from the array
-        //     }
-        // }
 
         // Remove the elements with a completed animation
         // and animate the other ones.

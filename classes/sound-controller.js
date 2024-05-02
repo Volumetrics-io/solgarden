@@ -19,31 +19,31 @@ class SoundController {
 
     initialize() {
         this.sounds.fridgeSound.components.set('audio', {
-            state: 'pause'
+            action: 'pause'
         });
         this.sounds.farmSound.components.set('audio', {
-            state: 'pause'
+            action: 'pause'
         });
         this.sounds.bandlandsSound.components.set('audio', {
-            state: 'pause'
+            action: 'pause'
         });
     }
 
     play(sound) {
         this.sounds[sound].components.set('audio', {
-            state: 'play'
+            action: 'play'
         });
     }
 
     background(sound) {
         this.sounds.fridgeSound.components.set('audio', {
-            state: 'pause'
+            action: 'pause'
         });
         this.sounds.farmSound.components.set('audio', {
-            state: 'pause'
+            action: 'pause'
         });
         this.sounds.bandlandsSound.components.set('audio', {
-            state: 'pause'
+            action: 'pause'
         });
         this.play(sound)
     }

@@ -21,8 +21,16 @@ class MRChest extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "models/chest_01.glb";
+        this.el.src = "models/chest1.glb";
         this.el.style.pointerEvents = 'none';
+
+        this.el.components.set('animation', {
+            clip: 0,
+            action: "stop",
+            loop: false,
+            clampWhenFinished: true,
+        })
+
     }
 
     // moveTo(x,y) {

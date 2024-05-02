@@ -36,7 +36,7 @@ class MRDoor extends MREntity {
         this.components.set('audio', {
             src: "./audio/door-hinge.mp3",
             loop: false,
-            state: "stop"
+            action: "stop"
         })
 
         this.ui.components.set('animation', {
@@ -71,7 +71,7 @@ class MRDoor extends MREntity {
 
         setTimeout(() => {
             this.components.set('audio', {
-                state: "play"
+                action: "play"
             })
 
         }, 1200);

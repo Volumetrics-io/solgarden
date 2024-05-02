@@ -68,7 +68,10 @@ class GameSystem extends MRSystem {
             // M for Map
             if (event.key === 'm') {
                 event.preventDefault();
+                this.printArray("this.board.heightMap", this.board.heightMap);
                 this.printArray("this.board.entityMap", this.board.entityMap);
+                this.printArray("this.board.propMap", this.board.propMap);
+                this.printArray("this.board.distances", this.board.distances);
             }
 
             // U for Update
@@ -197,6 +200,20 @@ class GameSystem extends MRSystem {
         // console.clear();
         this.timer = 0;
         // const state = this.state.components.get('state');
+
+        // a different approach: pushing the previous room down
+        // if (this.container.firstChild) {
+        //     const newContainer = document.createElement("mr-div");
+        //     this.root.appendChild(newContainer);
+        //     newContainer.style.scale = this.scale;
+        //
+        //     this.oldContainer = this.container;
+        //     this.container = newContainer;
+        //     const depth = -this.level / 10;
+        //     this.oldContainer.dataset.position = `0 ${depth} 0`;
+        //
+        //     // TODO: remove the player?
+        // }
 
         // clear up the dom elements container
         while (this.container.firstChild) {
@@ -977,8 +994,8 @@ class GameSystem extends MRSystem {
 
                     }
                 }
-            // } else {
-            //     this.board.projectAnimatedEntities(this.timer);
+                // } else {
+                //     this.board.projectAnimatedEntities(this.timer);
             }
 
             this.board.projectAnimatedEntities(this.timer);

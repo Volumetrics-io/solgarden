@@ -11,13 +11,14 @@ class MRLoot extends MREntity {
 
         switch (this.effect) {
             case "health":
-                this.el.src = "models/loot-health.glb";
+                this.el.src = "models/bolts1.glb";
                 break;
             case "range":
-                this.el.src = "models/loot-range.glb";
+                this.el.src = "models/battery1.glb";
                 break;
         }
 
+        this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
     }
 
