@@ -1,4 +1,4 @@
-const { distBetween, printArray } = require('utils.js');
+const { distBetween, printArray } = require('../utils.js');
 
 class GameSystem extends MRSystem {
     constructor() {
