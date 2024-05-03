@@ -64,7 +64,7 @@ class Board {
             }, (_, x) =>
             Array.from({
                 length: this.colCount
-            }, (_, y) => Math.floor(this.smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
+            }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
         );
 
         // this table contains an interactible or blocking entity
@@ -291,21 +291,13 @@ class Board {
         this.calcDistFromPlayer();
 
         if (this.isDebug) {
-            this.printArray("this.heightMap", this.heightMap);
-            this.printArray("this.entityMap", this.entityMap);
-            this.printArray("this.propMap", this.propMap);
-            this.printArray("this.distances", this.distances);
+            printArray("this.heightMap", this.heightMap);
+            printArray("this.entityMap", this.entityMap);
+            printArray("this.propMap", this.propMap);
+            printArray("this.distances", this.distances);
         }
     }
-
-    // only used to debug
-    printArray(string, array) {
-        console.log(string);
-        array.forEach(row => {
-            console.log(row);
-        })
-    }
-
+    
     startQuakeAt(x, y, force, frequence, duration) {
         this.quakePos = {
             x: x,
@@ -370,9 +362,7 @@ class Board {
         if (!this.entityMap[x1] || !this.entityMap[x1][y1]) {
             console.log("No object found at the source position.");
             return; // No object at the source position
-        }
-
-        if (!this.entityMap[x2] || this.entityMap[x2][y2] !== 0) {
+        } else if (!this.entityMap[x2] || this.entityMap[x2][y2] !== 0) {
             console.log("Target position is not empty or out of bounds.");
             return; // Target cell is not empty or out of bounds
         }
@@ -402,7 +392,7 @@ class Board {
 
         // remove origin and target from copy
         // otherwise the pathfinding can't work
-        const ppos = this.getPlayerPos();
+        const ppos = this.playerPos;
         blockmap[ppos.x][ppos.y] = 0;
         blockmap[x][y] = 0;
 
@@ -473,7 +463,7 @@ class Board {
 
     calcDistFromPlayer() {
         this.distances = this.calcDist(this.playerPos.y, this.playerPos.x, this.entityMap);
-        // this.printArray("this.distances", this.distances);
+        // printArray("this.distances", this.distances);
     }
 
     calcDist(x, y, blockmap) {
@@ -599,11 +589,10 @@ class Board {
             let distF;
 
             if (entity.type == "enemy") {
-                if (entity.subtype == 'homing') {
-                    distF = 0;
-                } else if (entity.subtype == 'aimless') {
+                if (entity.subtype == 'aimless') {
                     distF = h * 0.7;
                 } else {
+                    // includes 'homing'
                     distF = 0;
                 }
 
@@ -645,9 +634,11 @@ class Board {
         }
 
         // the offset is to center the board in the table
-        entity.el.object3D.position.x = coor.x - this.colCount / 2 + 0.5;
-        entity.el.object3D.position.y = coor.y;
-        entity.el.object3D.position.z = coor.z - this.rowCount / 2 + 0.5;
+        entity.el.object3D.position.set(
+            coor.x - this.colCount / 2 + 0.5,
+            coor.y,
+            coor.z - this.rowCount / 2 + 0.5
+        );
     }
 
     projectileTo(startPos, endPos) {
@@ -672,18 +663,7 @@ class Board {
         })
     }
 
-    getPlayerPos() {
-        return this.playerPos;
-    }
-
-    distBetween(x1, y1, x2, y2) {
-        var distX = x1 - x2;
-        var distY = y1 - y2;
-        return Math.sqrt(distX * distX + distY * distY);
-    }
-
     updateFloor(state, timer) {
-        const ppos = this.getPlayerPos();
 
         // Quake is about to start
         if (this.isQuake && !this.quakeHasStarted) {
@@ -712,7 +692,7 @@ class Board {
                 if (state.isPlayerTurn) {
                     const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
-                    const ppos = this.getPlayerPos();
+                    const ppos = this.playerPos;
 
                     // is the tile reachable by walking (pathfinder distance)
                     const isReachable = (
@@ -721,7 +701,7 @@ class Board {
                         dist > 0);
 
                     //  combat related distances are Euclidean
-                    const rawDist = this.distBetween(x, y, ppos.x, ppos.y);
+                    const rawDist = distBetween(x, y, ppos.x, ppos.y);
 
                     let attackRange;
                     if (state.selectedWeapon == 'melee') {
@@ -895,8 +875,8 @@ class Board {
             projectedCost = this.distances[x][y];
 
         } else if (entity.type == 'enemy') {
-            const ppos = this.getPlayerPos();
-            const dist = this.distBetween(x, y, ppos.x, ppos.y);
+            const ppos = this.playerPos;
+            const dist = distBetween(x, y, ppos.x, ppos.y);
 
             // console.log(dist)
             // if(dist <= state.getWeaponRange)
@@ -909,36 +889,5 @@ class Board {
 
         return projectedCost;
     }
-
-    /////////////////////////////////////////////////////////////
-    // lerp, noise, and smoothNoise are generating the heightMap.
-    lerp(a, b, t) {
-        return a + (b - a) * t;
-    }
-
-    noise(x, y) {
-        const random = Math.floor(Math.random() * 99999);
-        const n = Math.sin(x * 12.9898 + y * 78.233 + random) * 43758.5453;
-        return n - Math.floor(n);
-    }
-
-    smoothNoise(x, y) {
-        // Interpolate between four corners
-        const intX = Math.floor(x);
-        const intY = Math.floor(y);
-        const fracX = x - intX;
-        const fracY = y - intY;
-
-        const v1 = this.noise(intX, intY);
-        const v2 = this.noise(intX + 1, intY);
-        const v3 = this.noise(intX, intY + 1);
-        const v4 = this.noise(intX + 1, intY + 1);
-
-        const i1 = this.lerp(v1, v2, fracX);
-        const i2 = this.lerp(v3, v4, fracX);
-        return this.lerp(i1, i2, fracY);
-    }
-    /////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////
 
 }

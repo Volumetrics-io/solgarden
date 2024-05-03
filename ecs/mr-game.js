@@ -254,7 +254,7 @@ class GameSystem extends MRSystem {
             // to represent a level, either hardcoded or randomly generated
             params = {
                 levelId: this.level,
-                flrCount: 1,
+                floorCount: 1,
                 rowCount: 6,
                 colCount: 4,
                 enemyCount: 0,
@@ -283,7 +283,7 @@ class GameSystem extends MRSystem {
             // battery room
             params = {
                 levelId: this.level,
-                flrCount: 1,
+                floorCount: 1,
                 rowCount: 8,
                 colCount: 4,
                 enemyCount: 0,
@@ -476,8 +476,8 @@ class GameSystem extends MRSystem {
 
                             // enemies
                             if (targetEntity.type == "enemy") {
-                                const ppos = this.board.getPlayerPos();
-                                const dist = this.board.distBetween(x, y, ppos.x, ppos.y);
+                                const ppos = this.board.playerPos;
+                                const dist = distBetween(x, y, ppos.x, ppos.y);
                                 const type = state.selectedWeapon;
                                 let range = this.getWeaponRange();
 
@@ -706,7 +706,7 @@ class GameSystem extends MRSystem {
 
     attackPlayer(attacker, r, c) {
         const state = this.state.components.get('state');
-        const playerPos = this.board.getPlayerPos();
+        const playerPos = this.board.playerPos;
 
         // TODO: move the sound where the attacker is
         // this.soundController.moveSound()
@@ -742,7 +742,7 @@ class GameSystem extends MRSystem {
             console.log(entity);
         }
 
-        this.board.projectileTo(this.board.getPlayerPos(), {
+        this.board.projectileTo(this.board.playerPos, {
             x: r,
             y: c
         });
@@ -1009,7 +1009,7 @@ class GameSystem extends MRSystem {
                 // Dot is in the battery room
                 if (this.board.biome.name == 'battery') {
                     const state = this.state.components.get('state');
-                    const pos = this.board.getPlayerPos();
+                    const pos = this.board.playerPos;
 
                     // the gauge that fills at it charges
                     const gaugeEl = this.board.entityMap[4][2].el;
