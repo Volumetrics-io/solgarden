@@ -155,6 +155,12 @@
         };
     </script>
 
+    <!-- Utils:
+        We place this first so that other scripts can share the
+        functions it contains since JavaScript executes sequentially.
+    -->
+    <script src="/utils"></script>
+
     <!-- Classes -->
     <script src="/classes/pathfinder.js"></script>
     <script src="/classes/board.js"></script>
@@ -178,8 +184,6 @@
     <script src="/entities/mr-prop.js"></script>
     <script src="/entities/mr-tile.js"></script>
     <script src="/entities/mr-weapon.js"></script>
-    <!-- <script src="/entities/mr-ui-melee-weapon.js"></script> -->
-    <!-- <script src="/entities/mr-ui-range-weapon.js"></script> -->
 
 </body>
 

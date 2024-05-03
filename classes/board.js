@@ -1,5 +1,3 @@
-const { distBetween, printArray } = require('../utils.js');
-
 class Board {
     constructor(container, params) {
         this.container = container;
