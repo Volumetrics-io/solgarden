@@ -6,6 +6,16 @@ class GameSystem extends MRSystem {
         this.level = 0;
         this.cycle = 0;
 
+        // this boolean is very important.
+        // it toggles the interactivity of the whole game
+
+        // TODO: the goal is to set a staticUntil that is a timestamp
+        // let say, 3 seconds in the future: staticUntil = timestamp + 3;
+        // and then for every interaction we check if isStatic is true
+        // then we set isStatic back off when timestamp > staticUntil
+        this.isStatic = false;
+        this.staticUntil = 0;
+
         this.isDebug = false;
 
         // container to store board object references

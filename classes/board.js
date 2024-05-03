@@ -409,19 +409,14 @@ class Board {
         const pf = new PathFinder(blockmap);
         const path = pf.findPath([ppos.x, ppos.y], [x, y]);
 
-        // TODO: store those moves in a queue, and play
-        // the queue until it's empty, like enemy attacks
-        console.log(`player: ${ppos.x} ${ppos.y} goalTl: ${x} ${y}`)
+        // console.log(`player: ${ppos.x} ${ppos.y} goalTl: ${x} ${y}`)
 
+        // the next move queue
         this.nextMoveQueue = [];
-
         for (var i = 1; i < path.length - 1; i++) {
             this.nextMoveQueue.push(path[i]);
         }
-
         this.nextMoveQueue.push([x, y]);
-
-        // get the queue in the right order
         this.nextMoveQueue = this.nextMoveQueue.reverse();
 
         this.movementQueue();
@@ -437,7 +432,8 @@ class Board {
             const deltaX = this.playerPos.x - x;
             const deltaY = this.playerPos.y - y;
 
-            console.log(deltaX, deltaY);
+            // console.log(deltaX, deltaY);
+            // Orient the player model based on move
             if (deltaX == -1) {
                 this.playerEl.dataset.rotation = `0 0 0`;
             } else if (deltaX == 1) {
