@@ -1,3 +1,5 @@
+import { * } from 'utils.js';
+
 class GameSystem extends MRSystem {
     constructor() {
         super()
@@ -78,10 +80,10 @@ class GameSystem extends MRSystem {
             // M for Map
             if (event.key === 'm') {
                 event.preventDefault();
-                this.printArray("this.board.heightMap", this.board.heightMap);
-                this.printArray("this.board.entityMap", this.board.entityMap);
-                this.printArray("this.board.propMap", this.board.propMap);
-                this.printArray("this.board.distances", this.board.distances);
+                printArray("this.board.heightMap", this.board.heightMap);
+                printArray("this.board.entityMap", this.board.entityMap);
+                printArray("this.board.propMap", this.board.propMap);
+                printArray("this.board.distances", this.board.distances);
             }
 
             // U for Update
@@ -977,13 +979,6 @@ class GameSystem extends MRSystem {
         } else {
             this.endTurnButton.style.backgroundColor = Colors.health;
         }
-    }
-
-    printArray(string, array) {
-        console.log(string);
-        array.forEach(row => {
-            console.log(row);
-        })
     }
 
     update(deltaTime, frame) {

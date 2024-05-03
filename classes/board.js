@@ -1,3 +1,5 @@
+import { * } from 'utils.js';
+
 class Board {
     constructor(container, params) {
         this.container = container;
@@ -50,7 +52,7 @@ class Board {
         this.biome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
 
         // read the params, or generate a random geometry for the room
-        this.flrCount = params.flrCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
+        this.floorCount = params.floorCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
         this.rowCount = params.rowCount ?? Math.floor(Math.random() * (this.maxRowCount - this.minRowCount) + this.minRowCount);
         this.colCount = params.colCount ?? Math.floor(Math.random() * (this.maxColCount - this.minColCount) + this.minColCount);
 
@@ -64,7 +66,7 @@ class Board {
             }, (_, x) =>
             Array.from({
                 length: this.colCount
-            }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.flrCount))
+            }, (_, y) => Math.floor(smoothNoise(x * 0.5, y * 0.5) * this.floorCount))
         );
 
         // this table contains an interactible or blocking entity
@@ -105,7 +107,7 @@ class Board {
         this.effectList = [];
 
         if (this.isDebug) {
-            console.log(`Floor: ${this.flrCount}`);
+            console.log(`Floor: ${this.floorCount}`);
             console.log(`Rows: ${this.rowCount}`);
             console.log(`Cols: ${this.colCount}`);
         }
