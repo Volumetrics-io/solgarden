@@ -161,6 +161,17 @@ class GameSystem extends MRSystem {
                 this.state.needsUpdate = true;
             }
 
+            // K for Key
+            // if (event.key === 'k') {
+            //     event.preventDefault();
+            //     this.state.components.set("state", {
+            //         hasKey: true
+            //     });
+            //
+            //     this.needsUpdate = true;
+            //     this.state.needsUpdate = true;
+            // }
+
             // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
@@ -174,6 +185,10 @@ class GameSystem extends MRSystem {
             // O for Open door
             if (event.key === 'o') {
                 event.preventDefault();
+
+                this.state.components.set("state", {
+                    hasKey: true
+                });
 
                 this.board.openDoor();
             }
@@ -401,6 +416,7 @@ class GameSystem extends MRSystem {
                             // there is an entity on the tile
                             if (cost <= state.action &&
                                 this.board.distances[x][y] <= state.action) {
+
                                 this.interactWith(x, y, targetEntity, cost, state);
 
                                 // pickable items
@@ -662,9 +678,12 @@ class GameSystem extends MRSystem {
                 this.attackPlayer(entity, r, c);
             }
 
-            setTimeout(() => {
-                this.opponentTurn();
-            }, 3000)
+            if (this.combatQueue.length > 0) {
+                setTimeout(() => {
+                    this.opponentTurn();
+                }, 3000)
+            }
+
         } else {
             this.state.components.set('state', {
                 isPlayerTurn: true,
@@ -738,11 +757,11 @@ class GameSystem extends MRSystem {
         this.board.showDamageAt(r, c, damage);
 
         if (entity.hp <= 0) {
-            setTimeout(() => {
-                this.container.removeChild(entity.el);
-                this.dropLoot(r, c);
-                this.needsUpdate = true;
-            }, 500);
+            // setTimeout(() => {
+            this.container.removeChild(entity.el);
+            this.dropLoot(r, c);
+            this.needsUpdate = true;
+            // }, 500);
         }
     }
 
@@ -754,10 +773,16 @@ class GameSystem extends MRSystem {
             //     break;
 
             case "chest":
+
+                entity.el.open();
+
+                // setTimeout(() => {
                 this.container.removeChild(entity.el);
                 this.board.removeEntityAt(x, y);
                 this.dropWeapon(x, y);
-                this.soundController.play('latchSound');
+                // }, 1000)
+
+                // this.soundController.play('latchSound');
                 break;
 
             case "loot":
@@ -819,7 +844,17 @@ class GameSystem extends MRSystem {
 
         let state = this.state.components.get("state");
         let loot;
-        if (enemyCount == 1 && !state.hasKey) {
+        if (enemyCount == 1 && state.hasKey) {
+            // last enemy and no key, the key must drop
+            if (Math.random() < 0.5) {
+                const chest = document.createElement("mr-chest");
+                this.container.appendChild(chest);
+                loot = {
+                    el: chest,
+                    type: 'chest'
+                };
+            }
+        } else if (enemyCount == 1 && !state.hasKey) {
             // last enemy and no key, the key must drop
             const key = document.createElement("mr-key");
             this.container.appendChild(key);

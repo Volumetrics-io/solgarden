@@ -24,6 +24,14 @@ class MRChest extends MREntity {
         this.el.src = "models/chest1.glb";
         this.el.style.pointerEvents = 'none';
 
+        this.components.set('audio', {
+            src: "./audio/latch.mp3",
+            loop: false,
+            action: "stop"
+        })
+
+        this.isOpened = false;
+
         this.el.components.set('animation', {
             clip: 0,
             action: "stop",
@@ -33,12 +41,18 @@ class MRChest extends MREntity {
 
     }
 
-    // moveTo(x,y) {
-    //     let projected = this.parent.projectCoordinates(x, y, this.parent.heightMap[x][y]);
-    //     this.dataset.position = `${projected.offsetRow} ${projected.offsetFloor} ${projected.offsetCol}`;
-    //     // console.log(this.el.dataset.position)
-    //     // this.dataset.position = position;
-    // }
+    open() {
+        if (!this.isOpened) {
+            this.el.components.set('animation', {
+                action: "play",
+            })
+            this.components.set('audio', {
+                action: "play"
+            })
+            this.isOpened = true;
+        }
+    }
+
 }
 
 customElements.define('mr-chest', MRChest);

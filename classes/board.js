@@ -134,9 +134,9 @@ class Board {
         }
 
         // player
-        const player = document.createElement("mr-player");
+        this.playerEl = document.createElement("mr-player");
         this.playerPos = this.addToMap({
-            el: player,
+            el: this.playerEl,
             type: 'player'
         }, this.entityMap);
 
@@ -383,7 +383,7 @@ class Board {
 
         // TODO: this probably should be an ECS?
         this.entityMap[x2][y2].animation = {
-            speed: 3,
+            speed: 5,
             started: false,
             x: x1,
             y: y1,
@@ -393,9 +393,72 @@ class Board {
     }
 
     movePlayer(x, y) {
-        this.moveEntity(this.playerPos.x, this.playerPos.y, x, y);
-        this.playerPos.x = x;
-        this.playerPos.y = y;
+
+        // the path finder needs an obstacle map
+        // we can just copy the entity map
+        const blockmap = this.entityMap.map(function(arr) {
+            return arr.slice();
+        });
+
+        // remove origin and target from copy
+        // otherwise the pathfinding can't work
+        const ppos = this.getPlayerPos();
+        blockmap[ppos.x][ppos.y] = 0;
+        blockmap[x][y] = 0;
+
+        const pf = new PathFinder(blockmap);
+        const path = pf.findPath([ppos.x, ppos.y], [x, y]);
+
+        // TODO: store those moves in a queue, and play
+        // the queue until it's empty, like enemy attacks
+        console.log(`player: ${ppos.x} ${ppos.y} goalTl: ${x} ${y}`)
+
+        this.nextMoveQueue = [];
+
+        for (var i = 1; i < path.length - 1; i++) {
+            this.nextMoveQueue.push(path[i]);
+        }
+
+        this.nextMoveQueue.push([x, y]);
+
+        // get the queue in the right order
+        this.nextMoveQueue = this.nextMoveQueue.reverse();
+
+        this.movementQueue();
+    }
+
+    movementQueue() {
+        // if the queue is not empty, grab the next move.
+        if (this.nextMoveQueue.length > 0) {
+            const move = this.nextMoveQueue.pop();
+            const x = move[0];
+            const y = move[1];
+
+            const deltaX = this.playerPos.x - x;
+            const deltaY = this.playerPos.y - y;
+
+            console.log(deltaX, deltaY);
+            if (deltaX == -1) {
+                this.playerEl.dataset.rotation = `0 0 0`;
+            } else if (deltaX == 1) {
+                this.playerEl.dataset.rotation = `0 180 0`;
+            } else if (deltaY == -1) {
+                this.playerEl.dataset.rotation = `0 90 0`;
+            } else if (deltaY == 1) {
+                this.playerEl.dataset.rotation = `0 270 0`;
+            }
+
+            this.moveEntity(this.playerPos.x, this.playerPos.y, x, y);
+            this.playerPos.x = x;
+            this.playerPos.y = y;
+        }
+
+        // if the queue is still not empty, do it again.
+        if (this.nextMoveQueue.length > 0) {
+            setTimeout(() => {
+                this.movementQueue();
+            }, 500)
+        }
     }
 
     replaceEntity(r, c, entity) {
@@ -419,37 +482,9 @@ class Board {
 
     calcDist(x, y, blockmap) {
 
-        this.printArray("blockmap", blockmap);
-
-        // STEP 1: make a copy of the blockmap array to not mess it up
-        // let tempmap = blockmap.map(function(arr) {
-        //     return arr.slice();
-        // });
-        //
-        // this.printArray("blockmap before", blockmap);
-        // this.printArray("tempmap before", tempmap);
-        //
-        // // STEP 2: add the enemies as blocking tiles
-        // for (let r = 0; r < this.rowCount; r++) {
-        //     for (let c = 0; c < this.colCount; c++) {
-        //         const entity = this.entityMap[r][c];
-        //         // console.log(entity);
-        //         if (entity.type == 'enemy') {
-        //             tempmap[r][c] = entity;
-        //         }
-        //     }
-        // }
-        //
-        // this.printArray("blockmap after", blockmap);
-        // this.printArray("tempmap after", tempmap);
-
-
         // https://codepen.io/lobau/pen/XWQqVwy/6a4c88328ccf9f08befa5463af05708a
         const width = blockmap[0].length;
         const height = blockmap.length;
-
-        // const width = this.colCount;
-        // const height = this.rownCount;
 
         // Initialize distances array with Infinity for unvisited cells
         const distances = Array.from({

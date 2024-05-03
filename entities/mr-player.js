@@ -27,7 +27,15 @@ class MRPlayer extends MREntity {
     connected() {
         this.appendChild(this.el);
         this.el.src = "models/mainCharacter_wip.glb";
+        // this.el.src = "models/poof1.glb";
         this.el.style.pointerEvents = 'none';
+
+        // this.el.components.set("animation", {
+        //     action: "play",
+        //     loop: true,
+        //     clampWhenFinished: true
+        // });
+
 
         this.appendChild(this.light);
         this.light.setAttribute('color', "#ffffff");
