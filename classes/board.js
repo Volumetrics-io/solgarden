@@ -27,6 +27,13 @@ class Board {
         // this.quakeSpeed = 3;
         // this.quakeForce = 0.2; // 0.5
 
+        // TODO: the goal is to set a staticUntil that is a timestamp
+        // let say, 3 seconds in the future: staticUntil = timestamp + 3;
+        // and then for every interaction we check if isStatic is true
+        // then we set isStatic back off when timestamp > staticUntil
+        // this.isInteractive = true;
+        // this.staticUntil = 0;
+
         // TODO: biome soundtrack sound be here
         this.biomes = [{
                 // plains
@@ -213,7 +220,7 @@ class Board {
             el.dataset.tilepath = this.biome.path;
             const prop = {
                 el: el,
-                type: 'prop'
+                type: 'block'
             }
             this.addToMap(prop, this.entityMap);
         }
@@ -245,7 +252,7 @@ class Board {
 
         // chests
         const isChest = params.isChest ?? true;
-        if (isChest && Math.random() < 0.15) {
+        if (isChest && Math.random() < 0.15 || this.levelId == 0) {
             const randomChest = document.createElement("mr-chest");
             this.addToMap({
                 el: randomChest,
@@ -332,34 +339,43 @@ class Board {
             } else if (entity.type == "door") {
                 randRow = this.rowCount - 1;
             } else {
-                randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1);
-
-                // make a copy of the entity map
-                // this temporary array is used to determine
-                // if there would still be a solution if we
-                // add the element at the random position.
-                let tempMap = map.map(function(arr) {
-                    return arr.slice();
-                });
-
-                // add the entity to the array copy
-                tempMap[randRow][randCol] = entity;
-
-                // calc distances with the entity
-                // and see if there is a possible solution
-                let dist = this.calcDist(this.playerPos.y, this.playerPos.x, tempMap);
-                distanceToDoor = dist[this.doorPos.x][this.doorPos.y];
+                randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1)
             }
 
             if (entity.type == "player" ||
                 entity.type == "door" ||
-                (map[randRow][randCol] === 0 && distanceToDoor != Infinity)) {
-                map[randRow][randCol] = entity;
-                inserted = true;
-                pos = {
-                    x: randRow,
-                    y: randCol
+                (map[randRow][randCol] === 0)) {
+
+                if (entity.type == 'block') {
+                    // make a copy of the entity map
+                    // this temporary array is used to determine
+                    // if there would still be a solution if we
+                    // add the element at the random position.
+                    let tempMap = map.map(function(arr) {
+                        return arr.slice();
+                    });
+
+                    // add the entity to the array copy
+                    tempMap[randRow][randCol] = entity;
+
+                    // calc distances with the entity
+                    // and see if there is a possible solution
+                    let dist = this.calcDist(this.playerPos.y, this.playerPos.x, tempMap);
+                    distanceToDoor = dist[this.doorPos.x][this.doorPos.y];
+                    console.log(distanceToDoor);
+                } else {
+                    distanceToDoor = 0;
                 }
+
+                if (distanceToDoor != Infinity) {
+                    map[randRow][randCol] = entity;
+                    inserted = true;
+                    pos = {
+                        x: randRow,
+                        y: randCol
+                    }
+                }
+
             }
         }
 
@@ -392,7 +408,7 @@ class Board {
         }
     }
 
-    movePlayer(x, y) {
+    movePlayer(x, y, state) {
 
         // the path finder needs an obstacle map
         // we can just copy the entity map
@@ -405,6 +421,21 @@ class Board {
         const ppos = this.getPlayerPos();
         blockmap[ppos.x][ppos.y] = 0;
         blockmap[x][y] = 0;
+
+        // for (var r = 0; r < this.entityMap.length; r++) {
+        //     for (var c = 0; c < this.entityMap[0].length; c++) {
+        //         const entity = this.entityMap[r][c];
+        //         if (entity.type == 'key' ||
+        //             entity.type == 'weapon' ||
+        //             entity.type == 'loot' ||
+        //             entity.type == 'lore'
+        //         ) {
+        //             console.log(entity);
+        //             blockmap[r][c] = 0;
+        //         }
+        //
+        //     }
+        // }
 
         const pf = new PathFinder(blockmap);
         const path = pf.findPath([ppos.x, ppos.y], [x, y]);
@@ -419,7 +450,14 @@ class Board {
         this.nextMoveQueue.push([x, y]);
         this.nextMoveQueue = this.nextMoveQueue.reverse();
 
+        const moveCount = this.nextMoveQueue.length;
+
         this.movementQueue();
+
+        return moveCount;
+
+        // this.isInteractive = false;
+        // this.staticUntil =
     }
 
     movementQueue() {
@@ -520,16 +558,16 @@ class Board {
                     newY >= 0 &&
                     newY < height &&
                     (blockmap[newY][newX] === 0 ||
-                        blockmap[newY][newX].type != "prop")
+                        blockmap[newY][newX].type != "block"
+                    )
                 ) {
-                    // console.log(blockmap[newY][newX].type);
+                    console.log(blockmap[newY][newX].type);
                     // Calculate potential new distance
                     const newDistance = distances[currentY][currentX] + 1;
 
                     // Update distance if newDistance is smaller
                     // and effectively make enemies block the player
-                    if (newDistance < distances[newY][newX] &&
-                        blockmap[newY][newX].type != "enemy") {
+                    if (newDistance < distances[newY][newX]) {
 
                         distances[newY][newX] = newDistance;
                         queue.push([newX, newY]);
@@ -700,6 +738,8 @@ class Board {
             }
         }
 
+        // if (state.isInteractive) {
+
         this.tileMap.forEach(row => {
             row.forEach(tile => {
 
@@ -709,7 +749,7 @@ class Board {
 
                 this.project(tile, x, y, timer);
 
-                if (state.isPlayerTurn) {
+                if (state.isPlayerTurn && state.isInteractive) {
                     const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
                     const ppos = this.getPlayerPos();
@@ -809,6 +849,8 @@ class Board {
                 }
             })
         })
+
+        // }
     }
 
     projectEverything(timer) {

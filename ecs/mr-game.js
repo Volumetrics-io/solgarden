@@ -6,16 +6,6 @@ class GameSystem extends MRSystem {
         this.level = 0;
         this.cycle = 0;
 
-        // this boolean is very important.
-        // it toggles the interactivity of the whole game
-
-        // TODO: the goal is to set a staticUntil that is a timestamp
-        // let say, 3 seconds in the future: staticUntil = timestamp + 3;
-        // and then for every interaction we check if isStatic is true
-        // then we set isStatic back off when timestamp > staticUntil
-        this.isStatic = false;
-        this.staticUntil = 0;
-
         this.isDebug = false;
 
         // container to store board object references
@@ -38,6 +28,8 @@ class GameSystem extends MRSystem {
             rangeRange: 0,
             selectedWeapon: "melee",
             isPlayerTurn: true,
+            isInteractive: true,
+            staticUntil: 0,
         }
 
         // assign default state
@@ -171,17 +163,6 @@ class GameSystem extends MRSystem {
                 this.state.needsUpdate = true;
             }
 
-            // K for Key
-            // if (event.key === 'k') {
-            //     event.preventDefault();
-            //     this.state.components.set("state", {
-            //         hasKey: true
-            //     });
-            //
-            //     this.needsUpdate = true;
-            //     this.state.needsUpdate = true;
-            // }
-
             // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
@@ -217,6 +198,26 @@ class GameSystem extends MRSystem {
                     this.board.playerPos.y, 1, 15, 0.5);
             }
 
+            // T for Toggle isInteractive
+            if (event.key === 't') {
+                event.preventDefault();
+
+                if (this.state.components.get('state').isInteractive) {
+                    this.state.components.set("state", {
+                        isInteractive: false,
+                        staticUntil: this.timer + 2
+                    });
+                } else {
+                    this.state.components.set("state", {
+                        isInteractive: true,
+                        staticUntil: 0
+                    });
+                }
+
+                this.state.needsUpdate = true;
+                this.needsUpdate = true;
+            }
+
         });
 
     }
@@ -224,6 +225,7 @@ class GameSystem extends MRSystem {
     initialize() {
         // console.clear();
         this.timer = 0;
+
         // const state = this.state.components.get('state');
 
         // a different approach: pushing the previous room down
@@ -264,7 +266,7 @@ class GameSystem extends MRSystem {
                 biome: {
                     name: 'spawn',
                     path: "biomes/purple/",
-                    audio: "",
+                    // audio: "",
                     tiles: ["tilegrasspurple001.glb"],
                     props: [],
                     block: [],
@@ -294,7 +296,7 @@ class GameSystem extends MRSystem {
                 biome: {
                     name: 'battery',
                     path: "biomes/battery-room/",
-                    audio: "/audio/fridge.mp3",
+                    // audio: "/audio/fridge.mp3",
                     tiles: ["tilegrass001.glb"],
                     props: ["plant_01.glb",
                         "plant_02.glb",
@@ -337,7 +339,7 @@ class GameSystem extends MRSystem {
                     [0, 0, 0, 0],
                 ]
             }
-            this.soundController.play('fridgeSound');
+            this.soundController.play('battery');
 
             // give the key to the player since
             // there are no enemies in the room
@@ -355,14 +357,16 @@ class GameSystem extends MRSystem {
         this.board = new Board(this.container, params);
 
         // TODO: move somewhere else?
-        switch (this.board.biome.name) {
-            case 'plains':
-                this.soundController.play('farmSound');
-                break;
-            case "desert":
-                this.soundController.play('bandlandsSound');
-                break;
-        }
+        // switch (this.board.biome.name) {
+        //     case 'plains':
+        //         this.soundController.play('farmSound');
+        //         break;
+        //     case "desert":
+        //         this.soundController.play('bandlandsSound');
+        //         break;
+        // }
+
+        this.soundController.play(this.board.biome.name)
 
         // the tile elements (the floor) own all the events handling
         this.board.tileMap.forEach(row => {
@@ -371,137 +375,159 @@ class GameSystem extends MRSystem {
                 // Mouse over tiles
                 // Used to update the project cost of an action while hovering
                 tile.el.addEventListener("mouseover", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
-
-                    // TODO: GROSS
-                    tile.el.borderContainer.dataset.position = "0 0.15 0";
-
                     const state = this.state.components.get('state');
 
-                    this.state.components.set('state', {
-                        projectedCost: this.board.getCostFor(x, y, state),
-                    });
-                    this.state.needsUpdate = true;
+                    if (state.isInteractive) {
+                        const x = tile.pos.x;
+                        const y = tile.pos.y;
+
+                        // TODO: GROSS
+                        tile.el.borderContainer.dataset.position = "0 0.15 0";
+
+                        this.state.components.set('state', {
+                            projectedCost: this.board.getCostFor(x, y, state),
+                        });
+                        this.state.needsUpdate = true;
+                    }
+
                 });
 
                 // Mouse out, reset the projected cost to 0
                 tile.el.addEventListener("mouseout", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
+                    const state = this.state.components.get('state');
 
-                    // TODO: GROSS
-                    tile.el.borderContainer.dataset.position = "0 0.2 0";
+                    if (state.isInteractive) {
+                        const x = tile.pos.x;
+                        const y = tile.pos.y;
 
-                    this.state.components.set('state', {
-                        projectedCost: 0,
-                    });
-                    this.state.needsUpdate = true;
+                        // TODO: GROSS
+                        tile.el.borderContainer.dataset.position = "0 0.2 0";
+
+                        this.state.components.set('state', {
+                            projectedCost: 0,
+                        });
+                        this.state.needsUpdate = true;
+                    }
+
                 });
 
                 // Tap on a tile.
                 // State machine based on what is tapped and what is the state
                 tile.el.addEventListener("touchend", () => {
-                    const x = tile.pos.x;
-                    const y = tile.pos.y;
 
                     const state = this.state.components.get('state');
-                    const targetEntity = this.board.getEntityAt(x, y);
-                    const cost = this.board.getCostFor(x, y, state);
 
-                    if (this.isDebug) console.log("Tapped entity", targetEntity);
+                    if (state.isInteractive) {
+                        const x = tile.pos.x;
+                        const y = tile.pos.y;
 
-                    if (state.isPlayerTurn) {
-                        if (!targetEntity) {
-                            // there is nothing on the tile.
-                            if (cost <= state.action) {
-                                state.action -= cost;
-                                this.soundController.play('chessSound');
-                                this.board.movePlayer(x, y);
-                            } else {
-                                this.soundController.play('nopeSound');
-                            }
+                        // const state = this.state.components.get('state');
+                        const targetEntity = this.board.getEntityAt(x, y);
+                        const cost = this.board.getCostFor(x, y, state);
 
-                        } else {
-                            // there is an entity on the tile
-                            if (cost <= state.action &&
-                                this.board.distances[x][y] <= state.action) {
+                        if (this.isDebug) console.log("Tapped entity", targetEntity);
 
-                                this.interactWith(x, y, targetEntity, cost, state);
-
-                                // pickable items
-                                if (targetEntity.type == "loot" ||
-                                    targetEntity.type == "key" ||
-                                    targetEntity.type == "weapon" ||
-                                    targetEntity.type == "lore") {
-
-                                    // then move the player
+                        if (state.isPlayerTurn) {
+                            if (!targetEntity) {
+                                // there is nothing on the tile.
+                                if (cost <= state.action) {
                                     state.action -= cost;
                                     this.soundController.play('chessSound');
-                                    this.board.movePlayer(x, y);
+                                    const moveCount = this.board.movePlayer(x, y);
+                                    state.isInteractive = false;
+                                    state.staticUntil = this.timer + moveCount * 0.5;
+                                } else {
+                                    this.soundController.play('nopeSound');
                                 }
 
-                                if (targetEntity.type == "key") {
-                                    this.board.openDoor();
-                                    // this.soundController.play('doorSound');
-                                }
+                            } else {
+                                // there is an entity on the tile
+                                if (cost <= state.action &&
+                                    this.board.distances[x][y] <= state.action) {
 
-                                // door
-                                if (targetEntity.type == "door") {
+                                    this.interactWith(x, y, targetEntity, cost, state);
 
-                                    if (state.hasKey) {
-                                        // this.soundController.play('doorSound');
-                                        this.board.removeEntityAt(x, y);
+                                    // pickable items
+                                    if (targetEntity.type == "loot" ||
+                                        targetEntity.type == "key" ||
+                                        targetEntity.type == "weapon" ||
+                                        targetEntity.type == "lore") {
 
-                                        // move the player to the door
+                                        // then move the player
                                         state.action -= cost;
                                         this.soundController.play('chessSound');
-                                        this.board.movePlayer(x, y);
+                                        // this.board.movePlayer(x, y);
+                                        const moveCount = this.board.movePlayer(x, y);
+                                        state.isInteractive = false;
+                                        state.staticUntil = this.timer + moveCount * 0.5;
+                                    }
 
-                                        state.isPlayerTurn = false;
-                                        // free full bar if you reach the door
-                                        state.action = state.maxAction;
-                                        state.hasKey = false;
+                                    if (targetEntity.type == "key") {
+                                        this.board.openDoor();
+                                        // this.soundController.play('doorSound');
+                                    }
 
-                                        setTimeout(() => {
-                                            this.initialize();
-                                        }, 1000);
+                                    // door
+                                    if (targetEntity.type == "door") {
+
+                                        if (state.hasKey) {
+                                            // this.soundController.play('doorSound');
+                                            this.board.removeEntityAt(x, y);
+
+                                            // move the player to the door
+                                            state.action -= cost;
+                                            this.soundController.play('chessSound');
+                                            // this.board.movePlayer(x, y);
+                                            const moveCount = this.board.movePlayer(x, y);
+                                            state.isInteractive = false;
+                                            state.staticUntil = this.timer + moveCount * 0.5;
+
+                                            state.isPlayerTurn = false;
+                                            // free full bar if you reach the door
+                                            state.action = state.maxAction;
+                                            state.hasKey = false;
+
+                                            setTimeout(() => {
+                                                this.initialize();
+                                            }, 1000);
+                                        } else {
+                                            this.soundController.play('nopeSound');
+                                        }
+                                    }
+                                } else {
+                                    this.soundController.play('nopeSound');
+                                }
+
+                                // enemies
+                                if (targetEntity.type == "enemy") {
+                                    const ppos = this.board.getPlayerPos();
+                                    const dist = this.board.distBetween(x, y, ppos.x, ppos.y);
+                                    const type = state.selectedWeapon;
+                                    let range = this.getWeaponRange();
+
+                                    if (dist <= range && cost <= state.action) {
+                                        state.action -= cost;
+                                        this.attack(targetEntity, x, y);
                                     } else {
                                         this.soundController.play('nopeSound');
                                     }
                                 }
-                            } else {
-                                this.soundController.play('nopeSound');
                             }
 
-                            // enemies
-                            if (targetEntity.type == "enemy") {
-                                const ppos = this.board.getPlayerPos();
-                                const dist = this.board.distBetween(x, y, ppos.x, ppos.y);
-                                const type = state.selectedWeapon;
-                                let range = this.getWeaponRange();
-
-                                if (dist <= range && cost <= state.action) {
-                                    state.action -= cost;
-                                    this.attack(targetEntity, x, y);
-                                } else {
-                                    this.soundController.play('nopeSound');
-                                }
+                            // Automatically end the turn when the player
+                            // runs out of action points
+                            if (this.autoEndTurn && state.action == 0) {
+                                setTimeout(() => {
+                                    this.endTurn();
+                                }, 800);
+                                // this.endTurn();
                             }
+
+                            this.needsUpdate = true;
+                            this.state.needsUpdate = true;
+                            this.state.components.set('state', state);
                         }
 
-                        // Automatically end the turn when the player
-                        // runs out of action points
-                        if (this.autoEndTurn && state.action == 0) {
-                            setTimeout(() => {
-                                this.endTurn();
-                            }, 800);
-                            // this.endTurn();
-                        }
-
-                        this.needsUpdate = true;
-                        this.state.needsUpdate = true;
-                        this.state.components.set('state', state);
                     }
                 });
             })
@@ -509,6 +535,7 @@ class GameSystem extends MRSystem {
 
         this.state.components.set('state', {
             isPlayerTurn: true,
+            isInteractive: true
         });
 
         this.level++;
@@ -784,13 +811,32 @@ class GameSystem extends MRSystem {
 
             case "chest":
 
+                state.isInteractive = false;
+                state.staticUntil = this.timer + 2;
+
                 entity.el.open();
 
+                // overlay the poof over the chest
+                setTimeout(() => {
+                    this.poofElement = document.createElement('mr-poof');
+                    this.container.appendChild(this.poofElement);
+                }, 500)
+
+                // remove the chest and replace with weapon
+                setTimeout(() => {
+                    this.container.removeChild(entity.el);
+                    this.board.removeEntityAt(x, y);
+                    this.dropWeapon(x, y);
+
+                    // this.state.components.set("state", {
+                    //     isInteractive: true
+                    // });
+
+                }, 2000)
+
                 // setTimeout(() => {
-                this.container.removeChild(entity.el);
-                this.board.removeEntityAt(x, y);
-                this.dropWeapon(x, y);
-                // }, 1000)
+                //     this.container.removeChild(this.poofElement);
+                // }, 3000)
 
                 // this.soundController.play('latchSound');
                 break;
@@ -922,16 +968,6 @@ class GameSystem extends MRSystem {
             },
         ]
 
-        // const Weapons = [{
-        //         name: "shortsword",
-        //         subtype: "melee"
-        //     },
-        //     {
-        //         name: "slingshot",
-        //         subtype: "range"
-        //     }
-        // ]
-
         const randomId = Math.floor(Math.random() * Weapons.length);
         const weapon = Weapons[randomId];
         const el = document.createElement("mr-weapon");
@@ -951,7 +987,7 @@ class GameSystem extends MRSystem {
             console.error("Illegal type for weapon.subtype");
         }
 
-        console.log('dropped weapon', attack, range, weapon.name, weapon.subtype);
+        if (this.isDebug) console.log('dropped weapon', attack, range, weapon.name, weapon.subtype);
 
         this.board.entityMap[x][y] = {
             el: el,
@@ -972,11 +1008,16 @@ class GameSystem extends MRSystem {
         // this.board.setAttackRange(state, this.timer);
         this.board.projectEverything(this.timer);
 
-        if (state.action == 0) {
-            this.endTurnButton.style.backgroundColor = Colors.hover;
+        if (state.isInteractive) {
+            if (state.action == 0) {
+                this.endTurnButton.style.backgroundColor = Colors.hover;
+            } else {
+                this.endTurnButton.style.backgroundColor = Colors.health;
+            }
         } else {
-            this.endTurnButton.style.backgroundColor = Colors.health;
+            this.endTurnButton.style.backgroundColor = Colors.neutral;
         }
+
     }
 
     printArray(string, array) {
@@ -989,6 +1030,17 @@ class GameSystem extends MRSystem {
     update(deltaTime, frame) {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
+            const state = this.state.components.get('state');
+            // console.log(state.isInteractive);
+
+            // if (!state.isInteractive && state.staticUntil < this.timer) {
+            //     this.needsUpdate = true;
+            //     this.state.needsUpdate = true;
+            //     this.state.components.set('state', {
+            //         isInteractive: true
+            //     });
+            //     if (this.isDebug) console.log("isInteractive is true again");
+            // }
 
             if (this.needsUpdate ||
                 this.state.needsUpdate ||
@@ -1003,12 +1055,12 @@ class GameSystem extends MRSystem {
 
                 this.state.dataset.position = `-${offX} ${this.tableOffset} 0`;
 
+                // TODO: important to reenable at some point
                 this.needsUpdate = false;
                 this.state.needsUpdate = false;
 
                 // Dot is in the battery room
                 if (this.board.biome.name == 'battery') {
-                    const state = this.state.components.get('state');
                     const pos = this.board.getPlayerPos();
 
                     // the gauge that fills at it charges
@@ -1043,6 +1095,15 @@ class GameSystem extends MRSystem {
                 //     this.board.projectAnimatedEntities(this.timer);
             }
 
+            if (!state.isInteractive && state.staticUntil < this.timer) {
+                this.needsUpdate = true;
+                this.state.needsUpdate = true;
+                this.state.components.set('state', {
+                    isInteractive: true
+                });
+                if (this.isDebug) console.log("isInteractive is true again");
+            }
+
             this.board.projectAnimatedEntities(this.timer);
         }
     }
@@ -1070,7 +1131,11 @@ class GameSystem extends MRSystem {
         this.state.appendChild(this.endTurnButton);
 
         this.endTurnButton.addEventListener('click', () => {
-            this.endTurn();
+            if (this.state.components.get('state').isInteractive) {
+                this.endTurn();
+            } else {
+                this.soundController.play('nopeSound');
+            }
         });
 
         this.initialize();

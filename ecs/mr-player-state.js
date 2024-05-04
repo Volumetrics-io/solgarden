@@ -252,7 +252,6 @@ class StateSystem extends MRSystem {
                 this.rangeBar.scale.set(1, 1, rangeRatio * this.barLength);
                 this.rangeValueEl.innerText = Math.round(state.range);
 
-
                 this.meleeWeapons.forEach((weapon, i) => {
                     if (weapon.name == state.meleeName) {
                         weapon.el.style.visibility = "visible";
@@ -275,16 +274,37 @@ class StateSystem extends MRSystem {
                     this.rangeAttackValueEl.innerText = state.rangeAttack;
                 }
 
-                if (state.selectedWeapon == 'melee' && state.meleeName) {
-                    this.meleeSelection.material.opacity = 0.5;
-                    this.rangeSelection.material.opacity = 0;
-                } else if (state.selectedWeapon == 'range' && state.rangeName) {
-                    this.meleeSelection.material.opacity = 0;
-                    this.rangeSelection.material.opacity = 0.5;
+                // TODO: EWW
+                if (state.isInteractive) {
+                    this.meleeSelection.material.color.setStyle(Colors.objects);
+                    this.rangeSelection.material.color.setStyle(Colors.objects);
+
+                    if (state.selectedWeapon == 'melee' && state.meleeName) {
+                        this.meleeSelection.material.opacity = 0.5;
+                        this.rangeSelection.material.opacity = 0;
+                    } else if (state.selectedWeapon == 'range' && state.rangeName) {
+                        this.meleeSelection.material.opacity = 0;
+                        this.rangeSelection.material.opacity = 0.5;
+                    } else {
+                        this.meleeSelection.material.opacity = 0;
+                        this.rangeSelection.material.opacity = 0;
+                    }
                 } else {
-                    this.meleeSelection.material.opacity = 0;
-                    this.rangeSelection.material.opacity = 0;
+                    this.meleeSelection.material.color.setStyle(Colors.neutral);
+                    this.rangeSelection.material.color.setStyle(Colors.neutral);
+
+                    if (state.selectedWeapon == 'melee' && state.meleeName) {
+                        this.meleeSelection.material.opacity = 0.5;
+                        this.rangeSelection.material.opacity = 0;
+                    } else if (state.selectedWeapon == 'range' && state.rangeName) {
+                        this.meleeSelection.material.opacity = 0;
+                        this.rangeSelection.material.opacity = 0.5;
+                    } else {
+                        this.meleeSelection.material.opacity = 0;
+                        this.rangeSelection.material.opacity = 0;
+                    }
                 }
+
             }
 
         }

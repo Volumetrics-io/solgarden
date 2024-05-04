@@ -9,22 +9,23 @@ class SoundController {
             nopeSound: document.querySelector('#nope-sound'),
             swooshSound: document.querySelector('#swoosh-sound'),
             latchSound: document.querySelector('#latch-sound'),
-            fridgeSound: document.querySelector('#fridge-sound'),
-            farmSound: document.querySelector('#farm-sound'),
-            bandlandsSound: document.querySelector('#badlands-sound'),
+            battery: document.querySelector('#fridge-sound'),
+            plains: document.querySelector('#farm-sound'),
+            desert: document.querySelector('#badlands-sound'),
+            spawn: document.querySelector('#badlands-sound'),
         }
 
         this.initialize();
     }
 
     initialize() {
-        this.sounds.fridgeSound.components.set('audio', {
+        this.sounds.battery.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.farmSound.components.set('audio', {
+        this.sounds.plains.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.bandlandsSound.components.set('audio', {
+        this.sounds.desert.components.set('audio', {
             action: 'pause'
         });
     }
@@ -36,13 +37,16 @@ class SoundController {
     }
 
     background(sound) {
-        this.sounds.fridgeSound.components.set('audio', {
+        this.sounds.battery.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.farmSound.components.set('audio', {
+        this.sounds.plains.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.bandlandsSound.components.set('audio', {
+        this.sounds.desert.components.set('audio', {
+            action: 'pause'
+        });
+        this.sounds.spawn.components.set('audio', {
             action: 'pause'
         });
         this.play(sound)
