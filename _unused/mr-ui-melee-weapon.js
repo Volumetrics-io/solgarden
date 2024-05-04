@@ -9,12 +9,12 @@ class MRUIMeleeWeapon extends MREntity {
         this.meleeWeapons = [{
                 name: "twig",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-stick1.glb",
+                src: "assets/models/weapon-stick1.glb",
             },
             {
                 name: "short-sword",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-shortSword01.glb",
+                src: "assets/models/weapon-shortSword01.glb",
             },
         ]
     }

@@ -11,7 +11,7 @@ class MRUIRangeWeapon extends MREntity {
 
         switch(this.type) {
             case "short-sword":
-                this.el.src = "models/weapon-shortSword01.glb";
+                this.el.src = "assets/models/weapon-shortSword01.glb";
                 break;
         }
 

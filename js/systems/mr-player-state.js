@@ -12,12 +12,12 @@ class StateSystem extends MRSystem {
         this.meleeWeapons = [{
                 name: "twig",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-stick1-UI.glb",
+                src: "assets/models/weapon-stick1-UI.glb",
             },
             {
                 name: "shortsword",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-shortSword1-UI.glb",
+                src: "assets/models/weapon-shortSword1-UI.glb",
             },
         ];
 
@@ -26,12 +26,12 @@ class StateSystem extends MRSystem {
         this.rangeWeapons = [{
                 name: "slingshot",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-slingshot1-UI.glb",
+                src: "assets/models/weapon-slingshot1-UI.glb",
             },
             {
                 name: "bow",
                 el: document.createElement("mr-model"),
-                src: "models/weapon-bow1-UI.glb",
+                src: "assets/models/weapon-bow1-UI.glb",
             },
         ]
 

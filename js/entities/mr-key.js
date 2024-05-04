@@ -22,12 +22,12 @@ class MRKey extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "models/key1.glb";
+        this.el.src = "assets/models/key1.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
 
         // this.appendChild(this.glow);
-        // this.glow.src = '/ui-models/tileHighlight1.glb';
+        // this.glow.src = 'assets/ui-models/tileHighlight1.glb';
         // this.glow.style.pointerEvents = 'none';
     }
 

@@ -31,8 +31,8 @@ class Board {
         this.biomes = [{
                 // plains
                 name: "plains",
-                path: "biomes/plains/",
-                // audio: "/audio/farm.mp3",
+                path: "assets/biomes/plains/",
+                // audio: "/assets/audio/farm.mp3",
                 tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
                 props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
                 block: ["rock001.glb"]
@@ -40,8 +40,8 @@ class Board {
             {
                 // desert
                 name: "desert",
-                path: "biomes/deserts/",
-                // audio: "/audio/badlands.mp3",
+                path: "assets/biomes/deserts/",
+                // audio: "/assets/audio/badlands.mp3",
                 tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
                 props: ["plant_05_to_test.glb"],
                 block: ["rockdesert001.glb", "rockdesert002.glb"]

@@ -21,11 +21,11 @@ class MRChest extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "models/chest1.glb";
+        this.el.src = "assets/models/chest1.glb";
         this.el.style.pointerEvents = 'none';
 
         this.components.set('audio', {
-            src: "./audio/latch.mp3",
+            src: "./assets/audio/latch.mp3",
             loop: false,
             action: "stop"
         })

@@ -43,28 +43,28 @@ class MRTile extends MREntity {
 
         // TODO: automate this
         this.borderContainer.appendChild(this.borderWhite);
-        this.borderWhite.src = '/ui-models/borderObject-white.glb';
+        this.borderWhite.src = '/assets/ui-models//borderObject-white.glb';
         this.borderWhite.style.visibility = "hidden";
 
         this.borderContainer.appendChild(this.borderObjects);
-        this.borderObjects.src = '/ui-models/borderObject-objects.glb';
+        this.borderObjects.src = '/assets/ui-models//borderObject-objects.glb';
         this.borderObjects.style.visibility = "hidden";
 
         this.borderContainer.appendChild(this.borderHealth);
-        this.borderHealth.src = '/ui-models/borderObject-health.glb';
+        this.borderHealth.src = '/assets/ui-models//borderObject-health.glb';
         this.borderHealth.style.visibility = "hidden";
 
         this.borderContainer.appendChild(this.borderNeutral);
-        this.borderNeutral.src = '/ui-models/borderObject-neutral.glb';
+        this.borderNeutral.src = '/assets/ui-models//borderObject-neutral.glb';
         this.borderNeutral.style.visibility = "hidden";
 
         this.borderContainer.appendChild(this.borderRange);
-        this.borderRange.src = '/ui-models/borderObject-range.glb';
+        this.borderRange.src = '/assets/ui-models//borderObject-range.glb';
         this.borderRange.style.visibility = "hidden";
 
         this.borderContainer.appendChild(this.glowWhite);
-        // this.glowWhite.src = '/ui-models/borderObject-range.glb';
-        this.glowWhite.src = '/ui-models/tileHighlight1.glb';
+        // this.glowWhite.src = '/assets/ui-models//borderObject-range.glb';
+        this.glowWhite.src = '/assets/ui-models//tileHighlight1.glb';
         // this.borderRange.dataset.position = "0 0.2 0";
         this.glowWhite.style.visibility = "hidden";
         this.glowWhite.onLoad = () => {

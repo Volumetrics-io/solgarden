@@ -7,7 +7,7 @@ class MRProjectile extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "models/projectile.glb";
+        this.el.src = "assets/models/projectile.glb";
         // this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
     }
