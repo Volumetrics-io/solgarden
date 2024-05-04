@@ -27,7 +27,7 @@ class MRKey extends MREntity {
         this.el.style.pointerEvents = 'none';
 
         // this.appendChild(this.glow);
-        // this.glow.src = '/assets/ui-assets/models//tileHighlight1.glb';
+        // this.glow.src = 'assets/ui-models/tileHighlight1.glb';
         // this.glow.style.pointerEvents = 'none';
     }
 
