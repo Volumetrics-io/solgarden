@@ -1,13 +1,13 @@
 #! /bin/bash
 
-rm -rf mrjs
-mkdir mrjs
+rm -rf mrjs-build
+mkdir mrjs-build
 
 files_list=("mr.js" "57cf7fc5ff4d6dfc74e4.module.wasm" "vendors-node_modules_dimforge_rapier3d_rapier_js.mr.js")
 
 for str in "${files_list[@]}"; do
   echo "Updating build file: $str"
-  curl -o mrjs/${str} https://raw.githubusercontent.com/Volumetrics-io/mrjs/main/dist/${str}
+  curl -o mrjs-build/${str} https://raw.githubusercontent.com/Volumetrics-io/mrjs/main/dist/${str}
 done
 
 if command -v jq >/dev/null 2>&1; then
