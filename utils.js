@@ -2,18 +2,18 @@
 // --------- Debug ----------- //
 /////////////////////////////////
 
-printArray(string, array) {
+function printArray(string, array) {
     console.log(string);
     array.forEach(row => {
         console.log(row);
     })
 }
- 
+
 /////////////////////////////////
 // ----------- Math ---------- //
 /////////////////////////////////
 
-distBetween(x1, y1, x2, y2) {
+function distBetween(x1, y1, x2, y2) {
     var distX = x1 - x2;
     var distY = y1 - y2;
     return Math.sqrt(distX * distX + distY * distY);
@@ -23,17 +23,17 @@ distBetween(x1, y1, x2, y2) {
 // ------- Noise Funcs ------- //
 /////////////////////////////////
 
-lerp(a, b, t) {
+function lerp(a, b, t) {
     return a + (b - a) * t;
 }
 
-noise(x, y) {
+function noise(x, y) {
     const random = Math.floor(Math.random() * 99999);
     const n = Math.sin(x * 12.9898 + y * 78.233 + random) * 43758.5453;
     return n - Math.floor(n);
 }
 
-smoothNoise(x, y) {
+function smoothNoise(x, y) {
     // Interpolate between four corners
     const intX = Math.floor(x);
     const intY = Math.floor(y);
