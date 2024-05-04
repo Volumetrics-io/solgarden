@@ -263,7 +263,7 @@ class GameSystem extends MRSystem {
                 isChest: false,
                 biome: {
                     name: 'spawn',
-                    path: "biomes/purple/",
+                    path: "assets/biomes/purple/",
                     audio: "",
                     tiles: ["tilegrasspurple001.glb"],
                     props: [],
@@ -293,7 +293,7 @@ class GameSystem extends MRSystem {
                 isLore: false,
                 biome: {
                     name: 'battery',
-                    path: "biomes/battery-room/",
+                    path: "assets/biomes/battery-room/",
                     audio: "/assets/audio/fridge.mp3",
                     tiles: ["tilegrass001.glb"],
                     props: ["plant_01.glb",
