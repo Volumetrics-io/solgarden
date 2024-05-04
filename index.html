@@ -4,21 +4,21 @@
 <head>
     <meta charset="utf-8">
     <title>Sol Garden — The mini roguelike for your desk</title>
-    <script src="mrjs/mr.js"></script>
-    <!-- <link rel="preload" href="/fonts/JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin /> -->
-    <!-- <link rel="preload" href="/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin /> -->
-    <link rel="preload" href="/fonts/JetBrainsMono-Medium.ttf" as="font" type="font/truetype" crossorigin />
+    <script src="mrjs-build/mr.js"></script>
+    <!-- <link rel="preload" href="/assets/fonts/JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin /> -->
+    <!-- <link rel="preload" href="/assets/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin /> -->
+    <link rel="preload" href="/assets/fonts/JetBrainsMono-Medium.ttf" as="font" type="font/truetype" crossorigin />
     <style>
         /* @font-face {
             font-family: 'JetBrains';
-            src: url('/fonts/JetBrainsMono.ttf') format('truetype');
+            src: url('/assets/fonts/JetBrainsMono.ttf') format('truetype');
             font-weight: 100 900;
             font-style: normal;
         } */
 
         @font-face {
             font-family: 'JetBrains';
-            src: url('/fonts/JetBrainsMono-Medium.ttf') format('truetype');
+            src: url('/assets/fonts/JetBrainsMono-Medium.ttf') format('truetype');
             font-weight: 400;
             font-style: normal;
         }
@@ -96,18 +96,18 @@
 
         <!-- <mr-app debug="true" orbital="true"> -->
         <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
-            <mr-entity id="chess-sound" data-comp-audio="src: ./audio/chess.mp3; loop: false; state: stop;"></mr-entity>
-            <!-- <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
-            <mr-entity id="analog-sound" data-comp-audio="src: ./audio/analog.mp3; loop: false; state: stop;"></mr-entity>
-            <mr-entity id="clash-sound" data-comp-audio="src: ./audio/clash.mp3; loop: false; state: stop;"></mr-entity>
-            <mr-entity id="nope-sound" data-comp-audio="src: ./audio/nope.mp3; loop: false; state: stop;"></mr-entity>
-            <mr-entity id="swoosh-sound" data-comp-audio="src: ./audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
-            <!-- <mr-entity id="latch-sound" data-comp-audio="src: ./audio/latch.mp3; loop: false; state: stop;"></mr-entity> -->
+            <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
+            <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
+            <mr-entity id="analog-sound" data-comp-audio="src: ./assets/audio/analog.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="clash-sound" data-comp-audio="src: ./assets/audio/clash.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="nope-sound" data-comp-audio="src: ./assets/audio/nope.mp3; loop: false; state: stop;"></mr-entity>
+            <mr-entity id="swoosh-sound" data-comp-audio="src: ./assets/audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
+            <!-- <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity> -->
 
-            <mr-entity id="bg-music" data-comp-audio="src: ./audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="fridge-sound" data-comp-audio="src: ./audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="farm-sound" data-comp-audio="src: ./audio/farm.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="badlands-sound" data-comp-audio="src: ./audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="fridge-sound" data-comp-audio="src: ./assets/audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="farm-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="badlands-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
         </mr-entity>
     </mr-app>
 
@@ -160,31 +160,31 @@
         Note: We place this first so that other scripts can share the
         functions it contains since JavaScript executes sequentially.
     -->
-    <script src="/utils.js"></script>
+    <script src="/src/utils.js"></script>
 
     <!-- Classes -->
-    <script src="/classes/pathfinder.js"></script>
-    <script src="/classes/board.js"></script>
-    <script src="/classes/sound-controller.js"></script>
+    <script src="/src/pathfinder.js"></script>
+    <script src="/src/board.js"></script>
+    <script src="/src/sound-controller.js"></script>
 
     <!-- MRjs Systems -->
-    <script src="/ecs/mr-player-state.js"></script>
-    <script src="/ecs/mr-game.js"></script>
+    <script src="/src/systems/mr-player-state.js"></script>
+    <script src="/src/systems/mr-game.js"></script>
 
     <!-- Mrjs Entities -->
-    <script src="/entities/mr-battery.js"></script>
-    <script src="/entities/mr-chest.js"></script>
-    <script src="/entities/mr-door.js"></script>
-    <script src="/entities/mr-enemy.js"></script>
-    <script src="/entities/mr-goal.js"></script>
-    <script src="/entities/mr-key.js"></script>
-    <script src="/entities/mr-loot.js"></script>
-    <script src="/entities/mr-lore.js"></script>
-    <script src="/entities/mr-player.js"></script>
-    <script src="/entities/mr-projectile.js"></script>
-    <script src="/entities/mr-prop.js"></script>
-    <script src="/entities/mr-tile.js"></script>
-    <script src="/entities/mr-weapon.js"></script>
+    <script src="/src/entities/mr-battery.js"></script>
+    <script src="/src/entities/mr-chest.js"></script>
+    <script src="/src/entities/mr-door.js"></script>
+    <script src="/src/entities/mr-enemy.js"></script>
+    <script src="/src/entities/mr-goal.js"></script>
+    <script src="/src/entities/mr-key.js"></script>
+    <script src="/src/entities/mr-loot.js"></script>
+    <script src="/src/entities/mr-lore.js"></script>
+    <script src="/src/entities/mr-player.js"></script>
+    <script src="/src/entities/mr-projectile.js"></script>
+    <script src="/src/entities/mr-prop.js"></script>
+    <script src="/src/entities/mr-tile.js"></script>
+    <script src="/src/entities/mr-weapon.js"></script>
 
 </body>
 

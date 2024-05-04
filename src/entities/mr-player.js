@@ -1,9 +1,11 @@
-class MREnemy extends MREntity {
+class MRPlayer extends MREntity {
 
     constructor() {
         super()
 
         this.el = document.createElement("mr-model");
+        this.light = document.createElement("mr-light");
+
         this.damageContainer = document.createElement("mr-div")
         this.damageValue = document.createElement("mr-text");
         this.damageValueBackface = document.createElement("mr-text");
@@ -23,21 +25,22 @@ class MREnemy extends MREntity {
     }
 
     connected() {
-
-        const subtype = this.dataset.subtype ?? "aimless";
-
-        const enemyModels = {
-            static: "models/enemy-static1.glb",
-            homing: "models/enemy-floater1.glb",
-            aimless: "models/enemy-aimless1.glb",
-            // horse: "models/enemy-horse1.glb",
-        }
-
         this.appendChild(this.el);
-        this.el.src = enemyModels[subtype]
-        this.el.dataset.compAnimation = "clip: 0; action: play;";
-        this.el.dataset.rotation = `0 180 0`
+        this.el.src = "assets/models/mainCharacter_wip.glb";
+        // this.el.src = "assets/models/poof1.glb";
         this.el.style.pointerEvents = 'none';
+
+        // this.el.components.set("animation", {
+        //     action: "play",
+        //     loop: true,
+        //     clampWhenFinished: true
+        // });
+
+
+        this.appendChild(this.light);
+        this.light.setAttribute('color', "#ffffff");
+        this.light.setAttribute('intensity', 0.03);
+        this.light.dataset.position = `0 0.6 0.3`;
 
         this.appendChild(this.damageContainer);
         this.damageContainer.dataset.position = '0 2.5 0';
@@ -75,6 +78,7 @@ class MREnemy extends MREntity {
             this.damageContainer.style.visibility = "hidden";
         }, 500);
     }
+
 }
 
-customElements.define('mr-enemy', MREnemy);
+customElements.define('mr-player', MRPlayer);

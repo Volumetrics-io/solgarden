@@ -294,7 +294,7 @@ class GameSystem extends MRSystem {
                 biome: {
                     name: 'battery',
                     path: "biomes/battery-room/",
-                    audio: "/audio/fridge.mp3",
+                    audio: "/assets/audio/fridge.mp3",
                     tiles: ["tilegrass001.glb"],
                     props: ["plant_01.glb",
                         "plant_02.glb",

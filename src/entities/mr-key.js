@@ -1,9 +1,10 @@
-class MRGoal extends MREntity {
+class MRKey extends MREntity {
 
     constructor() {
         super()
 
         this.el = document.createElement("mr-model");
+        // this.glow = document.createElement("mr-model");
 
         // this.el.onLoad = () => {
         //     this.el.object3D.traverse(object => {
@@ -21,11 +22,15 @@ class MRGoal extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "models/goal1.glb";
+        this.el.src = "assets/models/key1.glb";
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
+
+        // this.appendChild(this.glow);
+        // this.glow.src = '/assets/ui-assets/models//tileHighlight1.glb';
+        // this.glow.style.pointerEvents = 'none';
     }
 
 }
 
-customElements.define('mr-goal', MRGoal);
+customElements.define('mr-key', MRKey);

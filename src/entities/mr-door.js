@@ -6,7 +6,7 @@ class MRDoor extends MREntity {
         this.el = document.createElement("mr-model");
         this.ui = document.createElement("mr-model");
 
-        // <mr-entity id="door-sound" data-comp-audio="src: ./audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
+        // <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity>
 
         // this.el.onLoad = () => {
         //     this.el.object3D.traverse(object => {
@@ -24,17 +24,17 @@ class MRDoor extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "models/door1.glb";
+        this.el.src = "assets/models/door1.glb";
         this.el.style.pointerEvents = 'none';
 
         this.appendChild(this.ui);
-        this.ui.src = "models/door1-UI.glb";
+        this.ui.src = "assets/models/door1-UI.glb";
         this.ui.style.pointerEvents = 'none';
 
         this.dataset.rotation = `0 180 0`
 
         this.components.set('audio', {
-            src: "./audio/door-hinge.mp3",
+            src: "./assets/audio/door-hinge.mp3",
             loop: false,
             action: "stop"
         })
