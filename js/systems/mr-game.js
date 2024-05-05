@@ -256,7 +256,7 @@ class GameSystem extends MRSystem {
 
         // params.isDebug = State.isDebug;
         this.board = new Board(this.container, params);
-        Sounds.play(this.board.biome.name);
+        Sounds.background(this.board.biome.name);
 
         // the tile elements (the floor) own all the events handling
         this.board.tileMap.forEach(row => {
