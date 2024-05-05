@@ -1,9 +1,11 @@
-class StateSystem extends MRSystem {
+class MRUI extends MREntity {
+
     constructor() {
         super()
-        this.isAttached = false;
+
         this.container = document.createElement("mr-entity");
         this.container.id = 'ui-container'; // for DOM debugging
+
         this.meleeContainer = document.createElement("mr-entity");
         this.rangeContainer = document.createElement("mr-entity");
 
@@ -41,13 +43,9 @@ class StateSystem extends MRSystem {
         this.rangeValueEl = document.createElement("mr-text");
     }
 
-    attachedComponent(entity) {
-        this.root = entity;
-        this.root.appendChild(this.container);
+    connected() {
 
-        this.root.needsUpdate = true;
-
-        // this.state = this.root.components.get('state');
+        this.appendChild(this.container);
 
         this.barLength = 2;
         this.actionBallCount = 7;
@@ -119,47 +117,35 @@ class StateSystem extends MRSystem {
         this.container.object3D.add(this.rangeBar);
 
         this.meleeContainer.addEventListener('touchend', () => {
-            this.root.components.set('state', {
-                selectedWeapon: 'melee',
-                hoverMelee: false,
-            });
-            this.root.needsUpdate = true;
+            State.selectedWeapon = 'melee';
+            // State.hoverMelee = false;
+            State.needsUpdate = true;
         })
 
         this.meleeContainer.addEventListener('mouseover', () => {
-            this.root.components.set('state', {
-                hoverMelee: true,
-            });
-            this.root.needsUpdate = true;
+            State.hoverMelee = true;
+            State.needsUpdate = true;
         })
 
         this.meleeContainer.addEventListener('mouseout', () => {
-            this.root.components.set('state', {
-                hoverMelee: false,
-            });
-            this.root.needsUpdate = true;
-        })
-
+            State.hoverMelee = false;
+            State.needsUpdate = true;
+        });
 
         this.rangeContainer.addEventListener('touchend', () => {
-            this.root.components.set('state', {
-                selectedWeapon: 'range',
-            });
-            this.root.needsUpdate = true;
+            State.selectedWeapon = 'range';
+            // State.hoverRange = false;
+            State.needsUpdate = true;
         });
 
         this.rangeContainer.addEventListener('mouseover', () => {
-            this.root.components.set('state', {
-                hoverRange: true,
-            });
-            this.root.needsUpdate = true;
+            State.hoverRange = true;
+            State.needsUpdate = true;
         })
 
         this.rangeContainer.addEventListener('mouseout', () => {
-            this.root.components.set('state', {
-                hoverRange: false,
-            });
-            this.root.needsUpdate = true;
+            State.hoverRange = false;
+            State.needsUpdate = true;
         })
 
         // melee weapons
@@ -213,85 +199,72 @@ class StateSystem extends MRSystem {
                 opacity: 0.5
             }));
         this.rangeContainer.object3D.add(this.rangeSelection);
-
-        this.isAttached = true;
     }
 
-    update(deltaTime, frame) {
-        if (this.isAttached) {
-            if (this.root.needsUpdate) {
-                const state = this.root.components.get('state');
-
-                // console.log(state.projectedCost);
-
-                this.actionBalls.forEach((actionBall, i) => {
-                    if (i < state.maxAction) {
-                        actionBall.visible = true;
-                        if (i < state.action) {
-                            actionBall.material.color.setStyle(Colors.movement)
-                            actionBall.material.opacity = 1;
-                        } else {
-                            actionBall.material.color.setStyle(Colors.neutral)
-                            actionBall.material.opacity = 0.25;
-                        }
-
-                        // recolor the ball if it's a projected cost
-                        if (i < state.projectedCost) {
-                            actionBall.material.color.setStyle(Colors.hover)
-                        } else if (state.projectedCost == Infinity) {
-                            actionBall.material.color.setStyle(Colors.neutral)
-                        }
-                    } else {
-                        actionBall.visible = false;
-                    }
-                });
-
-                const healthRatio = state.health / state.maxHealth;
-                this.healthBar.scale.set(1, 1, healthRatio * this.barLength);
-                this.healthValueEl.innerText = Math.round(state.health);
-
-                const rangeRatio = state.range / state.maxRange;
-                this.rangeBar.scale.set(1, 1, rangeRatio * this.barLength);
-                this.rangeValueEl.innerText = Math.round(state.range);
-
-
-                this.meleeWeapons.forEach((weapon, i) => {
-                    if (weapon.name == state.meleeName) {
-                        weapon.el.style.visibility = "visible";
-                    } else {
-                        weapon.el.style.visibility = "hidden";
-                    }
-                });
-                if (state.meleeName) {
-                    this.meleeAttackValueEl.innerText = state.meleeAttack;
-                }
-
-                this.rangeWeapons.forEach((weapon, i) => {
-                    if (weapon.name == state.rangeName) {
-                        weapon.el.style.visibility = "visible";
-                    } else {
-                        weapon.el.style.visibility = "hidden";
-                    }
-                });
-                if (state.rangeName) {
-                    this.rangeAttackValueEl.innerText = state.rangeAttack;
-                }
-
-                if (state.selectedWeapon == 'melee' && state.meleeName) {
-                    this.meleeSelection.material.opacity = 0.5;
-                    this.rangeSelection.material.opacity = 0;
-                } else if (state.selectedWeapon == 'range' && state.rangeName) {
-                    this.meleeSelection.material.opacity = 0;
-                    this.rangeSelection.material.opacity = 0.5;
+    update(timer) {
+        this.actionBalls.forEach((actionBall, i) => {
+            if (i < State.maxAction) {
+                actionBall.visible = true;
+                if (i < State.action) {
+                    actionBall.material.color.setStyle(Colors.movement)
+                    actionBall.material.opacity = 1;
                 } else {
-                    this.meleeSelection.material.opacity = 0;
-                    this.rangeSelection.material.opacity = 0;
+                    actionBall.material.color.setStyle(Colors.neutral)
+                    actionBall.material.opacity = 0.25;
                 }
-            }
 
+                // recolor the ball if it's a projected cost
+                if (i < State.projectedCost) {
+                    actionBall.material.color.setStyle(Colors.hover)
+                } else if (State.projectedCost == Infinity) {
+                    actionBall.material.color.setStyle(Colors.neutral)
+                }
+            } else {
+                actionBall.visible = false;
+            }
+        });
+
+        const healthRatio = State.health / State.maxHealth;
+        this.healthBar.scale.set(1, 1, healthRatio * this.barLength);
+        this.healthValueEl.innerText = Math.round(State.health);
+
+        const rangeRatio = State.range / State.maxRange;
+        this.rangeBar.scale.set(1, 1, rangeRatio * this.barLength);
+        this.rangeValueEl.innerText = Math.round(State.range);
+
+        this.meleeWeapons.forEach((weapon, i) => {
+            if (weapon.name == State.meleeName) {
+                weapon.el.style.visibility = "visible";
+            } else {
+                weapon.el.style.visibility = "hidden";
+            }
+        });
+        if (State.meleeName) {
+            this.meleeAttackValueEl.innerText = State.meleeAttack;
+        }
+
+        this.rangeWeapons.forEach((weapon, i) => {
+            if (weapon.name == State.rangeName) {
+                weapon.el.style.visibility = "visible";
+            } else {
+                weapon.el.style.visibility = "hidden";
+            }
+        });
+        if (State.rangeName) {
+            this.rangeAttackValueEl.innerText = State.rangeAttack;
+        }
+
+        if (State.selectedWeapon == 'melee' && State.meleeName) {
+            this.meleeSelection.material.opacity = 0.5;
+            this.rangeSelection.material.opacity = 0;
+        } else if (State.selectedWeapon == 'range' && State.rangeName) {
+            this.meleeSelection.material.opacity = 0;
+            this.rangeSelection.material.opacity = 0.5;
+        } else {
+            this.meleeSelection.material.opacity = 0;
+            this.rangeSelection.material.opacity = 0;
         }
     }
-
 }
 
-let state = new StateSystem();
+customElements.define('mr-ui', MRUI);

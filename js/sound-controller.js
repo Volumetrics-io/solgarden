@@ -1,7 +1,7 @@
 class SoundController {
     constructor() {
         this.sounds = {
-            bgMusic: document.querySelector('#bg-music'),
+            // bgMusic: document.querySelector('#bg-music'),
             chessSound: document.querySelector('#chess-sound'),
             // doorSound: document.querySelector('#door-sound'),
             analogSound: document.querySelector('#analog-sound'),

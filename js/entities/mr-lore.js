@@ -138,7 +138,7 @@ class MRLore extends MREntity {
     }
 
     playLore() {
-        // console.log(this.loreEntry);
+        console.log(this.loreEntry);
     }
 
     hideModel() {

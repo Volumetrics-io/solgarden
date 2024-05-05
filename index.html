@@ -5,17 +5,8 @@
     <meta charset="utf-8">
     <title>Sol Garden — The mini roguelike for your desk</title>
     <script src="mrjs-build/mr.js"></script>
-    <!-- <link rel="preload" href="/assets/fonts/JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin /> -->
-    <!-- <link rel="preload" href="/assets/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin /> -->
     <link rel="preload" href="/assets/fonts/JetBrainsMono-Medium.ttf" as="font" type="font/truetype" crossorigin />
     <style>
-        /* @font-face {
-            font-family: 'JetBrains';
-            src: url('/assets/fonts/JetBrainsMono.ttf') format('truetype');
-            font-weight: 100 900;
-            font-style: normal;
-        } */
-
         @font-face {
             font-family: 'JetBrains';
             src: url('/assets/fonts/JetBrainsMono-Medium.ttf') format('truetype');
@@ -27,41 +18,7 @@
         body {
             background-color: #0a0a0a;
             font-family: 'JetBrains';
-            /* font-family: monospace; */
         }
-
-        /* #game-panel {
-            width: 300px;
-            height: 110px;
-            padding: 20px;
-            display: flex;
-            flex-flow: column nowrap;
-            gap: 10px;
-        }
-
-        #lore-panel {
-            background-color: moccasin;
-            display: flex;
-            flex-flow: column nowrap;
-            gap: 10px;
-        }
-
-        .title {
-            font-size: 32px;
-        }
-
-        .row {
-            display: grid;
-            grid-template-columns: 50% 50%;
-        }
-
-        .column {
-            display: flex;
-            flex-flow: column nowrap;
-            gap: 10px;
-            background-color: grey;
-            padding: 10px;
-        } */
 
         .end-turn {
             color: white;
@@ -84,27 +41,37 @@
 
 <body>
 
-    <!-- <mr-app> -->
-    <!-- <mr-app debug='true' orbital="true" stats="true"> -->
     <mr-app orbital="true" stats="true">
 
-        <!-- <mr-light color="#fff4b8" intensity="1" data-position="0 1 0"></mr-light> -->
-
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
-        <!-- <mr-light color="#ffbb7c" intensity="0.8" data-position="-0.5 0.5 -0.5"></mr-light> -->
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
-        <!-- <mr-app debug="true" orbital="true"> -->
         <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+
+            <mr-ui id="interface"></mr-ui>
+            <!-- <mr-entity id="UI"></mr-entity> -->
+            <!-- <mr-entity id="state" data-comp-state="health: 10;
+                    range: 15;
+                    action: 4;
+                    projectedCost: 0;
+                    hasKey: false;
+                    meleeName: '';
+                    meleeAttack: 0;
+                    meleeRange: 1;
+                    rangeName: '';
+                    rangeAttack: 0;
+                    rangeRange: 0;
+                    selectedWeapon: melee;
+                    isPlayerTurn: true;">
+            </mr-entity> -->
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
             <mr-entity id="analog-sound" data-comp-audio="src: ./assets/audio/analog.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="clash-sound" data-comp-audio="src: ./assets/audio/clash.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="nope-sound" data-comp-audio="src: ./assets/audio/nope.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="swoosh-sound" data-comp-audio="src: ./assets/audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
-            <!-- <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity> -->
-
-            <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity>
+            <!-- <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity> -->
             <mr-entity id="fridge-sound" data-comp-audio="src: ./assets/audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="farm-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="badlands-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
@@ -112,6 +79,24 @@
     </mr-app>
 
     <script>
+        const State = {
+            isDebug: false,
+            level: 0,
+            health: 10,
+            range: 15,
+            action: 4,
+            projectedCost: 0,
+            hasKey: false,
+            meleeName: '',
+            meleeAttack: 0,
+            meleeRange: 1,
+            rangeName: '',
+            rangeAttack: 0,
+            rangeRange: 0,
+            selectedWeapon: "melee",
+            isPlayerTurn: true,
+        }
+
         const Colors = {
             movement: "#00ffff",
             objects: "#ff7a00",
@@ -124,10 +109,59 @@
             white: '#ffffff'
         }
 
+        const SoundController = {
+            sounds: {
+                chessSound: document.querySelector('#chess-sound'),
+                // doorHinge: document.querySelector('#door-sound'),
+                analogSound: document.querySelector('#analog-sound'),
+                clashSound: document.querySelector('#clash-sound'),
+                nopeSound: document.querySelector('#nope-sound'),
+                swooshSound: document.querySelector('#swoosh-sound'),
+                latchSound: document.querySelector('#latch-sound'),
+                spawn: document.querySelector('#farm-sound'),
+                battery: document.querySelector('#fridge-sound'),
+                plains: document.querySelector('#farm-sound'),
+                desert: document.querySelector('#badlands-sound'),
+            },
+            initialize: function() {
+                this.sounds["spawn"].components.set('audio', {
+                    action: 'pause'
+                });
+                this.sounds["battery"].components.set('audio', {
+                    action: 'pause'
+                });
+                this.sounds["plains"].components.set('audio', {
+                    action: 'pause'
+                });
+                this.sounds["desert"].components.set('audio', {
+                    action: 'pause'
+                });
+            },
+            play: function(sound) {
+                this.sounds[sound].components.set('audio', {
+                    action: 'play'
+                });
+            },
+            background(sound) {
+                this.sounds['spawn'].components.set('audio', {
+                    action: 'pause'
+                });
+                this.sounds['battery'].components.set('audio', {
+                    action: 'pause'
+                });
+                this.sounds['plains'].components.set('audio', {
+                    action: 'pause'
+                });
+                this.sounds['desert'].components.set('audio', {
+                    action: 'pause'
+                });
+                this.play(sound);
+            }
+        }
+
         // Various animation curves / timing functions
         // Not all of them are used in this project
-
-        Animator = {
+        const Animator = {
             easeInOut: time => {
                 return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
             },
@@ -165,13 +199,12 @@
     <!-- Classes -->
     <script src="/js/pathfinder.js"></script>
     <script src="/js/board.js"></script>
-    <script src="/js/sound-controller.js"></script>
 
     <!-- MRjs Systems -->
-    <script src="/js/systems/mr-player-state.js"></script>
     <script src="/js/systems/mr-game.js"></script>
 
     <!-- Mrjs Entities -->
+    <script src="/js/entities/mr-ui.js"></script>
     <script src="/js/entities/mr-battery.js"></script>
     <script src="/js/entities/mr-chest.js"></script>
     <script src="/js/entities/mr-door.js"></script>
