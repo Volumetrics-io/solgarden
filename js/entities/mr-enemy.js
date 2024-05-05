@@ -10,6 +10,10 @@ class MREnemy extends MREntity {
 
         this.swooshSound = document.createElement("mr-entity");
         this.bowReleaseSound = document.createElement("mr-entity");
+        this.critSound = document.createElement("mr-entity");
+
+        this.poof = document.createElement("mr-model");
+
     }
 
     connected() {
@@ -25,6 +29,7 @@ class MREnemy extends MREntity {
         // Sound effects
         this.appendChild(this.swooshSound);
         this.appendChild(this.bowReleaseSound);
+        this.appendChild(this.critSound);
         this.swooshSound.components.set('audio', {
             src: "./assets/audio/swoosh.mp3",
             loop: false,
@@ -35,6 +40,12 @@ class MREnemy extends MREntity {
             loop: false,
             action: "stop"
         })
+        this.critSound.components.set('audio', {
+            src: "./assets/audio/crits.mp3",
+            loop: false,
+            action: "stop"
+        })
+
 
         // Damage display
         this.appendChild(this.damageContainer);
@@ -59,6 +70,27 @@ class MREnemy extends MREntity {
         this.damageValueBackface.textObj.position.setX((-this.damageValueBackface.width / 2) / 0.005);
         this.damageValueBackface.dataset.rotation = "0 180 0";
         this.damageValueBackface.dataset.position = "0 0 -0.001";
+
+        // Poof effect
+        this.appendChild(this.poof);
+        this.poof.src = "./assets/models/poof1.glb";
+
+        this.poof.components.set('animation', {
+            action: "stop",
+            loop: false,
+        })
+    }
+
+    playPoof() {
+        this.poof.components.set('animation', {
+            action: "play"
+        })
+    }
+
+    playCrit() {
+        this.critSound.components.set('audio', {
+            action: "play"
+        })
     }
 
     playSwoosh() {

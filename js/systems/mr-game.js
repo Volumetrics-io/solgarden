@@ -6,11 +6,8 @@ class GameSystem extends MRSystem {
 
         // container to store board object references
         this.container = document.createElement("mr-div");
-
-        // The state system dealing with player state and UI
-        this.interface = document.querySelector("#interface");
-
-        // The
+        this.ui = document.querySelector("#interface");
+        this.dmgTile = document.querySelector("#damage-tile");
         this.endTurnButton = document.createElement("mr-button");
 
         Object.assign(State, {
@@ -40,7 +37,6 @@ class GameSystem extends MRSystem {
             // S for State
             if (event.key === 's') {
                 event.preventDefault();
-                // console.log(this.state.components.get('state'));
                 console.log(State);
             }
 
@@ -57,7 +53,6 @@ class GameSystem extends MRSystem {
             // U for Update
             if (event.key === "i") {
                 event.preventDefault();
-                // this.needsUpdate = true;
                 State.needsUpdate = true;
                 console.log('triggered an update')
             }
@@ -66,7 +61,6 @@ class GameSystem extends MRSystem {
             if (event.key === "d") {
                 event.preventDefault();
                 State.isDebug = !State.isDebug;
-                // this.needsUpdate = true;
                 State.needsUpdate = true;
                 console.log('isDebug is now ', State.isDebug);
             }
@@ -88,8 +82,6 @@ class GameSystem extends MRSystem {
                     attack: 10
                 });
                 console.log('Weapon dropped at ', pos);
-
-                // this.needsUpdate = true;
                 State.needsUpdate = true;
             }
 
@@ -110,8 +102,21 @@ class GameSystem extends MRSystem {
                     attack: 3
                 });
                 console.log('Weapon dropped at ', pos);
+                State.needsUpdate = true;
+            }
 
-                // this.needsUpdate = true;
+            // L for Loot
+            if (event.key === 'l') {
+                event.preventDefault();
+
+                const loot = document.createElement("mr-loot");
+                this.container.appendChild(loot);
+
+                const pos = this.board.addToLootMap({
+                    el: loot,
+                    type: 'loot',
+                });
+                console.log('Weapon dropped at ', pos);
                 State.needsUpdate = true;
             }
 
@@ -127,28 +132,20 @@ class GameSystem extends MRSystem {
                     type: 'chest',
                 }, this.board.entityMap);
                 console.log('Chest dropped at ', pos);
-
-                // this.needsUpdate = true;
                 State.needsUpdate = true;
             }
 
             // H for Health reset
             if (event.key === 'h') {
                 event.preventDefault();
-                // this.state.components.set("state", this.defaultState);
                 Object.assign(State, DefaultState);
-
-                // this.needsUpdate = true;
                 State.needsUpdate = true;
             }
 
             // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
-
                 this.board.projectileTo(this.board.playerPos, this.board.doorPos);
-
-                // this.needsUpdate = true;
                 State.needsUpdate = true;
             }
 
@@ -156,9 +153,6 @@ class GameSystem extends MRSystem {
             if (event.key === 'o') {
                 event.preventDefault();
                 State.hasKey = true;
-                // this.state.components.set("state", {
-                //     hasKey: true
-                // });
                 this.board.openDoor();
             }
 
@@ -167,13 +161,13 @@ class GameSystem extends MRSystem {
                 event.preventDefault();
                 this.board.startQuakeAt(
                     this.board.playerPos.x,
-                    this.board.playerPos.y, 1.5, 40, 3);
+                    this.board.playerPos.y, 4, 15, 2);
             }
             if (event.key === 'a') {
                 event.preventDefault();
                 this.board.startQuakeAt(
                     this.board.playerPos.x,
-                    this.board.playerPos.y, 1, 15, 0.5);
+                    this.board.playerPos.y, 1.2, 10, 0.5);
             }
 
             // N for eNemy
@@ -185,7 +179,7 @@ class GameSystem extends MRSystem {
                     el: document.createElement("mr-enemy"),
                     type: 'enemy',
                     subtype: EnemySubtypes[rand],
-                    hp: 1,
+                    hp: 20,
                     attack: 0
                 };
 
@@ -244,6 +238,8 @@ class GameSystem extends MRSystem {
             params = SpawnRoomParams();
 
         } else if (
+            // TODO: need an infinite, procedural way to interleave
+            // battery rooms with increased difficulty
             State.level == 3 ||
             State.level == 8 ||
             State.level == 13 ||
@@ -252,7 +248,6 @@ class GameSystem extends MRSystem {
             State.level == 55) {
 
             params = BatteryRoomParams();
-            // this.board.openDoor();
             State.hasKey = true;
 
         } else {
@@ -261,7 +256,7 @@ class GameSystem extends MRSystem {
 
         // params.isDebug = State.isDebug;
         this.board = new Board(this.container, params);
-        SoundController.play(this.board.biome.name);
+        Sounds.play(this.board.biome.name);
 
         // the tile elements (the floor) own all the events handling
         this.board.tileMap.forEach(row => {
@@ -302,33 +297,33 @@ class GameSystem extends MRSystem {
                     const x = tile.pos.x;
                     const y = tile.pos.y;
 
-                    const targetEntity = this.board.getEntityAt(x, y);
+                    const entity = this.board.getEntityAt(x, y);
                     const cost = this.board.getCostFor(x, y);
 
-                    if (State.isDebug) console.log("Tapped entity", targetEntity);
+                    if (State.isDebug) console.log("Tapped entity", entity);
 
                     if (State.isPlayerTurn && State.isInteractive) {
-                        if (!targetEntity) {
+                        if (!entity) {
                             // there is nothing on the tile.
                             if (cost <= State.action) {
                                 State.action -= cost;
-                                const moveCount = this.board.movePlayer(x, y);
+                                const steps = this.board.movePlayer(x, y);
                                 State.isInteractive = false;
-                                State.staticUntil = this.timer + moveCount * 0.3;
+                                State.staticUntil = this.timer + steps * 0.3;
                             } else {
-                                SoundController.play('nopeSound');
+                                Sounds.play('nopeSound');
                             }
 
                         } else {
                             // there is an entity on the tile
                             if (cost <= State.action &&
                                 this.board.distances[x][y] <= State.action &&
-                                targetEntity.type == "chest"
+                                entity.type == "chest"
                             ) {
                                 State.isInteractive = false;
                                 State.staticUntil = this.timer + 2;
 
-                                targetEntity.el.open();
+                                entity.el.open();
 
                                 setTimeout(() => {
                                     this.board.dropWeaponAt(x, y);
@@ -336,14 +331,14 @@ class GameSystem extends MRSystem {
                                 }, 500);
 
                                 setTimeout(() => {
-                                    this.container.removeChild(targetEntity.el);
+                                    this.container.removeChild(entity.el);
                                     this.board.removeEntityAt(x, y);
                                     State.needsUpdate = true;
                                 }, 2000)
                             }
 
                             // enemies
-                            if (targetEntity.type == "enemy") {
+                            if (entity.type == "enemy") {
                                 const ppos = this.board.playerPos;
                                 const dist = distBetween(x, y, ppos.x, ppos.y);
                                 const type = State.selectedWeapon;
@@ -353,9 +348,9 @@ class GameSystem extends MRSystem {
 
                                 if (dist <= range && cost <= State.action) {
                                     State.action -= cost;
-                                    this.attack(targetEntity, x, y);
+                                    this.attack(entity, x, y);
                                 } else {
-                                    SoundController.play('nopeSound');
+                                    Sounds.play('nopeSound');
                                 }
                             }
                         }
@@ -366,34 +361,24 @@ class GameSystem extends MRSystem {
                             setTimeout(() => {
                                 this.endTurn();
                             }, 800);
-                            // this.endTurn();
                         }
 
-                        // this.needsUpdate = true;
                         State.needsUpdate = true;
-                        // this.state.components.set('state', state);
                     }
                 });
             })
         })
 
-        // this.state.components.set('state', {
-        //     isPlayerTurn: true,
-        // });
-
-        State.isPlayerTurn = true;
-        // State.isInteractive = true;
-        State.staticUntil = this.timer;
-
         State.level++;
-        this.gameIsStarted = true;
-        // this.needsUpdate = true;
+        State.isPlayerTurn = true;
+        State.staticUntil = this.timer;
         State.needsUpdate = true;
+
+        this.gameIsStarted = true;
+
     }
 
     getWeaponRange() {
-        // const state = this.state.components.get('state');
-
         if (State.selectedWeapon == 'melee') {
             return State.meleeRange;
         } else if (State.selectedWeapon == 'range') {
@@ -404,8 +389,6 @@ class GameSystem extends MRSystem {
     }
 
     getWeaponDamage() {
-        // const state = this.state.components.get('state');
-
         if (State.selectedWeapon == 'melee') {
             return State.meleeAttack;
         } else if (State.selectedWeapon == 'range') {
@@ -416,9 +399,6 @@ class GameSystem extends MRSystem {
     }
 
     endTurn() {
-        // const state = this.state.components.get('state');
-
-        // let range = state.range;
         if (State.range > 1) {
             this.combatQueue = [];
 
@@ -447,7 +427,7 @@ class GameSystem extends MRSystem {
         State.action = State.maxAction;
         State.isPlayerTurn = true;
         State.needsUpdate = true;
-        SoundController.play('analogSound');
+        Sounds.play('analogSound');
 
         if (State.isDebug) console.log("Combat queue", this.combatQueue);
     }
@@ -496,7 +476,9 @@ class GameSystem extends MRSystem {
                 ]
 
                 PossibleMoves.forEach((move, i) => {
-                    const cell = this.board.getEntityAt(r + move[0], c + move[1]);
+                    const x = r + move[0];
+                    const y = c + move[1];
+                    const cell = this.board.getEntityAt(x, y);
                     if (!cell && cell != "offmap") {
                         Moves.push(move);
                     }
@@ -542,8 +524,6 @@ class GameSystem extends MRSystem {
                 this.board.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
-            console.log(deltaX, deltaY);
-
             if (deltaX == -1) {
                 entity.el.dataset.rotation = `0 0 0`;
             } else if (deltaX == 1) {
@@ -570,6 +550,8 @@ class GameSystem extends MRSystem {
             }
 
         } else {
+            State.isInteractive = false;
+            State.staticUntil = this.timer + 0.3;
             State.isPlayerTurn = true;
         }
 
@@ -577,9 +559,9 @@ class GameSystem extends MRSystem {
     }
 
     attackPlayer(attacker, r, c) {
-        const playerPos = this.board.playerPos;
+        const pos = this.board.playerPos;
 
-        switch(attacker.subtype) {
+        switch (attacker.subtype) {
             case "aimless":
                 attacker.el.playSwoosh();
                 break;
@@ -591,17 +573,17 @@ class GameSystem extends MRSystem {
                 this.board.projectileTo({
                     x: r,
                     y: c
-                }, playerPos);
+                }, pos);
                 break;
             default:
                 console.error('this enemy type is not handled')
         }
 
-        this.board.startQuakeAt(playerPos.x, playerPos.y, 1, 10, 0.5);
+        this.board.showDamageAt(pos.x, pos.y, attacker.attack, Colors.hover);
+        this.board.startQuakeAt(pos.x, pos.y, 1, 10, 0.5);
 
         State.health -= attacker.attack;
         State.needsUpdate = true;
-        this.board.showDamageAt(playerPos.x, playerPos.y, attacker.attack);
 
         if (State.health <= 0) {
             this.endGame();
@@ -635,16 +617,31 @@ class GameSystem extends MRSystem {
             console.error('invalid value for selectedWeapon')
         }
 
-        this.board.startQuakeAt(r, c, 1, 10, 0.5);
+        // 10% chance of critical hits
+        // TODO: should be based on the weapon
+        if (Math.random() < 0.1) {
+            const critMultiplier = 3;
+            damage = damage * critMultiplier;
+            entity.el.playCrit();
+            player.el.showCritSpikes();
+
+            this.board.startQuakeAt(r, c, 4, 10, 2);
+            this.board.showDamageAt(r, c, damage, Colors.health);
+        } else {
+            this.board.startQuakeAt(r, c, 1.2, 10, 0.5);
+            this.board.showDamageAt(r, c, damage, Colors.hover);
+        }
 
         entity.hp -= damage;
-        this.board.showDamageAt(r, c, damage);
+        entity.el.playPoof();
 
         if (entity.hp <= 0) {
-            this.container.removeChild(entity.el);
-            this.board.removeEntityAt(r, c);
-            this.board.dropLootAt(r, c);
-            State.needsUpdate = true;
+            setTimeout(() => {
+                this.container.removeChild(entity.el);
+                this.board.removeEntityAt(r, c);
+                this.board.dropLootAt(r, c);
+                State.needsUpdate = true;
+            }, 500)
         }
     }
 
@@ -653,6 +650,7 @@ class GameSystem extends MRSystem {
         this.board.updateFloor(this.timer);
         this.board.projectEverything(this.timer);
 
+        // End turn button
         if (State.isInteractive) {
             if (State.action == 0) {
                 this.endTurnButton.style.backgroundColor = Colors.hover;
@@ -675,13 +673,18 @@ class GameSystem extends MRSystem {
                     console.log('updated at', this.timer);
                 }
 
-                this.interface.update(this.timer);
-
+                this.ui.update(this.timer);
                 this.projectRoom();
-                const offX = (this.board.colCount / 2 + 0.5) * this.scale;
 
-                // TODO: put back the UI position
-                this.interface.dataset.position = `-${offX} ${this.tableOffset} 0`;
+                // position the floating damage tile at its position
+                const dmgX = (this.dmgTile.pos.y - this.board.colCount / 2 + 0.5) * this.scale;
+                const dmgY = 0.2;
+                const dmgZ = (this.dmgTile.pos.x - this.board.rowCount / 2 + 0.5) * this.scale;
+                this.dmgTile.dataset.position = `${dmgX} ${dmgY} ${dmgZ}`;
+
+                // position the interface alongside the board
+                const offX = (this.board.colCount / 2 + 0.5) * this.scale;
+                this.ui.dataset.position = `-${offX} ${this.tableOffset} 0`;
 
                 this.needsUpdate = false;
                 State.needsUpdate = false;
@@ -694,7 +697,7 @@ class GameSystem extends MRSystem {
                     State.action = State.maxAction;
                     State.hasKey = false;
 
-                    // TODO: introduce a pause here when we have the system back
+                    // TODO: introduce a pause here when staticUntil is back
                     this.initialize();
                 }
 
@@ -728,6 +731,7 @@ class GameSystem extends MRSystem {
                 }
             }
 
+            // Flip back isInteractive when the timer reaches staticUntil
             if (!State.isInteractive && State.staticUntil < this.timer) {
                 State.needsUpdate = true;
                 State.isInteractive = true;
@@ -750,17 +754,21 @@ class GameSystem extends MRSystem {
         this.container.style.scale = this.scale;
         this.container.dataset.position = `0 ${this.tableOffset} 0`;
 
-        this.interface.style.scale = this.scale;
-        this.interface.dataset.rotation = `0 0 30`
+        this.ui.style.scale = this.scale;
+        this.ui.dataset.rotation = `0 0 30`;
+
+        this.dmgTile.style.scale = this.scale;
 
         this.endTurnButton.className = 'end-turn';
         this.endTurnButton.innerText = "End";
         this.endTurnButton.dataset.position = "0 0.08 2";
         this.endTurnButton.dataset.rotation = "270 0 270";
-        this.interface.appendChild(this.endTurnButton);
+        this.ui.appendChild(this.endTurnButton);
 
         this.endTurnButton.addEventListener('click', () => {
-            this.endTurn();
+            if (State.isInteractive) {
+                this.endTurn();
+            }
         });
 
         this.initialize();
@@ -768,4 +776,4 @@ class GameSystem extends MRSystem {
 }
 
 // To be read with Mario's voice
-const saGo = new GameSystem();
+let saGo = new GameSystem();

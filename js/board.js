@@ -167,10 +167,6 @@ class Board {
             const hp = State.level / 4 + Math.random() * State.level / 4;
             const attack = Math.floor(Math.random() * 2 + 1);
 
-            // console.log(subtype);
-
-            // el.dataset.hp = hp;
-            // el.dataset.attack = attack;
             el.dataset.subtype = subtype;
             const enemy = {
                 el: el,
@@ -247,15 +243,17 @@ class Board {
 
         // Health drop in the battery room
         if (this.biome.name == 'battery') {
-            const healthLoot = document.createElement("mr-loot");
-            healthLoot.dataset.effect = "health";
+            const rand = Math.floor(Math.random() * 2) + 1;
+            for (let i = 0; i < rand; i++) {
+                const loot = document.createElement("mr-loot");
+                loot.dataset.effect = "health";
 
-            // twig.dataset.model = "twig"
-            this.addToLootMap({
-                el: healthLoot,
-                type: 'loot',
-                effect: "health"
-            });
+                this.addToLootMap({
+                    el: loot,
+                    type: 'loot',
+                    effect: "health"
+                });
+            }
         }
 
         this.entityMap.forEach(row => {
@@ -322,8 +320,7 @@ class Board {
 
             if (entity.type == "player") {
                 randRow = 0;
-                // } else if (entity.type == "door") {
-                //     randRow = this.rowCount - 1;
+
             } else {
                 randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1);
 
@@ -345,7 +342,6 @@ class Board {
             }
 
             if (entity.type == "player" ||
-                entity.type == "door" ||
                 (map[randRow][randCol] === 0 &&
                     this.lootMap[randRow][randCol] === 0 &&
                     distanceToDoor != Infinity)) {
@@ -426,6 +422,7 @@ class Board {
 
         // TODO: this probably should be an ECS?
         this.entityMap[x2][y2].animation = {
+            type: 'move',
             speed: 5,
             started: false,
             x: x1,
@@ -452,8 +449,6 @@ class Board {
         const pf = new PathFinder(blockmap);
         const path = pf.findPath([ppos.x, ppos.y], [x, y]);
 
-        // console.log(`player: ${ppos.x} ${ppos.y} goalTl: ${x} ${y}`)
-
         // the next move queue
         this.nextMoveQueue = [];
         for (var i = 1; i < path.length - 1; i++) {
@@ -461,12 +456,9 @@ class Board {
         }
         this.nextMoveQueue.push([x, y]);
         this.nextMoveQueue = this.nextMoveQueue.reverse();
-
-        const moveCount = this.nextMoveQueue.length;
-
         this.movementQueue();
 
-        return moveCount;
+        return this.nextMoveQueue.length;
     }
 
     movementQueue() {
@@ -500,7 +492,7 @@ class Board {
         }
 
         setTimeout(() => {
-            SoundController.play('chessSound');
+            Sounds.play('chessSound');
         }, 150)
 
         // if the queue is still not empty, do it again.
@@ -569,6 +561,9 @@ class Board {
     }
 
     dropLootAt(x, y) {
+
+        // Check how many enemies are on the board
+        // and check if at least one key is laying on the board
         let enemyCount = 0;
         let isAlreadyKey = false;
         for (let r = 0; r < this.rowCount; r++) {
@@ -576,14 +571,11 @@ class Board {
                 if (this.entityMap[r][c].type == 'enemy') {
                     enemyCount++;
                 }
-                // console.log(this.lootMap[r][c].type);
                 if (this.lootMap[r][c].type == 'key') {
                     isAlreadyKey = true;
                 }
             }
         }
-
-        // console.log(enemyCount, isAlreadyKey);
 
         if (this.lootMap[x][y] == 0) {
             let loot;
@@ -599,12 +591,13 @@ class Board {
                     };
                 } else {
                     // Otherwise drop something random
-                    const Effects = ["health", "range"]
-                    const rand = Math.floor(Math.random() * Effects.length);
-                    const effect = Effects[rand];
-                    const droppedLoot = document.createElement("mr-loot");
-                    droppedLoot.dataset.effect = effect;
-                    this.container.appendChild(droppedLoot);
+                    const loot = document.createElement("mr-loot");
+                    this.container.appendChild(loot);
+
+                    this.lootMap[x][y] = {
+                        el: loot,
+                        type: 'loot',
+                    };
                 }
 
             } else if (enemyCount == 0 && !State.hasKey && !isAlreadyKey) {
@@ -635,19 +628,11 @@ class Board {
             } else {
 
                 // Otherwise drop something random
-                const Effects = ["health", "range"]
-                const rand = Math.floor(Math.random() * Effects.length);
-                const effect = Effects[rand];
-                const droppedLoot = document.createElement("mr-loot");
-                droppedLoot.dataset.effect = effect;
-                this.container.appendChild(droppedLoot);
-
-                // replace the enemy with the loot
-                this.entityMap[x][y] = 0;
+                const loot = document.createElement("mr-loot");
+                this.container.appendChild(loot);
                 this.lootMap[x][y] = {
-                    el: droppedLoot,
+                    el: loot,
                     type: 'loot',
-                    effect: effect
                 };
             }
         }
@@ -671,7 +656,7 @@ class Board {
                 this.container.removeChild(entity.el);
                 this.removeLootAt(x, y);
                 // TODO: switch to a key sound
-                SoundController.play('analogSound');
+                Sounds.play('analogSound');
                 break;
 
             case "weapon":
@@ -695,7 +680,7 @@ class Board {
                 this.container.removeChild(entity.el);
                 this.removeLootAt(x, y);
                 // TODO: switch to a blade sound
-                SoundController.play('analogSound')
+                Sounds.play('analogSound')
                 break;
 
             case "lore":
@@ -704,7 +689,7 @@ class Board {
                 this.removeLootAt(x, y);
 
                 // TODO: switch to a wiring / drive sound?
-                SoundController.play('analogSound')
+                Sounds.play('analogSound')
                 break;
 
             case "loot":
@@ -713,7 +698,7 @@ class Board {
                 this.removeLootAt(x, y);
 
                 // TODO: switch to a better sound
-                SoundController.play('analogSound')
+                Sounds.play('analogSound')
                 break;
         }
     }
@@ -722,8 +707,13 @@ class Board {
         this.entityMap[r][c] = entity;
     }
 
-    showDamageAt(r, c, damage) {
-        this.entityMap[r][c].el.showDamage(damage);
+    showDamageAt(r, c, damage, color) {
+        const dmgTile = document.querySelector("#damage-tile");
+        dmgTile.pos = {
+            x: r,
+            y: c
+        }
+        dmgTile.showDamage(damage, color);
     }
 
     openDoor() {
@@ -839,7 +829,7 @@ class Board {
             entity.animation.timerStart = timer;
         }
 
-        if (entity.animation) {
+        if (entity.animation && entity.animation.type == 'move') {
             const startTime = timer - entity.animation.timerStart;
 
             const t = startTime * entity.animation.speed;
@@ -915,6 +905,7 @@ class Board {
             r: startPos.x,
             c: startPos.y,
             animation: {
+                type: 'move',
                 speed: 2,
                 started: false,
                 x: startPos.x,
@@ -975,7 +966,13 @@ class Board {
                     if (!entity || entity.type == "chest") {
                         if (isReachable) {
                             // the tile is floor, and in reach
-                            el.tileColor('white');
+                            if (this.lootMap[x][y] != 0 &&
+                                this.lootMap[x][y].type != 'door') {
+                                // the loot tiles have a lighting effect
+                                el.tileColor('glow-white');
+                            } else {
+                                el.tileColor('white');
+                            }
                             el.setCostIndicator(dist);
                         } else {
                             // floor, but too far for current action points

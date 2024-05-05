@@ -117,35 +117,45 @@ class MRUI extends MREntity {
         this.container.object3D.add(this.rangeBar);
 
         this.meleeContainer.addEventListener('touchend', () => {
-            State.selectedWeapon = 'melee';
-            // State.hoverMelee = false;
-            State.needsUpdate = true;
+            if (State.isInteractive) {
+                State.selectedWeapon = 'melee';
+                State.needsUpdate = true;
+            }
         })
 
         this.meleeContainer.addEventListener('mouseover', () => {
-            State.hoverMelee = true;
-            State.needsUpdate = true;
+            if (State.isInteractive) {
+                State.hoverMelee = true;
+                State.needsUpdate = true;
+            }
         })
 
         this.meleeContainer.addEventListener('mouseout', () => {
-            State.hoverMelee = false;
-            State.needsUpdate = true;
+            if (State.isInteractive) {
+                State.hoverMelee = false;
+                State.needsUpdate = true;
+            }
         });
 
         this.rangeContainer.addEventListener('touchend', () => {
-            State.selectedWeapon = 'range';
-            // State.hoverRange = false;
-            State.needsUpdate = true;
+            if (State.isInteractive) {
+                State.selectedWeapon = 'range';
+                State.needsUpdate = true;
+            }
         });
 
         this.rangeContainer.addEventListener('mouseover', () => {
-            State.hoverRange = true;
-            State.needsUpdate = true;
+            if (State.isInteractive) {
+                State.hoverRange = true;
+                State.needsUpdate = true;
+            }
         })
 
         this.rangeContainer.addEventListener('mouseout', () => {
-            State.hoverRange = false;
-            State.needsUpdate = true;
+            if (State.isInteractive) {
+                State.hoverRange = false;
+                State.needsUpdate = true;
+            }
         })
 
         // melee weapons

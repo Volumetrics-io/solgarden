@@ -20,6 +20,12 @@ class MRPlayer extends MREntity {
         this.el.src = "assets/models/enemy_temp_multiTrack.glb";
         // this.el.src = "assets/models/poof1.glb";
         this.el.style.pointerEvents = 'none';
+        this.el.object3D.traverse(object => {
+            if (object.isMesh && object.morphTargetInfluences) {
+                object.morphTargets = true;
+                object.morphTargetInfluences[0] = 0.2;
+            }
+        })
 
         this.appendChild(this.swooshSound);
         this.appendChild(this.bowReleaseSound);
@@ -103,10 +109,16 @@ class MRPlayer extends MREntity {
     showCritSpikes() {
         this.el.object3D.traverse(object => {
             if (object.isMesh && object.morphTargetInfluences) {
-                object.morphTargets = true;
-                object.morphTargetInfluences[0] = Math.random();
+                object.morphTargetInfluences[0] = 0.5;
             }
         })
+        setTimeout(() => {
+            this.el.object3D.traverse(object => {
+                if (object.isMesh && object.morphTargetInfluences) {
+                    object.morphTargetInfluences[0] = 0.2;
+                }
+            })
+        }, 500)
     }
 
     showDamage(string) {

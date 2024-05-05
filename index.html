@@ -49,6 +49,8 @@
         <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
 
             <mr-ui id="interface"></mr-ui>
+            <mr-damage-tile id="damage-tile"></mr-damage-tile>
+
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
             <mr-entity id="analog-sound" data-comp-audio="src: ./assets/audio/analog.mp3; loop: false; state: stop;"></mr-entity>
@@ -58,8 +60,8 @@
             <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity> -->
             <mr-entity id="fridge-sound" data-comp-audio="src: ./assets/audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="farm-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="badlands-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="plains-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="desert-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
         </mr-entity>
     </mr-app>
 
@@ -195,56 +197,6 @@
             }
         }
 
-        const SoundController = {
-            sounds: {
-                chessSound: document.querySelector('#chess-sound'),
-                // doorHinge: document.querySelector('#door-sound'),
-                analogSound: document.querySelector('#analog-sound'),
-                clashSound: document.querySelector('#clash-sound'),
-                nopeSound: document.querySelector('#nope-sound'),
-                swooshSound: document.querySelector('#swoosh-sound'),
-                latchSound: document.querySelector('#latch-sound'),
-                spawn: document.querySelector('#farm-sound'),
-                battery: document.querySelector('#fridge-sound'),
-                plains: document.querySelector('#farm-sound'),
-                desert: document.querySelector('#badlands-sound'),
-            },
-            initialize: function() {
-                this.sounds["spawn"].components.set('audio', {
-                    action: 'pause'
-                });
-                this.sounds["battery"].components.set('audio', {
-                    action: 'pause'
-                });
-                this.sounds["plains"].components.set('audio', {
-                    action: 'pause'
-                });
-                this.sounds["desert"].components.set('audio', {
-                    action: 'pause'
-                });
-            },
-            play: function(sound) {
-                this.sounds[sound].components.set('audio', {
-                    action: 'play'
-                });
-            },
-            background(sound) {
-                this.sounds['spawn'].components.set('audio', {
-                    action: 'pause'
-                });
-                this.sounds['battery'].components.set('audio', {
-                    action: 'pause'
-                });
-                this.sounds['plains'].components.set('audio', {
-                    action: 'pause'
-                });
-                this.sounds['desert'].components.set('audio', {
-                    action: 'pause'
-                });
-                this.play(sound);
-            }
-        }
-
         // Various animation curves / timing functions
         // Not all of them are used in this project
         const Animator = {
@@ -283,6 +235,10 @@
     <script src="/js/utils.js"></script>
 
     <!-- Classes -->
+    <script src="/js/sound-controller.js"></script>
+    <script>
+        const Sounds = new SoundController();
+    </script>
     <script src="/js/pathfinder.js"></script>
     <script src="/js/board.js"></script>
 
@@ -304,6 +260,7 @@
     <script src="/js/entities/mr-prop.js"></script>
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
+    <script src="/js/entities/mr-damage-tile.js"></script>
 
 </body>
 
