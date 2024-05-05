@@ -1,12 +1,6 @@
 class Board {
     constructor(container, params) {
-        // this.initialize = initializeHandler;
-
-        // console.log(this.initialize)
         this.container = container;
-        // this.levelId = params.levelId ?? 0;
-
-        this.isDebug = params.isDebug ?? false;
 
         this.minRowCount = params.minRowCount ?? 5;
         this.minColCount = params.minColCount ?? 4;
@@ -108,7 +102,7 @@ class Board {
         // like poofs, projectiles, etc.
         this.effectList = [];
 
-        if (this.isDebug) {
+        if (State.isDebug) {
             console.log(`Floor: ${this.floorCount}`);
             console.log(`Rows: ${this.rowCount}`);
             console.log(`Cols: ${this.colCount}`);
@@ -154,23 +148,17 @@ class Board {
 
         // lore
         // 10% of the time
-        // if (this.isLore && Math.random() < 0.1) {
-        const el = document.createElement("mr-lore");
-        const lore = {
-            el: el,
-            type: 'lore',
-        };
-        this.addToLootMap(lore);
-        // }
+        if (this.isLore && Math.random() < 0.1) {
+            const el = document.createElement("mr-lore");
+            const lore = {
+                el: el,
+                type: 'lore',
+            };
+            this.addToLootMap(lore);
+        }
 
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
-            const EnemySubtypes = [
-                'static',
-                'homing',
-                'aimless',
-                // 'horse'
-            ]
 
             const rand = Math.floor(Math.random() * EnemySubtypes.length);
             const subtype = EnemySubtypes[rand];
@@ -193,7 +181,7 @@ class Board {
             };
             this.addToMap(enemy, this.entityMap);
 
-            if (this.isDebug) console.log(enemy);
+            if (State.isDebug) console.log(enemy);
         }
 
         // props
@@ -302,7 +290,7 @@ class Board {
 
         this.calcDistFromPlayer();
 
-        if (this.isDebug) {
+        if (State.isDebug) {
             printArray("this.heightMap", this.heightMap);
             printArray("this.entityMap", this.entityMap);
             printArray("this.lootMap", this.lootMap);
@@ -474,7 +462,11 @@ class Board {
         this.nextMoveQueue.push([x, y]);
         this.nextMoveQueue = this.nextMoveQueue.reverse();
 
+        const moveCount = this.nextMoveQueue.length;
+
         this.movementQueue();
+
+        return moveCount;
     }
 
     movementQueue() {
@@ -487,7 +479,6 @@ class Board {
             const deltaX = this.playerPos.x - x;
             const deltaY = this.playerPos.y - y;
 
-            // console.log(deltaX, deltaY);
             // Orient the player model based on move
             if (deltaX == -1) {
                 this.playerEl.dataset.rotation = `0 0 0`;
@@ -507,6 +498,10 @@ class Board {
                 this.lootEntity(x, y);
             }
         }
+
+        setTimeout(() => {
+            SoundController.play('chessSound');
+        }, 150)
 
         // if the queue is still not empty, do it again.
         if (this.nextMoveQueue.length > 0) {
@@ -575,18 +570,26 @@ class Board {
 
     dropLootAt(x, y) {
         let enemyCount = 0;
+        let isAlreadyKey = false;
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
                 if (this.entityMap[r][c].type == 'enemy') {
                     enemyCount++;
                 }
+                // console.log(this.lootMap[r][c].type);
+                if (this.lootMap[r][c].type == 'key') {
+                    isAlreadyKey = true;
+                }
             }
         }
 
+        // console.log(enemyCount, isAlreadyKey);
+
         if (this.lootMap[x][y] == 0) {
             let loot;
-            if (enemyCount == 1 && State.hasKey) {
-                // last enemy and no key, the key must drop
+            if (enemyCount == 0 && State.hasKey) {
+                // last enemy and key already
+                // a chest might drop
                 if (Math.random() < 0.5) {
                     const chest = document.createElement("mr-chest");
                     this.container.appendChild(chest);
@@ -594,9 +597,20 @@ class Board {
                         el: chest,
                         type: 'chest'
                     };
+                } else {
+                    // Otherwise drop something random
+                    const Effects = ["health", "range"]
+                    const rand = Math.floor(Math.random() * Effects.length);
+                    const effect = Effects[rand];
+                    const droppedLoot = document.createElement("mr-loot");
+                    droppedLoot.dataset.effect = effect;
+                    this.container.appendChild(droppedLoot);
                 }
-            } else if (enemyCount == 1 && !State.hasKey) {
-                // last enemy and no key, the key must drop
+
+            } else if (enemyCount == 0 && !State.hasKey && !isAlreadyKey) {
+
+                // last enemy and no key in inventory or on the board
+                // the key must drop
                 const key = document.createElement("mr-key");
                 this.container.appendChild(key);
                 this.entityMap[x][y] = 0;
@@ -604,8 +618,12 @@ class Board {
                     el: key,
                     type: 'key'
                 };
-            } else if (enemyCount > 1 && !State.hasKey && Math.random() > 0.5) {
-                // not last enemy and no key. Key could drop
+
+            } else if (enemyCount > 0 && !State.hasKey && !isAlreadyKey &&
+                Math.random() > 0.5) {
+
+                // not the last enemy and no key. Key could drop
+                // but only if there is not already one on the board
                 const key = document.createElement("mr-key");
                 this.container.appendChild(key);
                 this.entityMap[x][y] = 0;
@@ -613,13 +631,18 @@ class Board {
                     el: key,
                     type: 'key'
                 };
+
             } else {
+
+                // Otherwise drop something random
                 const Effects = ["health", "range"]
                 const rand = Math.floor(Math.random() * Effects.length);
                 const effect = Effects[rand];
                 const droppedLoot = document.createElement("mr-loot");
                 droppedLoot.dataset.effect = effect;
                 this.container.appendChild(droppedLoot);
+
+                // replace the enemy with the loot
                 this.entityMap[x][y] = 0;
                 this.lootMap[x][y] = {
                     el: droppedLoot,
@@ -639,7 +662,7 @@ class Board {
     lootEntity(x, y) {
         const entity = this.lootMap[x][y];
 
-        if (this.isDebug) console.log(entity);
+        if (State.isDebug) console.log(entity);
 
         switch (entity.type) {
             case "key":
@@ -685,14 +708,7 @@ class Board {
                 break;
 
             case "loot":
-                if (entity.effect == 'health' &&
-                    State.health < State.maxHealth) {
-                    State.health += Math.max(3, State.maxHealth - State.health);
-                }
-                if (entity.effect == 'range' &&
-                    State.range < State.maxRange) {
-                    State.range += Math.max(3, State.maxRange - State.range);
-                }
+                entity.el.applyEffect();
                 this.container.removeChild(entity.el);
                 this.removeLootAt(x, y);
 
@@ -762,7 +778,7 @@ class Board {
                     (blockmap[newY][newX] === 0 ||
                         blockmap[newY][newX].type != "prop")
                 ) {
-                    // console.log(blockmap[newY][newX].type);
+
                     // Calculate potential new distance
                     const newDistance = distances[currentY][currentX] + 1;
 
@@ -806,11 +822,11 @@ class Board {
             // a cool looking function that simulate a wave propagating
             // https://www.youtube.com/watch?v=ciUNizDgiOs
             // the amplitude decreases with the distance
-            const amplitude = Math.sin(dist + t * this.quakeFrequence) / (dist * 10);
+            const ampl = Math.sin(dist + t * this.quakeFrequence) / (dist * 10);
 
             // the Y offset, product of the amplitude and the falloff
             // the -1 is for the motion to go down first, like it got hit
-            const offsetY = -1 * amplitude * falloff * this.quakeForce;
+            const offsetY = -1 * ampl * falloff * this.quakeForce;
 
             // The base floor Y used for the rest of the calculations.
             floorY = this.heightMap[r][c] * 0.35 + 0.3 + offsetY * 2;
@@ -824,11 +840,9 @@ class Board {
         }
 
         if (entity.animation) {
-            // const speed = 3;
             const startTime = timer - entity.animation.timerStart;
 
             const t = startTime * entity.animation.speed;
-            // const p = Animator.fanOut(t);
             const p = Animator.fanOut(t);
             const h = Animator.jump(t);
 
@@ -937,7 +951,7 @@ class Board {
 
                 this.project(tile, x, y, timer);
 
-                if (State.isPlayerTurn) {
+                if (State.isPlayerTurn && State.isInteractive) {
                     const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
                     const ppos = this.playerPos;
@@ -956,12 +970,9 @@ class Board {
                         attackRange = State.meleeRange;
                     } else if (State.selectedWeapon == 'range') {
                         attackRange = State.rangeRange;
-                    } else {
-                        attackRange = 0;
-                        // console.error('Illegal value for selectedWeapon.');
                     }
 
-                    if (!entity) {
+                    if (!entity || entity.type == "chest") {
                         if (isReachable) {
                             // the tile is floor, and in reach
                             el.tileColor('white');
@@ -972,7 +983,6 @@ class Board {
                         }
 
                     } else if (entity.type == "enemy") {
-
                         // if the enemy is in attack range
                         if (rawDist <= attackRange) {
                             el.tileColor('health');

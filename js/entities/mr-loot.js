@@ -22,7 +22,19 @@ class MRLoot extends MREntity {
         this.el.style.pointerEvents = 'none';
     }
 
-    applyEffect(state) {
+    applyEffect() {
+
+        if (this.effect == 'health' &&
+            State.health < State.maxHealth) {
+            const healthDiff = State.maxHealth - State.health;
+            State.health += Math.floor(healthDiff / 3);
+        }
+        if (this.effect == 'range' &&
+            State.range < State.maxRange) {
+            const rangeDiff = State.maxRange - State.range;
+            State.range += Math.floor(rangeDiff / 3);
+        }
+
         // TODO: should the effect be applied here?
         // let state = state;
         // console.log(state)

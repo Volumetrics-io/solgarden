@@ -8,37 +8,35 @@ class MREnemy extends MREntity {
         this.damageValue = document.createElement("mr-text");
         this.damageValueBackface = document.createElement("mr-text");
 
-        this.el.onLoad = () => {
-            this.el.object3D.traverse(object => {
-                if (object.isMesh) {
-                    // Necessary for the single-faced
-                    // grass texture to appear correctly
-                    object.material.alphaTest = 0.5;
-                    object.receiveShadow = true;
-                    object.castShadow = true;
-                    object.morphTargets = true;
-                }
-            })
-        }
+        this.swooshSound = document.createElement("mr-entity");
+        this.bowReleaseSound = document.createElement("mr-entity");
     }
 
     connected() {
 
-        const subtype = this.dataset.subtype ?? "aimless";
-
-        const enemyModels = {
-            static: "assets/models/enemy-static1.glb",
-            homing: "assets/models/enemy-floater1.glb",
-            aimless: "assets/models/enemy-aimless1.glb",
-            // horse: "assets/models/enemy-horse1.glb",
-        }
-
         this.appendChild(this.el);
-        this.el.src = enemyModels[subtype]
         this.el.dataset.compAnimation = "clip: 0; action: play;";
-        this.el.dataset.rotation = `0 180 0`
+        this.el.dataset.rotation = `0 0 0`
         this.el.style.pointerEvents = 'none';
 
+        const subtype = this.dataset.subtype ?? "aimless";
+        this.el.src = EnemyModels[subtype];
+
+        // Sound effects
+        this.appendChild(this.swooshSound);
+        this.appendChild(this.bowReleaseSound);
+        this.swooshSound.components.set('audio', {
+            src: "./assets/audio/swoosh.mp3",
+            loop: false,
+            action: "stop"
+        })
+        this.bowReleaseSound.components.set('audio', {
+            src: "./assets/audio/bow-release.mp3",
+            loop: false,
+            action: "stop"
+        })
+
+        // Damage display
         this.appendChild(this.damageContainer);
         this.damageContainer.dataset.position = '0 2.5 0';
         this.damageContainer.style.scale = 1 / 0.05; // will be fixed soon in MRjs
@@ -46,7 +44,7 @@ class MREnemy extends MREntity {
             padding: "5px 10px",
             width: "auto",
             borderRadius: "5px",
-            backgroundColor: '#e72d75',
+            backgroundColor: Colors.health,
             visibility: 'hidden'
         });
 
@@ -61,6 +59,18 @@ class MREnemy extends MREntity {
         this.damageValueBackface.textObj.position.setX((-this.damageValueBackface.width / 2) / 0.005);
         this.damageValueBackface.dataset.rotation = "0 180 0";
         this.damageValueBackface.dataset.position = "0 0 -0.001";
+    }
+
+    playSwoosh() {
+        this.swooshSound.components.set('audio', {
+            action: "play"
+        })
+    }
+
+    playBowRelease() {
+        this.bowReleaseSound.components.set('audio', {
+            action: "play"
+        })
     }
 
     showDamage(string) {

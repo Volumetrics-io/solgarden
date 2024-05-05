@@ -49,21 +49,6 @@
         <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
 
             <mr-ui id="interface"></mr-ui>
-            <!-- <mr-entity id="UI"></mr-entity> -->
-            <!-- <mr-entity id="state" data-comp-state="health: 10;
-                    range: 15;
-                    action: 4;
-                    projectedCost: 0;
-                    hasKey: false;
-                    meleeName: '';
-                    meleeAttack: 0;
-                    meleeRange: 1;
-                    rangeName: '';
-                    rangeAttack: 0;
-                    rangeRange: 0;
-                    selectedWeapon: melee;
-                    isPlayerTurn: true;">
-            </mr-entity> -->
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
             <mr-entity id="analog-sound" data-comp-audio="src: ./assets/audio/analog.mp3; loop: false; state: stop;"></mr-entity>
@@ -79,8 +64,10 @@
     </mr-app>
 
     <script>
-        const State = {
+        const DefaultState = {
             isDebug: false,
+            isInteractive: true,
+            staticUntil: 0,
             level: 0,
             health: 10,
             range: 15,
@@ -97,6 +84,8 @@
             isPlayerTurn: true,
         }
 
+        const State = structuredClone(DefaultState);
+
         const Colors = {
             movement: "#00ffff",
             objects: "#ff7a00",
@@ -107,6 +96,103 @@
             enemies: "#ff0000",
             debug: '#00ff00',
             white: '#ffffff'
+        }
+
+        const EnemySubtypes = [
+            'static',
+            'homing',
+            'aimless',
+        ];
+
+        const EnemyModels = {
+            static: "assets/models/enemy-static1.glb",
+            homing: "assets/models/enemy-floater1.glb",
+            aimless: "assets/models/enemy-horse1.glb",
+        }
+
+        const WeaponModels = {
+            twig: "assets/models/weapon-stick1-pickup.glb",
+            shortsword: "assets/models/weapon-shortSword1-pickup.glb",
+            slingshot: "assets/models/weapon-slingshot1-pickup.glb",
+            bow: "assets/models/weapon-bow1-pickup.glb",
+        }
+
+        const SpawnRoomParams = () => {
+            return {
+                floorCount: 1,
+                rowCount: 6,
+                colCount: 4,
+                enemyCount: 0,
+                propCount: 0,
+                blockCount: 0,
+                isChest: false,
+                biome: {
+                    name: 'spawn',
+                    path: "assets/biomes/purple/",
+                    audio: "",
+                    tiles: ["tilegrasspurple001.glb"],
+                    props: [],
+                    block: [],
+                }
+            }
+        }
+
+        const BatteryRoomParams = () => {
+            return {
+                floorCount: 1,
+                rowCount: 8,
+                colCount: 4,
+                enemyCount: 0,
+                propCount: 12,
+                blockCount: 0,
+                isChest: false,
+                isLore: false,
+                biome: {
+                    name: 'battery',
+                    path: "assets/biomes/battery-room/",
+                    audio: "/assets/audio/fridge.mp3",
+                    tiles: ["tilegrass001.glb"],
+                    props: ["plant_01.glb",
+                        "plant_02.glb",
+                        "plant_03.glb",
+                        "plant_04.glb",
+                        "plant_05.glb"
+                    ],
+                    block: []
+                },
+                entityMap: [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-battery-ii"),
+                        type: 'prop'
+                    }, {
+                        el: document.createElement("mr-battery-i"),
+                        type: 'prop'
+                    }, 0],
+                    [0, 0, {
+                        el: document.createElement("mr-battery-iv"),
+                        type: 'prop'
+                    }, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ],
+                propMap: [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-battery-iii"),
+                        type: 'battery'
+                    }, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ]
+            }
         }
 
         const SoundController = {

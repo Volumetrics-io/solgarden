@@ -6,36 +6,37 @@ class MRPlayer extends MREntity {
         this.el = document.createElement("mr-model");
         this.light = document.createElement("mr-light");
 
+        this.swooshSound = document.createElement("mr-entity");
+        this.bowReleaseSound = document.createElement("mr-entity");
+
         this.damageContainer = document.createElement("mr-div")
         this.damageValue = document.createElement("mr-text");
         this.damageValueBackface = document.createElement("mr-text");
-
-        this.el.onLoad = () => {
-            this.el.object3D.traverse(object => {
-                if (object.isMesh) {
-                    // Necessary for the single-faced
-                    // grass texture to appear correctly
-                    object.material.alphaTest = 0.5;
-                    object.receiveShadow = true;
-                    object.castShadow = true;
-                    object.morphTargets = true;
-                }
-            })
-        }
     }
 
     connected() {
         this.appendChild(this.el);
-        this.el.src = "assets/models/mainCharacter_wip.glb";
+        // this.el.src = "assets/models/mainCharacter_wip.glb";
+        this.el.src = "assets/models/enemy_temp_multiTrack.glb";
         // this.el.src = "assets/models/poof1.glb";
         this.el.style.pointerEvents = 'none';
 
-        // this.el.components.set("animation", {
-        //     action: "play",
-        //     loop: true,
-        //     clampWhenFinished: true
-        // });
+        this.appendChild(this.swooshSound);
+        this.appendChild(this.bowReleaseSound);
 
+        this.playIdleAnimation();
+
+        this.swooshSound.components.set('audio', {
+            src: "./assets/audio/swoosh.mp3",
+            loop: false,
+            action: "stop"
+        })
+
+        this.bowReleaseSound.components.set('audio', {
+            src: "./assets/audio/bow-release.mp3",
+            loop: false,
+            action: "stop"
+        })
 
         this.appendChild(this.light);
         this.light.setAttribute('color', "#ffffff");
@@ -64,6 +65,48 @@ class MRPlayer extends MREntity {
         this.damageValueBackface.textObj.position.setX((-this.damageValueBackface.width / 2) / 0.005);
         this.damageValueBackface.dataset.rotation = "0 180 0";
         this.damageValueBackface.dataset.position = "0 0 -0.001";
+    }
+
+    playIdleAnimation() {
+        this.el.components.set("animation", {
+            clip: 0,
+            action: "play",
+            loop: true,
+        });
+    }
+
+    playCombatAnimation() {
+        this.el.components.set("animation", {
+            clip: 1,
+            action: "play",
+            loop: false,
+            clampWhenFinished: true
+        });
+
+        setTimeout(() => {
+            this.playIdleAnimation();
+        }, 2000)
+    }
+
+    playSwoosh() {
+        this.swooshSound.components.set('audio', {
+            action: "play"
+        })
+    }
+
+    playBowRelease() {
+        this.bowReleaseSound.components.set('audio', {
+            action: "play"
+        })
+    }
+
+    showCritSpikes() {
+        this.el.object3D.traverse(object => {
+            if (object.isMesh && object.morphTargetInfluences) {
+                object.morphTargets = true;
+                object.morphTargetInfluences[0] = Math.random();
+            }
+        })
     }
 
     showDamage(string) {

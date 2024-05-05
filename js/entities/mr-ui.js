@@ -254,15 +254,35 @@ class MRUI extends MREntity {
             this.rangeAttackValueEl.innerText = State.rangeAttack;
         }
 
-        if (State.selectedWeapon == 'melee' && State.meleeName) {
-            this.meleeSelection.material.opacity = 0.5;
-            this.rangeSelection.material.opacity = 0;
-        } else if (State.selectedWeapon == 'range' && State.rangeName) {
-            this.meleeSelection.material.opacity = 0;
-            this.rangeSelection.material.opacity = 0.5;
+        // TODO: ew
+        if (State.isInteractive) {
+            this.meleeSelection.material.color.setStyle(Colors.objects);
+            this.rangeSelection.material.color.setStyle(Colors.objects);
+
+            if (State.selectedWeapon == 'melee' && State.meleeName) {
+                this.meleeSelection.material.opacity = 0.5;
+                this.rangeSelection.material.opacity = 0;
+            } else if (State.selectedWeapon == 'range' && State.rangeName) {
+                this.meleeSelection.material.opacity = 0;
+                this.rangeSelection.material.opacity = 0.5;
+            } else {
+                this.meleeSelection.material.opacity = 0;
+                this.rangeSelection.material.opacity = 0;
+            }
         } else {
-            this.meleeSelection.material.opacity = 0;
-            this.rangeSelection.material.opacity = 0;
+            this.meleeSelection.material.color.setStyle(Colors.neutral);
+            this.rangeSelection.material.color.setStyle(Colors.neutral);
+
+            if (State.selectedWeapon == 'melee' && State.meleeName) {
+                this.meleeSelection.material.opacity = 0.5;
+                this.rangeSelection.material.opacity = 0;
+            } else if (State.selectedWeapon == 'range' && State.rangeName) {
+                this.meleeSelection.material.opacity = 0;
+                this.rangeSelection.material.opacity = 0.5;
+            } else {
+                this.meleeSelection.material.opacity = 0;
+                this.rangeSelection.material.opacity = 0;
+            }
         }
     }
 }
