@@ -16,7 +16,6 @@ class MRProp extends MREntity {
                     object.receiveShadow = true;
                     object.castShadow = true;
                     object.morphTargets = true;
-                    // object.morphTargetInfluences[0] = Math.random()
                 }
             })
         }

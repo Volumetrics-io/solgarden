@@ -37,8 +37,6 @@ class MRUI extends MREntity {
             },
         ]
 
-        // this.meleeContainer = document.createElement("mr-entity");
-
         this.healthValueEl = document.createElement("mr-text");
         this.rangeValueEl = document.createElement("mr-text");
     }
@@ -85,6 +83,7 @@ class MRUI extends MREntity {
                 transparent: true,
                 opacity: 1
             }));
+            
         // position the object
         this.healthBar.position.z = -0.5;
         this.container.object3D.add(this.healthBar);
@@ -183,7 +182,6 @@ class MRUI extends MREntity {
             }));
         this.meleeContainer.object3D.add(this.meleeSelection);
 
-
         // range weapons
         this.container.appendChild(this.rangeContainer);
         this.rangeContainer.dataset.position = "0 0 -1.2";
@@ -198,7 +196,6 @@ class MRUI extends MREntity {
             this.rangeContainer.appendChild(weapon.el);
             weapon.el.setAttribute('src', weapon.src);
             weapon.el.dataset.position = "0 0.05 0";
-            // weapon.el.style.pointerEvents = 'none';
         });
 
         this.rangeSelection = new THREE.Mesh(

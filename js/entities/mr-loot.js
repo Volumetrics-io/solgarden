@@ -7,7 +7,6 @@ class MRLoot extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        // this.effect = this.dataset.effect ?? "health";
 
         const Effects = ["health", "range"]
         const rand = Math.floor(Math.random() * Effects.length);
