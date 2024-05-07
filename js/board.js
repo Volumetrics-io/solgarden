@@ -146,7 +146,7 @@ class Board {
 
             const el = document.createElement("mr-enemy");
             const hp = State.level / 4 + Math.random() * State.level / 4;
-            const attack = Math.floor(Math.random() * 2 + 1);
+            const attack = Math.floor(Math.random() * 2 + State.level / 8);
 
             el.dataset.subtype = subtype;
             const enemy = {

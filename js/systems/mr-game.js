@@ -8,8 +8,12 @@ class GameSystem extends MRSystem {
         this.container = document.createElement("mr-div");
         this.ui = document.querySelector("#interface");
         this.dmgTile = document.querySelector("#damage-tile");
+
+        // UI elements
         this.endTurnButton = document.createElement("mr-button");
         this.startWall = document.querySelector("#start-wall");
+        this.disposedRobotsLabel = document.querySelector("#disposed-robots");
+        this.farthestRoomLabel = document.querySelector("#farthest-room");
 
         Object.assign(State, {
             maxHealth: 20,
@@ -693,13 +697,29 @@ class GameSystem extends MRSystem {
                 this.ui.update(this.timer);
                 this.ui.dataset.position = `-${offX} ${this.tableOffset} 0`;
 
-                // if(State.level == 0) {
-                // this.startWall.update(this.timer);
+                // The start wall
+                // Doesn't show before the first death
+                const currentCycle = this.cycle;
+                const currentRoom = State.level;
+                const maxCycle = localStorage.getItem('maxCycle') ?? currentCycle;
+                const maxRoom = localStorage.getItem('maxRoom') ?? currentRoom;
+                if (State.level == 1) {
+                    this.startWall.style.visibility = 'visible';
+                    this.disposedRobotsLabel.innerText = `Disposed robots: ${maxCycle}`;
+                    this.farthestRoomLabel.innerText = `Farthest room: ${maxRoom}`;
 
+                    if (currentCycle > parseInt(maxCycle)) {
+                        localStorage.setItem('maxCycle', currentCycle);
+                    }
 
+                    if (currentRoom > parseInt(maxRoom)) {
+                        localStorage.setItem('maxRoom', currentRoom);
+                    }
+                } else {
+                    this.startWall.style.visibility = 'hidden';
 
+                }
                 this.startWall.dataset.position = `${offX} ${this.tableOffset} 0`;
-                // }
 
                 State.needsUpdate = false;
 
