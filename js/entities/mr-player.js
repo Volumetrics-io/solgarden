@@ -24,6 +24,7 @@ class MRPlayer extends MREntity {
         //     }
         // })
 
+
         this.appendChild(this.swooshSound);
         this.appendChild(this.bowReleaseSound);
 
@@ -66,6 +67,7 @@ class MRPlayer extends MREntity {
         // setTimeout(() => {
         //     this.playIdleAnimation();
         // }, 2000)
+
 
     }
 

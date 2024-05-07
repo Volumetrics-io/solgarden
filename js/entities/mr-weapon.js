@@ -9,7 +9,7 @@ class MRWeapon extends MREntity {
         this.appendChild(this.el);
         const model = this.dataset.model ?? "shortsword";
 
-        this.el.src = WeaponModels[model];
+        this.el.src = WEAPON_MODELS[model];
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
     }

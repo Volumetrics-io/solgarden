@@ -20,7 +20,7 @@ class MREnemy extends MREntity {
         this.el.style.pointerEvents = 'none';
 
         const subtype = this.dataset.subtype ?? "aimless";
-        this.el.src = EnemyModels[subtype];
+        this.el.src = ENEMY_MODELS[subtype];
 
         // Sound effects
         this.appendChild(this.swooshSound);

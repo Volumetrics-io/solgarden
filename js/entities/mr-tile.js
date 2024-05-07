@@ -108,34 +108,42 @@ class MRTile extends MREntity {
         switch (color) {
             case 'neutral':
                 this.borderNeutral.style.visibility = "visible";
-                this.numberString.style.color = Colors.neutral;
+                this.numberString.style.color = COLORS.neutral;
                 break;
             case 'white':
                 this.borderWhite.style.visibility = "visible";
-                this.numberString.style.color = Colors.white;
+                this.numberString.style.color = COLORS.white;
                 break;
             case 'health':
                 this.borderHealth.style.visibility = "visible";
-                this.numberString.style.color = Colors.health;
+                this.numberString.style.color = COLORS.health;
                 break;
             case 'objects':
                 this.borderObjects.style.visibility = "visible";
-                this.numberString.style.color = Colors.objects;
+                this.numberString.style.color = COLORS.objects;
                 break;
             case 'range':
                 this.borderRange.style.visibility = "visible";
-                this.numberString.style.color = Colors.range;
+                this.numberString.style.color = COLORS.range;
                 break;
             case 'glow-white':
                 this.borderWhite.style.visibility = "visible";
                 this.glowWhite.style.visibility = "visible";
-                this.numberString.style.color = Colors.white;
+                this.numberString.style.color = COLORS.white;
                 break;
         }
     }
 
     setCostIndicator(number) {
         this.numberString.innerText = number;
+    }
+
+    raiseTile() {
+        this.borderContainer.dataset.position = "0 0.2 0";
+    }
+
+    sinkTile() {
+        this.borderContainer.dataset.position = "0 0.15 0";
     }
 }
 

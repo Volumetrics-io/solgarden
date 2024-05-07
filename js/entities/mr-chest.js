@@ -37,6 +37,7 @@ class MRChest extends MREntity {
             clampWhenFinished: true,
         });
         this.poof.style.pointerEvents = 'none';
+
     }
 
     open() {

@@ -141,8 +141,8 @@ class Board {
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
 
-            const rand = Math.floor(Math.random() * EnemySubtypes.length);
-            const subtype = EnemySubtypes[rand];
+            const rand = Math.floor(Math.random() * ENEMY_SUBTYPES.length);
+            const subtype = ENEMY_SUBTYPES[rand];
 
             const el = document.createElement("mr-enemy");
             const hp = State.level / 4 + Math.random() * State.level / 4;

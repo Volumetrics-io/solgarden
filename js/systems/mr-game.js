@@ -27,7 +27,6 @@ class GameSystem extends MRSystem {
 
         this.ui = document.querySelector("#ui");
 
-
         Object.assign(State, {
             maxHealth: 20,
             maxRange: 30,
@@ -156,7 +155,7 @@ class GameSystem extends MRSystem {
             // H for Health reset
             if (event.key === 'h') {
                 event.preventDefault();
-                Object.assign(State, DefaultState);
+                Object.assign(State, DEFAULT_STATE);
                 State.needsUpdate = true;
             }
 
@@ -196,16 +195,15 @@ class GameSystem extends MRSystem {
                 player.el.playCombatAnimation();
             }
 
-
             // N for eNemy
             if (event.key === 'n') {
                 event.preventDefault();
 
-                const rand = Math.floor(Math.random() * EnemySubtypes.length);
+                const rand = Math.floor(Math.random() * ENEMY_SUBTYPES.length);
                 const enemy = {
                     el: document.createElement("mr-enemy"),
                     type: 'enemy',
-                    subtype: EnemySubtypes[rand],
+                    subtype: ENEMY_SUBTYPES[rand],
                     hp: 20,
                     attack: 0
                 };
@@ -262,7 +260,7 @@ class GameSystem extends MRSystem {
         let params;
         // TODO: make the soundtrack part of the biome
         if (State.level == 0) {
-            params = SpawnRoomParams();
+            params = generateSpawnRoomParams();
 
         } else if (
             // TODO: need an infinite, procedural way to interleave
@@ -274,14 +272,13 @@ class GameSystem extends MRSystem {
             State.level == 34 ||
             State.level == 55) {
 
-            params = BatteryRoomParams();
+            params = generateBatteryRoomParams();
             State.hasKey = true;
 
         } else {
             params = {};
         }
 
-        // params.isDebug = State.isDebug;
         this.board = new Board(this.container, params);
         Sounds.background(this.board.biome.name);
 
@@ -296,9 +293,7 @@ class GameSystem extends MRSystem {
                         const x = tile.pos.x;
                         const y = tile.pos.y;
 
-                        // TODO: GROSS
-                        tile.el.borderContainer.dataset.position = "0 0.15 0";
-
+                        tile.el.sinkTile();
                         State.projectedCost = this.board.getCostFor(x, y);
                         State.needsUpdate = true;
                     }
@@ -310,9 +305,7 @@ class GameSystem extends MRSystem {
                         const x = tile.pos.x;
                         const y = tile.pos.y;
 
-                        // TODO: GROSS
-                        tile.el.borderContainer.dataset.position = "0 0.2 0";
-
+                        tile.el.raiseTile();
                         State.projectedCost = 0;
                         State.needsUpdate = true;
                     }
@@ -463,8 +456,7 @@ class GameSystem extends MRSystem {
         console.log('you ded');
 
         this.cycle++;
-        localStorage.setItem('maxCycle', this.cycle);
-        Object.assign(State, DefaultState);
+        Object.assign(State, DEFAULT_STATE);
 
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
@@ -607,7 +599,7 @@ class GameSystem extends MRSystem {
                 console.error('this enemy type is not handled')
         }
 
-        this.board.showDamageAt(pos.x, pos.y, attacker.attack, Colors.hover);
+        this.board.showDamageAt(pos.x, pos.y, attacker.attack, COLORS.hover);
         this.board.startQuakeAt(pos.x, pos.y, 1, 10, 0.5);
 
         State.health -= attacker.attack;
@@ -654,10 +646,10 @@ class GameSystem extends MRSystem {
             player.el.showCritSpikes();
 
             this.board.startQuakeAt(r, c, 4, 10, 2);
-            this.board.showDamageAt(r, c, damage, Colors.health);
+            this.board.showDamageAt(r, c, damage, COLORS.health);
         } else {
             this.board.startQuakeAt(r, c, 1.2, 10, 0.5);
-            this.board.showDamageAt(r, c, damage, Colors.hover);
+            this.board.showDamageAt(r, c, damage, COLORS.hover);
         }
 
         entity.hp -= damage;
@@ -681,12 +673,12 @@ class GameSystem extends MRSystem {
         // End turn button
         if (State.isInteractive) {
             if (State.action == 0) {
-                this.endTurnButton.style.backgroundColor = Colors.hover;
+                this.endTurnButton.style.backgroundColor = COLORS.hover;
             } else {
-                this.endTurnButton.style.backgroundColor = Colors.health;
+                this.endTurnButton.style.backgroundColor = COLORS.health;
             }
         } else {
-            this.endTurnButton.style.backgroundColor = Colors.neutral;
+            this.endTurnButton.style.backgroundColor = COLORS.neutral;
         }
     }
 

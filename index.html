@@ -86,6 +86,7 @@
 
 <body>
 
+
     <!-- <mr-app orbital="true" stats="true" debug='true'> -->
         <mr-app orbital="true" stats="true">
 
@@ -93,7 +94,6 @@
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
         <mr-entity class='game' data-comp-game="autoEndTurn: false; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
-
 
             <mr-ui id="interface"></mr-ui>
             <mr-damage-tile id="damage-tile"></mr-damage-tile>
@@ -157,7 +157,8 @@
     </mr-app>
 
     <script>
-        const DefaultState = {
+
+        const DEFAULT_STATE = {
             isDebug: false,
             isInteractive: true,
             staticUntil: 0,
@@ -185,6 +186,7 @@
             ],
             selectedWeapon: 0,
 
+
             meleeName: '',
             meleeAttack: 0,
             meleeRange: 1,
@@ -195,9 +197,9 @@
             isPlayerTurn: true,
         }
 
-        const State = structuredClone(DefaultState);
+        const State = structuredClone(DEFAULT_STATE);
 
-        const Colors = {
+        const COLORS = {
             movement: "#00ffff",
             objects: "#ff7a00",
             neutral: "#888",
@@ -209,26 +211,28 @@
             white: '#ffffff'
         }
 
-        const EnemySubtypes = [
+
+        const ENEMY_SUBTYPES = [
             'static',
             'homing',
             'aimless',
         ];
 
-        const EnemyModels = {
+        const ENEMY_MODELS = {
             static: "assets/models/enemy-static1.glb",
             homing: "assets/models/enemy-floater1.glb",
             aimless: "assets/models/enemy-horse1.glb",
         }
 
-        const WeaponModels = {
+
+        const WEAPON_MODELS = {
             twig: "assets/models/weapon-stick1-pickup.glb",
             shortsword: "assets/models/weapon-shortSword1-pickup.glb",
             slingshot: "assets/models/weapon-slingshot1-pickup.glb",
             bow: "assets/models/weapon-bow1-pickup.glb",
         }
 
-        const SpawnRoomParams = () => {
+        const generateSpawnRoomParams = () => {
             return {
                 floorCount: 1,
                 rowCount: 6,
@@ -248,7 +252,8 @@
             }
         }
 
-        const BatteryRoomParams = () => {
+
+        const generateBatteryRoomParams = () => {
             return {
                 floorCount: 1,
                 rowCount: 8,
@@ -305,6 +310,7 @@
                 ]
             }
         }
+
 
         const Biomes = [{
                 // plains
@@ -374,9 +380,7 @@
 
     <!-- Classes -->
     <script src="/js/sound-controller.js"></script>
-    <script>
-        const Sounds = new SoundController();
-    </script>
+
     <script src="/js/pathfinder.js"></script>
     <script src="/js/board.js"></script>
 
@@ -399,9 +403,11 @@
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
     <script src="/js/entities/mr-damage-tile.js"></script>
+
     <script src="/js/entities/mr-ui-melee.js"></script>
     <script src="/js/entities/mr-ui-range.js"></script>
     <!-- <script src="/js/entities/mr-start-wall.js"></script> -->
+
 
 </body>
 
