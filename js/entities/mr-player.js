@@ -27,7 +27,7 @@ class MRPlayer extends MREntity {
             mixer._actions[1].enabled = false; // turn of the run animation for now
             this.runAnimAction = 1;
 
-            console.log(mixer, animations);
+            console.log('mixer:', mixer, 'animations', animations);
 
             this.playIdleAnimation();
         }
@@ -75,7 +75,7 @@ class MRPlayer extends MREntity {
     playIdleAnimation() {
         this.el.mixer._actions[this.idleAnimAction].enabled = true;
         this.el.mixer._actions[this.runAnimAction].enabled = false;
-        this.el.mixer._actions[this.idleAnimAction].reset().play();
+        this.el.mixer._actions[this.idleAnimAction].play();
         
         // console.log(action);
         // action.reset().play();
@@ -90,7 +90,7 @@ class MRPlayer extends MREntity {
     playCombatAnimation() {
         this.el.mixer._actions[this.runAnimAction].enabled = true;
         this.el.mixer._actions[this.idleAnimAction].enabled = false;
-        this.el.mixer._actions[this.runAnimAction].reset().play();
+        this.el.mixer._actions[this.runAnimAction].play();
 
         // this.el.components.set("animation", {
         //     clip: 2,
