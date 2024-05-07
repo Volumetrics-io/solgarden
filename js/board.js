@@ -17,7 +17,7 @@ class Board {
         this.isQuake = false;
 
         // TODO: biome soundtrack sound be here
-        this.biome = params.biome ?? Biomes[params.biomeId] ?? Biomes[Math.floor(Math.random() * Biomes.length)];
+        this.biome = params.biome ?? BIOMES[params.biomeId] ?? BIOMES[Math.floor(Math.random() * BIOMES.length)];
 
         // read the params, or generate a random geometry for the room
         this.floorCount = params.floorCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);
@@ -198,10 +198,10 @@ class Board {
             this.addToLootMap({
                 el: twig,
                 type: 'weapon',
-                subtype: 'melee',
-                name: 'twig',
-                range: 1,
-                attack: 1
+                weaponID: 0,
+                subtype: 'twig',
+                attack: 1,
+                range: WEAPONS[0][0].range
             });
 
             // key
@@ -391,15 +391,15 @@ class Board {
     moveEntity(x1, y1, x2, y2) {
         if (!this.entityMap[x1] || !this.entityMap[x1][y1]) {
             console.log("No object found at the source position.");
-            return; // No object at the source position
+            return;
         } else if (!this.entityMap[x2] || this.entityMap[x2][y2] !== 0) {
             console.log("Target position is not empty or out of bounds.");
-            return; // Target cell is not empty or out of bounds
+            return;
         }
 
         // Move the object
         this.entityMap[x2][y2] = this.entityMap[x1][y1];
-        this.entityMap[x1][y1] = 0; // Set the source cell to empty
+        this.entityMap[x1][y1] = 0;
 
         // TODO: this probably should be an ECS?
         this.entityMap[x2][y2].animation = {
@@ -486,58 +486,23 @@ class Board {
 
     dropWeaponAt(x, y) {
 
-        // TODO: what kind of weapons can drop?
-        const Weapons = [{
-                name: "twig",
-                subtype: "melee",
-                range: 1
-            },
-            {
-                name: "shortsword",
-                subtype: "melee",
-                range: 1.5
-            },
-            {
-                name: "slingshot",
-                subtype: "range",
-                range: 2
-            },
-            {
-                name: "bow",
-                subtype: "range",
-                range: 3
-            },
-        ]
+        const randType = Math.floor(Math.random() * WEAPONS.length);
+        const randId = Math.floor(Math.random() * WEAPONS[randType].length);
+        const weapon = WEAPONS[randType][randId];
 
-        const randomId = Math.floor(Math.random() * Weapons.length);
-        const weapon = Weapons[randomId];
         const el = document.createElement("mr-weapon");
-        el.dataset.model = weapon.name;
+        el.dataset.model = weapon.subtype;
         this.container.appendChild(el);
-
-        // random attack and random range
-        let attack;
-        let range;
-        if (weapon.subtype == 'melee') {
-            range = 1.5;
-            attack = 1 + Math.ceil(State.level / 5);
-        } else if (weapon.subtype == 'range') {
-            range = 3;
-            attack = 1 + Math.ceil(State.level / 5);
-        } else {
-            console.error("Illegal type for weapon.subtype");
-        }
-
-        console.log('dropped weapon', attack, range, weapon.name, weapon.subtype);
 
         this.lootMap[x][y] = {
             el: el,
             type: 'weapon',
+            weaponID: randType,
             subtype: weapon.subtype,
-            name: weapon.name,
-            attack: attack,
-            range: range,
+            attack: 1 + Math.ceil(State.level / 5),
+            range: weapon.range,
         };
+
         this.needsUpdate = true;
     }
 
@@ -641,21 +606,11 @@ class Board {
                 break;
 
             case "weapon":
-                console.log(entity.attack, State.meleeAttack)
-                if (entity.subtype == "melee" &&
-                    entity.attack > State.meleeAttack) {
-                    State.meleeName = entity.name;
-                    State.meleeAttack = entity.attack;
-                    State.meleeRange = entity.range;
-
-                } else if (entity.subtype == "range" &&
-                    entity.attack > State.rangeAttack) {
-                    State.rangeName = entity.name;
-                    State.rangeAttack = entity.attack;
-                    State.rangeRange = entity.range;
-
-                } else {
-                    State.selectedWeapon = entity.subtype;
+                if(entity.attack > State.weapons[entity.weaponID].attack) {
+                    State.weapons[entity.weaponID].attack = entity.attack;
+                    State.weapons[entity.weaponID].subtype = entity.subtype;
+                    State.weapons[entity.weaponID].range = entity.range;
+                    State.weapons[entity.weaponID].crits = entity.crits;
                 }
 
                 this.container.removeChild(entity.el);
@@ -909,7 +864,7 @@ class Board {
         if (this.isQuake && this.quakeHasStarted) {
 
             if (timer - this.quakeTimerStart > this.quakeDuration) {
-                console.log("quake is over")
+                if(State.isDebug) console.log("quake is over")
                 this.isQuake = false;
             }
         }
@@ -937,13 +892,6 @@ class Board {
                     //  combat related distances are Euclidean
                     const rawDist = distBetween(x, y, ppos.x, ppos.y);
 
-                    let attackRange;
-                    if (State.selectedWeapon == 'melee') {
-                        attackRange = State.meleeRange;
-                    } else if (State.selectedWeapon == 'range') {
-                        attackRange = State.rangeRange;
-                    }
-
                     if (!entity || entity.type == "chest") {
                         if (isReachable) {
                             // the tile is floor, and in reach
@@ -962,7 +910,8 @@ class Board {
 
                     } else if (entity.type == "enemy") {
                         // if the enemy is in attack range
-                        if (rawDist <= attackRange) {
+                        const weapon = State.weapons[State.selectedWeaponID];
+                        if (rawDist <= weapon.range) {
                             el.tileColor('health');
                             el.setCostIndicator("×");
                         } else {
@@ -977,20 +926,9 @@ class Board {
                     }
 
                     // If either melee or range weapon is hovered
-                    if (State.hoverMelee) {
-                        if (rawDist <= State.meleeRange) {
+                    if(State.displayRange > 0) {
+                        if (rawDist <= State.displayRange) {
                             el.tileColor('health');
-                            el.setCostIndicator('');
-                        } else {
-                            el.hideTile();
-                        }
-                    }
-                    if (State.hoverRange) {
-                        if (rawDist <= State.rangeRange) {
-                            el.tileColor('health');
-                            el.setCostIndicator('');
-                        } else {
-                            el.hideTile();
                         }
                     }
 

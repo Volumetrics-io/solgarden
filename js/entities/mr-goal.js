@@ -4,7 +4,6 @@ class MRGoal extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
-
     }
 
     connected() {

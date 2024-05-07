@@ -6,11 +6,10 @@ class GameSystem extends MRSystem {
 
         // container to store board object references
         this.container = document.createElement("mr-div");
-        this.interface = document.querySelector("#interface");
+        // this.interface = document.querySelector("#interface");
         this.dmgTile = document.querySelector("#damage-tile");
 
         // UI elements
-        // this.endTurnButton = document.createElement("mr-button");
         this.endTurnButton = document.querySelector("#end-turn-button");
         this.startWall = document.querySelector("#start-wall");
         this.disposedRobotsLabel = document.querySelector("#disposed-robots");
@@ -21,6 +20,9 @@ class GameSystem extends MRSystem {
 
         this.rangeProgress = document.querySelector('#range-progress');
         this.rangeLabel = document.querySelector('#range-label');
+
+        this.uiActions = document.querySelector('#ui-actions');
+        this.actionLabel = document.querySelector('#action-label');
 
         this.uiMelee = document.querySelector('#ui-melee');
         this.uiRange = document.querySelector('#ui-range');
@@ -85,40 +87,8 @@ class GameSystem extends MRSystem {
             // W for Weapon
             if (event.key === 'w') {
                 event.preventDefault();
-
-                const twig = document.createElement("mr-weapon");
-                twig.dataset.model = "twig";
-                this.container.appendChild(twig);
-
-                const pos = this.board.addToLootMap({
-                    el: twig,
-                    type: 'weapon',
-                    subtype: 'melee',
-                    name: 'twig',
-                    range: 10,
-                    attack: 10
-                });
-                console.log('Weapon dropped at ', pos);
-                State.needsUpdate = true;
-            }
-
-            // R for Range
-            if (event.key === 'r') {
-                event.preventDefault();
-
-                const range = document.createElement("mr-weapon");
-                range.dataset.model = "slingshot";
-                this.container.appendChild(range);
-
-                const pos = this.board.addToLootMap({
-                    el: range,
-                    type: 'weapon',
-                    subtype: 'range',
-                    name: 'slingshot',
-                    range: 3,
-                    attack: 3
-                });
-                console.log('Weapon dropped at ', pos);
+                const ppos = this.board.playerPos;
+                this.board.dropWeaponAt(ppos.x, ppos.y);
                 State.needsUpdate = true;
             }
 
@@ -336,15 +306,12 @@ class GameSystem extends MRSystem {
 
                         } else {
                             // there is an entity on the tile
-                            if (cost <= State.action &&
-                                this.board.distances[x][y] <= State.action &&
-                                entity.type == "chest"
-                            ) {
-                                State.isInteractive = false;
-                                State.staticUntil = this.timer + 2;
-
+                            if (entity.type == "chest" &&
+                                cost <= State.action &&
+                                this.board.distances[x][y] <= State.action) {
                                 entity.el.open();
 
+                                // TODO: improve the chest opening animation
                                 setTimeout(() => {
                                     this.board.dropWeaponAt(x, y);
                                     State.needsUpdate = true;
@@ -354,17 +321,18 @@ class GameSystem extends MRSystem {
                                     this.container.removeChild(entity.el);
                                     this.board.removeEntityAt(x, y);
                                     State.needsUpdate = true;
-                                }, 600)
+                                }, 600);
+
+                                State.isInteractive = false;
+                                State.staticUntil = this.timer + 2;
                             }
 
                             // enemies
                             if (entity.type == "enemy") {
                                 const ppos = this.board.playerPos;
                                 const dist = distBetween(x, y, ppos.x, ppos.y);
-                                const type = State.selectedWeapon;
-                                let range = this.getWeaponRange();
-
-                                console.log('enemy', ppos, dist, type, range)
+                                const weapon = State.weapons[State.selectedWeaponID];
+                                const range = weapon.range;
 
                                 if (dist <= range && cost <= State.action) {
                                     State.action -= cost;
@@ -396,26 +364,6 @@ class GameSystem extends MRSystem {
 
         this.gameIsStarted = true;
 
-    }
-
-    getWeaponRange() {
-        if (State.selectedWeapon == 'melee') {
-            return State.meleeRange;
-        } else if (State.selectedWeapon == 'range') {
-            return State.rangeRange;
-        } else {
-            console.error('its not a valid selected weapon');
-        }
-    }
-
-    getWeaponDamage() {
-        if (State.selectedWeapon == 'melee') {
-            return State.meleeAttack;
-        } else if (State.selectedWeapon == 'range') {
-            return State.rangeAttack;
-        } else {
-            console.error('its not a valid selected weapon');
-        }
     }
 
     endTurn() {
@@ -570,6 +518,7 @@ class GameSystem extends MRSystem {
             }
 
         } else {
+
             State.isInteractive = false;
             State.staticUntil = this.timer + 0.3;
             State.isPlayerTurn = true;
@@ -618,36 +567,27 @@ class GameSystem extends MRSystem {
 
         const ppos = this.board.playerPos;
         const player = this.board.entityMap[ppos.x][ppos.y];
-        let damage;
+        const weapon = State.weapons[State.selectedWeaponID];
 
-        if (State.selectedWeapon == 'range') {
-            // TODO: assign the projectile particle based on subtype
+        if (State.selectedWeaponID == 0) { // melee
+            player.el.playSwoosh();
+            player.el.playCombatAnimation();
+        } else { // range
             this.board.projectileTo(this.board.playerPos, {
                 x: r,
                 y: c
             });
-            damage = State.rangeAttack;
             player.el.playBowRelease();
-
-        } else if (State.selectedWeapon == "melee") {
-            damage = State.meleeAttack;
-            player.el.playSwoosh();
-            player.el.playCombatAnimation();
-        } else {
-            console.error('invalid value for selectedWeapon')
         }
 
-        // 10% chance of critical hits
-        // TODO: should be based on the weapon
-        if (Math.random() < 0.1) {
-            const critMultiplier = 3;
-            damage = damage * critMultiplier;
+        let damage;
+        if (Math.random() < weapon.critChances) {
+            damage = weapon.attack * weapon.critMultiplier;
             entity.el.playCrit();
-            player.el.showCritSpikes();
-
             this.board.startQuakeAt(r, c, 4, 10, 2);
             this.board.showDamageAt(r, c, damage, COLORS.health);
         } else {
+            damage = weapon.attack;
             this.board.startQuakeAt(r, c, 1.2, 10, 0.5);
             this.board.showDamageAt(r, c, damage, COLORS.hover);
         }
@@ -673,9 +613,9 @@ class GameSystem extends MRSystem {
         // End turn button
         if (State.isInteractive) {
             if (State.action == 0) {
-                this.endTurnButton.style.backgroundColor = COLORS.hover;
-            } else {
                 this.endTurnButton.style.backgroundColor = COLORS.health;
+            } else {
+                this.endTurnButton.style.backgroundColor = COLORS.white;
             }
         } else {
             this.endTurnButton.style.backgroundColor = COLORS.neutral;
@@ -698,51 +638,50 @@ class GameSystem extends MRSystem {
                 const dmgZ = (this.dmgTile.pos.x - this.board.rowCount / 2 + 0.5) * this.scale;
                 this.dmgTile.dataset.position = `${dmgX} ${dmgY} ${dmgZ}`;
 
-                // position the interface alongside the board
+                // position the wall and interface alongside the board
                 const offX = (this.board.colCount / 2 + 0.5) * this.scale;
-                this.interface.update(this.timer);
-                this.interface.dataset.position = `-${offX} ${this.tableOffset - 0.1} 0`;
-
                 this.ui.dataset.position = `-${offX} ${this.tableOffset} 0`;
+                this.startWall.dataset.position = `${offX} ${this.tableOffset} 0`;
 
-                // The start wall
+                // The spawn wall
                 const maxRoom = localStorage.getItem('maxRoom') ?? State.level;
 
+                // Show and update the spawn wall if the first room
                 if (State.level == 1) {
                     this.startWall.style.visibility = 'visible';
                     this.disposedRobotsLabel.innerText = `Disposed robots: ${this.cycle}`;
                     this.farthestRoomLabel.innerText = `Farthest room: ${maxRoom}`;
-
                     if (State.level > parseInt(maxRoom)) {
                         localStorage.setItem('maxRoom', State.level);
                     }
                 } else {
                     this.startWall.style.visibility = 'hidden';
-
                 }
-                this.startWall.dataset.position = `${offX} ${this.tableOffset} 0`;
 
-                // New UI HEALTH
+                // UI health progress bar
+                // TODO: should be a custom element like acton balls
                 const healthRatio = State.health / State.maxHealth;
                 this.hpProgress.object3D.traverse(object => {
                     if (object.isMesh && object.morphTargetInfluences) {
                         object.morphTargetInfluences[0] = healthRatio;
                     }
                 })
-                this.hpLabel.innerText = "⊕ " + Math.ceil(State.health);
 
-                // New UI RANGW
+                // UI range progress bar
                 const rangeRatio = State.range / State.maxRange;
                 this.rangeProgress.object3D.traverse(object => {
                     if (object.isMesh && object.morphTargetInfluences) {
                         object.morphTargetInfluences[0] = rangeRatio;
                     }
                 })
-                this.rangeLabel.innerText = "⚡ " + Math.ceil(State.range);
 
-                // New UI
+                // Update all the UI
+                this.hpLabel.innerText = "⊕ " + Math.ceil(State.health);
+                this.rangeLabel.innerText = "⚡ " + Math.ceil(State.range);
+                this.actionLabel.innerText = "● 0" + State.action;
                 this.uiMelee.update(this.timer);
                 this.uiRange.update(this.timer);
+                this.uiActions.update(this.timer);
                 State.needsUpdate = false;
 
                 // If the player is at the door with the key
@@ -754,7 +693,11 @@ class GameSystem extends MRSystem {
                     State.hasKey = false;
 
                     // TODO: introduce a pause here when staticUntil is back
-                    this.initialize();
+                    State.isInteractive = false;
+                    State.staticUntil = this.timer + 0.5;
+                    setTimeout(() => {
+                        this.initialize();
+                    }, 500)
                 }
 
                 // Dot is in the battery room
@@ -810,12 +753,7 @@ class GameSystem extends MRSystem {
 
         this.container.style.scale = this.scale;
         this.container.dataset.position = `0 ${this.tableOffset} 0`;
-
-        // TODO: to delete at some point
-        // when DOM based UI is in place
-        this.interface.style.scale = this.scale;
-        this.interface.dataset.rotation = `0 0 30`;
-
+        
         this.dmgTile.style.scale = this.scale;
 
         this.endTurnButton.addEventListener('click', () => {

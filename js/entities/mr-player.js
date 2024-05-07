@@ -63,12 +63,6 @@ class MRPlayer extends MREntity {
             loop: false,
             // clampWhenFinished: true
         });
-
-        // setTimeout(() => {
-        //     this.playIdleAnimation();
-        // }, 2000)
-
-
     }
 
     playSwoosh() {
@@ -81,21 +75,6 @@ class MRPlayer extends MREntity {
         this.bowReleaseSound.components.set('audio', {
             action: "play"
         })
-    }
-
-    showCritSpikes() {
-        // this.el.object3D.traverse(object => {
-        //     if (object.isMesh && object.morphTargetInfluences) {
-        //         object.morphTargetInfluences[0] = 0.5;
-        //     }
-        // })
-        // setTimeout(() => {
-        //     this.el.object3D.traverse(object => {
-        //         if (object.isMesh && object.morphTargetInfluences) {
-        //             object.morphTargetInfluences[0] = 0.2;
-        //         }
-        //     })
-        // }, 500)
     }
 
 }

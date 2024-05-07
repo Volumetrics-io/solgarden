@@ -8,7 +8,7 @@ function printArray(string, array) {
         console.log(row);
     })
 }
- 
+
 /////////////////////////////////
 // ----------- Math ---------- //
 /////////////////////////////////
@@ -49,3 +49,34 @@ function smoothNoise(x, y) {
     const i2 = lerp(v3, v4, fracX);
     return lerp(i1, i2, fracY);
 }
+
+//////////////////////////////////
+// ------- Timing Funcs ------- //
+//////////////////////////////////
+
+const Animator = {
+    easeInOut: time => {
+        return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
+    },
+    easeOutBack: time => {
+        return Math.pow(time - 1, 2) * ((1.70158 + 1) * (time - 1) + 1.70158) + 1;
+    },
+    elastic: time => {
+        return Math.pow(2, -5 * time) * Math.sin(((time - 0.3 / 4) * (Math.PI * 2)) / 0.3) + 1;
+    },
+    fanOut: time => {
+        return 2 / (1 + Math.pow(1000, -time)) - 1;
+    },
+    rollercoaster: time => {
+        return (-1.15 * Math.sin(time * 7.7)) / (time * 7.7) + 1.15;
+    },
+    linear: time => {
+        return time;
+    },
+    jump: time => {
+        return -((2 * time - 1) * (2 * time - 1)) + 1;
+    },
+    softJump: time => {
+        return 1 - (Math.cos(time * 2 * Math.PI) / 2 + 0.5);
+    }
+};

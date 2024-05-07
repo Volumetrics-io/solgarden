@@ -1,59 +1,48 @@
-class MRUIMelee extends MREntity {
+class MRUIWeapon extends MREntity {
 
     constructor() {
         super()
 
-        this.type = 'melee';
-        this.hoverName = 'hoverMelee';
-        this.weaponName = 'meleeName';
-        this.weaponAttack = 'meleeAttack';
+        this.weapons = [];
+        this.isHovered = false;
 
         this.label = document.createElement("mr-text");
-        this.weapons = [{
-                name: "twig",
-                el: document.createElement("mr-model"),
-                src: "assets/models/weapon-stick1-UI.glb",
-            },
-            {
-                name: "shortsword",
-                el: document.createElement("mr-model"),
-                src: "assets/models/weapon-shortSword1-UI.glb",
-            },
-        ];
-
         this.tileSelected = document.createElement('mr-model');
         this.tileNeutral = document.createElement('mr-model');
         this.tileHover = document.createElement('mr-model');
-
-        // this.selection = new THREE.Mesh(
-        //     new THREE.BoxGeometry(0.8, 0.2, 0.8),
-        //     new THREE.MeshPhongMaterial({
-        //         color: Colors.objects,
-        //         transparent: true,
-        //         opacity: 0.5
-        //     }));
-        // this.object3D.add(this.selection);
     }
 
     connected() {
+        this.type = this.dataset.type ?? 0;
+
+        WEAPONS[this.type].forEach((weapon, i) => {
+            weapon.el = document.createElement("mr-model");
+            this.appendChild(weapon.el);
+            weapon.el.setAttribute('src', weapon.uiModel);
+            weapon.el.style.visibility = 'hidden';
+            this.weapons.push(weapon);
+        });
 
         this.addEventListener('touchend', () => {
-            if (State.isInteractive) {
-                State.selectedWeapon = this.type;
+            if (State.isInteractive && State.weapons[this.type].attack > 0) {
+                this.isHovered = false;
+                State.selectedWeaponID = this.type;
                 State.needsUpdate = true;
             }
         })
 
         this.addEventListener('mouseover', () => {
-            if (State.isInteractive) {
-                State[this.hoverName] = true;
+            if (State.isInteractive && State.weapons[this.type].range > 0) {
+                this.isHovered = true;
+                State.displayRange = State.weapons[this.type].range;
                 State.needsUpdate = true;
             }
         })
 
         this.addEventListener('mouseout', () => {
             if (State.isInteractive) {
-                State[this.hoverName] = false;
+                this.isHovered = false;
+                State.displayRange = 0;
                 State.needsUpdate = true;
             }
         });
@@ -73,27 +62,21 @@ class MRUIMelee extends MREntity {
         this.appendChild(this.label);
         this.label.className = 'hud-text';
         this.label.dataset.rotation = "270 0 0";
-
-        this.weapons.forEach((weapon, i) => {
-            this.appendChild(weapon.el);
-            weapon.el.setAttribute('src', weapon.src);
-            weapon.el.style.visibility = 'hidden';
-        });
+        this.label.dataset.position = "-0.3 0 -0.35";
     }
 
     update(timer) {
 
         this.weapons.forEach((weapon, i) => {
-            console.log(weapon.name, State[this.weaponName]);
-            if (weapon.name == State[this.weaponName]) {
+            if (weapon.subtype == State.weapons[this.type].subtype) {
                 weapon.el.style.visibility = "visible";
             } else {
                 weapon.el.style.visibility = "hidden";
             }
         });
 
-        if (State[this.weaponName]) {
-            this.label.innerText = State[this.weaponAttack];
+        if (State.weapons[this.type].attack > 0) {
+            this.label.innerText = State.weapons[this.type].attack;
         } else {
             this.label.innerText = "";
         }
@@ -103,9 +86,9 @@ class MRUIMelee extends MREntity {
         this.tileHover.style.visibility = 'hidden';
 
         if (State.isInteractive) {
-            if (State[this.hoverName]) {
+            if (this.isHovered) {
                 this.tileHover.style.visibility = 'visible';
-            } else if (State.selectedWeapon == this.type && State[this.weaponName]) {
+            } else if (State.selectedWeaponID == this.type) {
                 this.tileSelected.style.visibility = 'visible';
             } else {
                 this.tileNeutral.style.visibility = 'visible';
@@ -118,4 +101,4 @@ class MRUIMelee extends MREntity {
     }
 }
 
-customElements.define('mr-ui-melee', MRUIMelee);
+customElements.define('mr-ui-weapon', MRUIWeapon);
