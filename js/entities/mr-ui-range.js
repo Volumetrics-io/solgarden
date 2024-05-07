@@ -24,7 +24,7 @@ class MRUIRange extends MREntity {
         this.selection = new THREE.Mesh(
             new THREE.BoxGeometry(0.8, 0.2, 0.8),
             new THREE.MeshPhongMaterial({
-                color: Colors.objects,
+                color: COLORS.objects,
                 transparent: true,
                 opacity: 0.5
             }));
@@ -86,7 +86,7 @@ class MRUIRange extends MREntity {
 
         // TODO: ew
         if (State.isInteractive) {
-            this.selection.material.color.setStyle(Colors.objects);
+            this.selection.material.color.setStyle(COLORS.objects);
 
             if (State.selectedWeapon == this.type && State[this.weaponName]) {
                 this.selection.material.opacity = 0.5;
@@ -94,7 +94,7 @@ class MRUIRange extends MREntity {
                 this.selection.material.opacity = 0;
             }
         } else {
-            this.selection.material.color.setStyle(Colors.neutral);
+            this.selection.material.color.setStyle(COLORS.neutral);
 
             if (State.selectedWeapon == this.type && State[this.weaponName]) {
                 this.selection.material.opacity = 0.5;
