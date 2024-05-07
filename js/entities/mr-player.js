@@ -19,10 +19,13 @@ class MRPlayer extends MREntity {
             }
             let mixer = this.el.mixer;
 
-            mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30)).setDuration(1).play(); //0
-            mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)).setDuration(1).play(); //1
-            mixer._actions[0].enabled = true;
-            mixer._actions[1].enabled = false;
+            mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30)); // 0
+            mixer._actions[0].enabled = true; // set the idle animation to be the one running
+            this.idleAnimAction = 0;
+
+            mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)); // 1
+            mixer._actions[1].enabled = false; // turn of the run animation for now
+            this.runAnimAction = 1;
 
             console.log(mixer, animations);
 
@@ -70,8 +73,12 @@ class MRPlayer extends MREntity {
     }
 
     playIdleAnimation() {
-        let action = this.el.mixer.clipAction(0);
-        action.reset().play();
+        mixer._actions[this.idleAnimAction].enabled = true;
+        mixer._actions[this.runAnimAction].enabled = false;
+        mixer._actions[this.idleAnimAction].reset().play();
+        
+        // console.log(action);
+        // action.reset().play();
 
         // this.el.components.set("animation", {
         //     clip: 0,
@@ -81,12 +88,16 @@ class MRPlayer extends MREntity {
     }
 
     playCombatAnimation() {
-        this.el.components.set("animation", {
-            clip: 2,
-            action: "play",
-            loop: false,
-            // clampWhenFinished: true
-        });
+        mixer._actions[this.runAnimAction].enabled = true;
+        mixer._actions[this.idleAnimAction].enabled = false;
+        mixer._actions[this.runAnimAction].reset().play();
+        
+        // this.el.components.set("animation", {
+        //     clip: 2,
+        //     action: "play",
+        //     loop: false,
+        //     // clampWhenFinished: true
+        // });
     }
 
     playSwoosh() {
