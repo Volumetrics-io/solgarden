@@ -7,9 +7,16 @@ class MRWeapon extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        const model = this.dataset.model ?? "shortsword";
+        const subtype = this.dataset.model ?? "shortsword";
 
-        this.el.src = WEAPON_MODELS[model];
+        WEAPONS.forEach((type, i) => {
+            type.forEach((weapon, i) => {
+                if(weapon.subtype === subtype) {
+                    this.el.src = weapon.gameModel;
+                }
+            });
+        });
+
         this.el.dataset.compAnimation = "clip: 0; action: play;";
         this.el.style.pointerEvents = 'none';
     }

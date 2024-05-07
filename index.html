@@ -14,6 +14,10 @@
             font-style: normal;
         }
 
+        :root {
+            --scale: 0.06;
+        }
+
         html,
         body {
             background-color: #0a0a0a;
@@ -22,7 +26,8 @@
 
         .end-turn {
             color: white;
-            font-size: 200px;
+            font-size: 120px;
+            line-height: 80px;
             border-radius: 50px;
             padding: 150px;
         }
@@ -36,20 +41,91 @@
             flex-direction: row;
             gap: 20px;
         }
+
+        #start-wall {
+            pointer-events: none;
+            scale: var(--scale);
+        }
+
+        #ui {
+            scale: var(--scale);
+        }
+
+        .hud-text {
+            color: #ffffff;
+            font-size: calc(10px / var(--scale));
+        }
+
+        #hp-label,
+        #range-label,
+        #action-label {
+            width: calc(400px / var(--scale));
+            height: calc(200px / var(--scale));
+        }
+
+        .wall-text {
+            color: #333;
+            font-size: calc(10px / var(--scale));
+            width: calc(2000px / var(--scale));
+        }
+
+        .progress-bar {
+            scale: 0.75;
+        }
+
+        #end-turn-button {
+            font-size: calc(13px / var(--scale));
+            width: calc(800px / var(--scale));
+            height: calc(800px / var(--scale));
+            border-radius: calc(3px / var(--scale));
+        }
     </style>
 </head>
 
 <body>
-
-    <mr-app orbital="true" stats="true">
+    <mr-app orbital="true" stats="true" debug='false'>
 
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
-        <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+        <mr-entity class='game' data-comp-game="autoEndTurn: false; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
 
-            <mr-ui id="interface"></mr-ui>
             <mr-damage-tile id="damage-tile"></mr-damage-tile>
+
+            <!-- The wall behind the first room -->
+            <mr-div id='start-wall' data-rotation='0 270 0'>
+                <mr-model class="solgarden" src='./assets/ui-models/wall.glb'></mr-model>
+                <mr-div data-position='0 2 0.55'>
+                    <mr-text id='disposed-robots' class='wall-text' data-position='-1.5 -0.4 0'>loading</mr-text>
+                    <mr-text id='farthest-room' class='wall-text' data-position='-1.5 -0.6 0'>loading</mr-text>
+                </mr-div>
+            </mr-div>
+
+            <!-- The floating UI in front of the board -->
+            <mr-div id='ui' data-rotation='270 -30 270'>
+
+                <!-- The HP bar and label -->
+                <mr-div data-position='0 0.3 0'>
+                    <mr-text id='hp-label' class='hud-text' data-position='-0.25 0 0'>99</mr-text>
+                    <mr-model id="hp-progress" class="progress-bar" src='./assets/ui-models/UI_bar1-red.glb' data-rotation='90 0 0'></mr-model>
+                </mr-div>
+
+                <!-- The range bar and label -->
+                <mr-div data-position='0 0 0'>
+                    <mr-text id='range-label' class='hud-text' data-position='-0.25 0 0'>99</mr-text>
+                    <mr-model id="range-progress" class="progress-bar" src='./assets/ui-models/UI_bar1-green.glb' data-rotation='90 0 0'></mr-model>
+                </mr-div>
+
+                <!-- The action balls -->
+                <mr-div data-position='0 -0.3 0'>
+                    <mr-text id='action-label' class='hud-text' data-position='-0.25 0 0'>99</mr-text>
+                    <mr-ui-actions id="ui-actions"></mr-ui-actions>
+                </mr-div>
+
+                <mr-button id='end-turn-button' data-position='2.6 0 0'>End turn</mr-button>
+                <mr-ui-weapon id='ui-melee' data-type='0' data-rotation='270 180 180' data-position='-2.5 0 0.1'></mr-ui-weapon>
+                <mr-ui-weapon id='ui-range' data-type='1' data-rotation='270 180 180' data-position='-1.5 0 0.1'></mr-ui-weapon>
+            </mr-div>
 
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
@@ -58,32 +134,43 @@
             <mr-entity id="nope-sound" data-comp-audio="src: ./assets/audio/nope.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="swoosh-sound" data-comp-audio="src: ./assets/audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity>
-            <!-- <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity> -->
+
+            <mr-entity id="spawn-sound" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="fridge-sound" data-comp-audio="src: ./assets/audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="plains-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="desert-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="night-forest" data-comp-audio="src: ./assets/audio/night-forest.mp3; loop: true; state: stop;"></mr-entity>
+
         </mr-entity>
     </mr-app>
 
     <script>
         const DEFAULT_STATE = {
             isDebug: false,
+            isPlayerTurn: true,
             isInteractive: true,
             staticUntil: 0,
+            hasKey: false,
             level: 0,
             health: 10,
             range: 15,
             action: 4,
             projectedCost: 0,
-            hasKey: false,
-            meleeName: '',
-            meleeAttack: 0,
-            meleeRange: 1,
-            rangeName: '',
-            rangeAttack: 0,
-            rangeRange: 0,
-            selectedWeapon: "melee",
-            isPlayerTurn: true,
+            displayRange: 0,
+            weapons: [{
+                    subtype: 'twig',
+                    attack: .5,
+                    range: 1,
+                    crits: 0
+                },
+                {
+                    subtype: '',
+                    attack: 0,
+                    range: 0,
+                    crits: 0
+                }
+            ],
+            selectedWeaponID: 0,
         }
 
         const State = structuredClone(DEFAULT_STATE);
@@ -100,6 +187,7 @@
             white: '#ffffff'
         }
 
+
         const ENEMY_SUBTYPES = [
             'static',
             'homing',
@@ -112,14 +200,36 @@
             aimless: "assets/models/enemy-horse1.glb",
         }
 
-        const WEAPON_MODELS = {
-            twig: "assets/models/weapon-stick1-pickup.glb",
-            shortsword: "assets/models/weapon-shortSword1-pickup.glb",
-            slingshot: "assets/models/weapon-slingshot1-pickup.glb",
-            bow: "assets/models/weapon-bow1-pickup.glb",
-        }
+        const WEAPONS = [
+            [{
+                    subtype: 'twig',
+                    gameModel: "assets/models/weapon-stick1-pickup.glb",
+                    uiModel: "assets/models/weapon-stick1-UI.glb",
+                    range: 1
+                },
+                {
+                    subtype: 'shortsword',
+                    gameModel: "assets/models/weapon-shortSword1-pickup.glb",
+                    uiModel: "assets/models/weapon-shortSword1-UI.glb",
+                    range: 1.5
+                },
+            ],
+            [{
+                    subtype: 'slingshot',
+                    gameModel: "assets/models/weapon-slingshot1-pickup.glb",
+                    uiModel: "assets/models/weapon-slingshot1-UI.glb",
+                    range: 2
+                },
+                {
+                    subtype: 'bow',
+                    gameModel: "assets/models/weapon-bow1-pickup.glb",
+                    uiModel: "assets/models/weapon-bow1-UI.glb",
+                    range: 3
+                },
+            ]
+        ]
 
-        const GenerateSpawnRoomParams = () => {
+        const generateSpawnRoomParams = () => {
             return {
                 floorCount: 1,
                 rowCount: 6,
@@ -139,7 +249,7 @@
             }
         }
 
-        const GenerateBatteryRoomParams = () => {
+        const generateBatteryRoomParams = () => {
             return {
                 floorCount: 1,
                 rowCount: 8,
@@ -197,34 +307,31 @@
             }
         }
 
-        // Various animation curves / timing functions
-        // Not all of them are used in this project
-        const Animator = {
-            easeInOut: time => {
-                return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
+        const BIOMES = [{
+                // plains
+                name: "plains",
+                path: "assets/biomes/plains/",
+                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
+                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
+                block: ["rock001.glb"]
             },
-            easeOutBack: time => {
-                return Math.pow(time - 1, 2) * ((1.70158 + 1) * (time - 1) + 1.70158) + 1;
+            {
+                // desert
+                name: "desert",
+                path: "assets/biomes/deserts/",
+                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
+                props: ["plant_05.glb", 'plant_08-cactus1.glb'],
+                block: ["rockdesert001.glb", "rockdesert002.glb"]
             },
-            elastic: time => {
-                return Math.pow(2, -5 * time) * Math.sin(((time - 0.3 / 4) * (Math.PI * 2)) / 0.3) + 1;
-            },
-            fanOut: time => {
-                return 2 / (1 + Math.pow(1000, -time)) - 1;
-            },
-            rollercoaster: time => {
-                return (-1.15 * Math.sin(time * 7.7)) / (time * 7.7) + 1.15;
-            },
-            linear: time => {
-                return time;
-            },
-            jump: time => {
-                return -((2 * time - 1) * (2 * time - 1)) + 1;
-            },
-            softJump: time => {
-                return 1 - (Math.cos(time * 2 * Math.PI) / 2 + 0.5);
+            {
+                // forest
+                name: "forest",
+                path: "assets/biomes/forest/",
+                tiles: ["tileforest001.glb"],
+                props: ["plant_06-fern1.glb", "plant_07-mushrooms1.glb"],
+                block: ["pine1.glb", "rockforest001.glb", "stump1.glb"]
             }
-        };
+        ]
     </script>
 
     <!-- Utils -->
@@ -236,6 +343,7 @@
 
     <!-- Classes -->
     <script src="/js/sound-controller.js"></script>
+
     <script src="/js/pathfinder.js"></script>
     <script src="/js/board.js"></script>
 
@@ -243,7 +351,6 @@
     <script src="/js/systems/mr-game.js"></script>
 
     <!-- Mrjs Entities -->
-    <script src="/js/entities/mr-ui.js"></script>
     <script src="/js/entities/mr-battery.js"></script>
     <script src="/js/entities/mr-chest.js"></script>
     <script src="/js/entities/mr-door.js"></script>
@@ -258,6 +365,8 @@
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
     <script src="/js/entities/mr-damage-tile.js"></script>
+    <script src="/js/entities/mr-ui-weapon.js"></script>
+    <script src="/js/entities/mr-ui-actions.js"></script>
 
 </body>
 
