@@ -5,17 +5,8 @@
     <meta charset="utf-8">
     <title>Sol Garden — The mini roguelike for your desk</title>
     <script src="mrjs-build/mr.js"></script>
-    <!-- <link rel="preload" href="/assets/fonts/JetBrainsMono.ttf" as="font" type="font/truetype" crossorigin /> -->
-    <!-- <link rel="preload" href="/assets/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin /> -->
     <link rel="preload" href="/assets/fonts/JetBrainsMono-Medium.ttf" as="font" type="font/truetype" crossorigin />
     <style>
-        /* @font-face {
-            font-family: 'JetBrains';
-            src: url('/assets/fonts/JetBrainsMono.ttf') format('truetype');
-            font-weight: 100 900;
-            font-style: normal;
-        } */
-
         @font-face {
             font-family: 'JetBrains';
             src: url('/assets/fonts/JetBrainsMono-Medium.ttf') format('truetype');
@@ -27,41 +18,7 @@
         body {
             background-color: #0a0a0a;
             font-family: 'JetBrains';
-            /* font-family: monospace; */
         }
-
-        /* #game-panel {
-            width: 300px;
-            height: 110px;
-            padding: 20px;
-            display: flex;
-            flex-flow: column nowrap;
-            gap: 10px;
-        }
-
-        #lore-panel {
-            background-color: moccasin;
-            display: flex;
-            flex-flow: column nowrap;
-            gap: 10px;
-        }
-
-        .title {
-            font-size: 32px;
-        }
-
-        .row {
-            display: grid;
-            grid-template-columns: 50% 50%;
-        }
-
-        .column {
-            display: flex;
-            flex-flow: column nowrap;
-            gap: 10px;
-            background-color: grey;
-            padding: 10px;
-        } */
 
         .end-turn {
             color: white;
@@ -84,35 +41,54 @@
 
 <body>
 
-    <!-- <mr-app> -->
-    <!-- <mr-app debug='true' orbital="true" stats="true"> -->
     <mr-app orbital="true" stats="true">
 
-        <!-- <mr-light color="#fff4b8" intensity="1" data-position="0 1 0"></mr-light> -->
-
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
-        <!-- <mr-light color="#ffbb7c" intensity="0.8" data-position="-0.5 0.5 -0.5"></mr-light> -->
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
-        <!-- <mr-app debug="true" orbital="true"> -->
         <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+
+            <mr-ui id="interface"></mr-ui>
+            <mr-damage-tile id="damage-tile"></mr-damage-tile>
+
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
             <mr-entity id="analog-sound" data-comp-audio="src: ./assets/audio/analog.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="clash-sound" data-comp-audio="src: ./assets/audio/clash.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="nope-sound" data-comp-audio="src: ./assets/audio/nope.mp3; loop: false; state: stop;"></mr-entity>
             <mr-entity id="swoosh-sound" data-comp-audio="src: ./assets/audio/swoosh.mp3; loop: false; state: stop;"></mr-entity>
-            <!-- <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity> -->
-
-            <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="latch-sound" data-comp-audio="src: ./assets/audio/latch.mp3; loop: false; state: stop;"></mr-entity>
+            <!-- <mr-entity id="bg-music" data-comp-audio="src: ./assets/audio/immersion-cut.mp3; loop: true; state: stop;"></mr-entity> -->
             <mr-entity id="fridge-sound" data-comp-audio="src: ./assets/audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="farm-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
-            <mr-entity id="badlands-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="plains-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="desert-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
         </mr-entity>
     </mr-app>
 
     <script>
-        const Colors = {
+        const DEFAULT_STATE = {
+            isDebug: false,
+            isInteractive: true,
+            staticUntil: 0,
+            level: 0,
+            health: 10,
+            range: 15,
+            action: 4,
+            projectedCost: 0,
+            hasKey: false,
+            meleeName: '',
+            meleeAttack: 0,
+            meleeRange: 1,
+            rangeName: '',
+            rangeAttack: 0,
+            rangeRange: 0,
+            selectedWeapon: "melee",
+            isPlayerTurn: true,
+        }
+
+        const State = structuredClone(DEFAULT_STATE);
+
+        const COLORS = {
             movement: "#00ffff",
             objects: "#ff7a00",
             neutral: "#888",
@@ -124,10 +100,106 @@
             white: '#ffffff'
         }
 
+        const ENEMY_SUBTYPES = [
+            'static',
+            'homing',
+            'aimless',
+        ];
+
+        const ENEMY_MODELS = {
+            static: "assets/models/enemy-static1.glb",
+            homing: "assets/models/enemy-floater1.glb",
+            aimless: "assets/models/enemy-horse1.glb",
+        }
+
+        const WEAPON_MODELS = {
+            twig: "assets/models/weapon-stick1-pickup.glb",
+            shortsword: "assets/models/weapon-shortSword1-pickup.glb",
+            slingshot: "assets/models/weapon-slingshot1-pickup.glb",
+            bow: "assets/models/weapon-bow1-pickup.glb",
+        }
+
+        const GenerateSpawnRoomParams = () => {
+            return {
+                floorCount: 1,
+                rowCount: 6,
+                colCount: 4,
+                enemyCount: 0,
+                propCount: 0,
+                blockCount: 0,
+                isChest: false,
+                biome: {
+                    name: 'spawn',
+                    path: "assets/biomes/purple/",
+                    audio: "",
+                    tiles: ["tilegrasspurple001.glb"],
+                    props: [],
+                    block: [],
+                }
+            }
+        }
+
+        const GenerateBatteryRoomParams = () => {
+            return {
+                floorCount: 1,
+                rowCount: 8,
+                colCount: 4,
+                enemyCount: 0,
+                propCount: 12,
+                blockCount: 0,
+                isChest: false,
+                isLore: false,
+                biome: {
+                    name: 'battery',
+                    path: "assets/biomes/battery-room/",
+                    audio: "/assets/audio/fridge.mp3",
+                    tiles: ["tilegrass001.glb"],
+                    props: ["plant_01.glb",
+                        "plant_02.glb",
+                        "plant_03.glb",
+                        "plant_04.glb",
+                        "plant_05.glb"
+                    ],
+                    block: []
+                },
+                entityMap: [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-battery-ii"),
+                        type: 'prop'
+                    }, {
+                        el: document.createElement("mr-battery-i"),
+                        type: 'prop'
+                    }, 0],
+                    [0, 0, {
+                        el: document.createElement("mr-battery-iv"),
+                        type: 'prop'
+                    }, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ],
+                propMap: [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-battery-iii"),
+                        type: 'battery'
+                    }, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ]
+            }
+        }
+
         // Various animation curves / timing functions
         // Not all of them are used in this project
-
-        Animator = {
+        const Animator = {
             easeInOut: time => {
                 return time < 0.5 ? 4 * time * time * time : (time - 1) * (2 * time - 2) * (2 * time - 2) + 1;
             },
@@ -163,15 +235,15 @@
     <script src="/js/utils.js"></script>
 
     <!-- Classes -->
+    <script src="/js/sound-controller.js"></script>
     <script src="/js/pathfinder.js"></script>
     <script src="/js/board.js"></script>
-    <script src="/js/sound-controller.js"></script>
 
     <!-- MRjs Systems -->
-    <script src="/js/systems/mr-player-state.js"></script>
     <script src="/js/systems/mr-game.js"></script>
 
     <!-- Mrjs Entities -->
+    <script src="/js/entities/mr-ui.js"></script>
     <script src="/js/entities/mr-battery.js"></script>
     <script src="/js/entities/mr-chest.js"></script>
     <script src="/js/entities/mr-door.js"></script>
@@ -185,6 +257,7 @@
     <script src="/js/entities/mr-prop.js"></script>
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
+    <script src="/js/entities/mr-damage-tile.js"></script>
 
 </body>
 

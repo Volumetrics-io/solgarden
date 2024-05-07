@@ -5,24 +5,14 @@ class MRChest extends MREntity {
 
         this.el = document.createElement("mr-model");
 
-        this.el.onLoad = () => {
-            this.el.object3D.traverse(object => {
-                if (object.isMesh) {
-                    // Necessary for the single-faced
-                    // grass texture to appear correctly
-                    object.material.alphaTest = 0.5;
-                    object.receiveShadow = true;
-                    object.castShadow = true;
-                    object.morphTargets = true;
-                }
-            })
-        }
+        this.poof = document.createElement("mr-model");
     }
 
     connected() {
         this.appendChild(this.el);
         this.el.src = "assets/models/chest1.glb";
         this.el.style.pointerEvents = 'none';
+        this.el.dataset.rotation = '0 180 0';
 
         this.components.set('audio', {
             src: "./assets/audio/latch.mp3",
@@ -39,6 +29,14 @@ class MRChest extends MREntity {
             clampWhenFinished: true,
         })
 
+        // Poof effect
+        this.appendChild(this.poof);
+        this.poof.src = "./assets/models/poof1.glb";
+        this.poof.components.set('animation', {
+            action: "stop",
+            loop: false,
+            clampWhenFinished: true,
+        })
     }
 
     open() {
@@ -50,6 +48,11 @@ class MRChest extends MREntity {
                 action: "play"
             })
             this.isOpened = true;
+
+            this.el.style.scale = 0.8;
+            this.poof.components.set('animation', {
+                action: "play"
+            })
         }
     }
 

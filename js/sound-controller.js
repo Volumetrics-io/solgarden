@@ -1,30 +1,33 @@
 class SoundController {
     constructor() {
         this.sounds = {
-            bgMusic: document.querySelector('#bg-music'),
             chessSound: document.querySelector('#chess-sound'),
-            // doorSound: document.querySelector('#door-sound'),
+            // doorHinge: document.querySelector('#door-sound'),
             analogSound: document.querySelector('#analog-sound'),
             clashSound: document.querySelector('#clash-sound'),
             nopeSound: document.querySelector('#nope-sound'),
             swooshSound: document.querySelector('#swoosh-sound'),
             latchSound: document.querySelector('#latch-sound'),
-            fridgeSound: document.querySelector('#fridge-sound'),
-            farmSound: document.querySelector('#farm-sound'),
-            bandlandsSound: document.querySelector('#badlands-sound'),
+            spawn: document.querySelector('#plains-sound'),
+            battery: document.querySelector('#fridge-sound'),
+            plains: document.querySelector('#plains-sound'),
+            desert: document.querySelector('#desert-sound'),
         }
 
         this.initialize();
     }
 
     initialize() {
-        this.sounds.fridgeSound.components.set('audio', {
+        this.sounds.spawn.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.farmSound.components.set('audio', {
+        this.sounds.battery.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.bandlandsSound.components.set('audio', {
+        this.sounds.plains.components.set('audio', {
+            action: 'pause'
+        });
+        this.sounds.desert.components.set('audio', {
             action: 'pause'
         });
     }
@@ -36,20 +39,21 @@ class SoundController {
     }
 
     background(sound) {
-        this.sounds.fridgeSound.components.set('audio', {
+        this.sounds.spawn.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.farmSound.components.set('audio', {
+        this.sounds.battery.components.set('audio', {
             action: 'pause'
         });
-        this.sounds.bandlandsSound.components.set('audio', {
+        this.sounds.plains.components.set('audio', {
             action: 'pause'
         });
-        this.play(sound)
+        this.sounds.desert.components.set('audio', {
+            action: 'pause'
+        });
+        this.play(sound);
     }
 
-    // moveSoundPosition(sound, position) {
-    //     this.sounds[sound] = position;
-    // }
-
 }
+
+const Sounds = new SoundController();

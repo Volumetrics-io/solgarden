@@ -26,8 +26,6 @@ class MRTile extends MREntity {
                     // Necessary for the single-faced
                     // grass texture to appear correctly
                     object.material.alphaTest = 0.5;
-                    // object.receiveShadow = true;
-                    // object.castShadow = true;
                     object.morphTargets = true;
                     object.morphTargetInfluences[0] = Math.random()
                 }
@@ -63,9 +61,7 @@ class MRTile extends MREntity {
         this.borderRange.style.visibility = "hidden";
 
         this.borderContainer.appendChild(this.glowWhite);
-        // this.glowWhite.src = '/assets/ui-models//borderObject-range.glb';
         this.glowWhite.src = '/assets/ui-models//tileHighlight1.glb';
-        // this.borderRange.dataset.position = "0 0.2 0";
         this.glowWhite.style.visibility = "hidden";
         this.glowWhite.onLoad = () => {
             this.glowWhite.object3D.traverse(object => {
@@ -77,22 +73,16 @@ class MRTile extends MREntity {
 
         this.appendChild(this.el);
 
-        // const tileset = this.dataset.tileset.split(',');
-        // const tilepath = this.dataset.tilepath;
-
         let randomRotation = this.rotationCollection[Math.floor(Math.random() * this.rotationCollection.length)];
         this.dataset.rotation = `0 ${randomRotation} 0`;
 
-        // let randomModel = tileset[Math.floor(Math.random() * tileset.length)];
         this.el.src = this.dataset.model;
 
         this.numberString.dataset.position = '0.15 0.3 0';
         this.numberString.style.fontSize = "200px";
         this.numberContainer.appendChild(this.numberString);
 
-        // this.numberContainer.dataset.position = '0 0.2 0'
         this.numberContainer.dataset.rotation = `270 0 -${randomRotation + 90}`
-        // this.numberContainer.dataset.rotation = `270 0 0`;
         Object.assign(this.numberContainer.style, {
             width: "300px",
             height: "300px",
@@ -118,34 +108,42 @@ class MRTile extends MREntity {
         switch (color) {
             case 'neutral':
                 this.borderNeutral.style.visibility = "visible";
-                this.numberString.style.color = Colors.neutral;
+                this.numberString.style.color = COLORS.neutral;
                 break;
             case 'white':
                 this.borderWhite.style.visibility = "visible";
-                this.numberString.style.color = Colors.white;
+                this.numberString.style.color = COLORS.white;
                 break;
             case 'health':
                 this.borderHealth.style.visibility = "visible";
-                this.numberString.style.color = Colors.health;
+                this.numberString.style.color = COLORS.health;
                 break;
             case 'objects':
                 this.borderObjects.style.visibility = "visible";
-                this.numberString.style.color = Colors.objects;
+                this.numberString.style.color = COLORS.objects;
                 break;
             case 'range':
                 this.borderRange.style.visibility = "visible";
-                this.numberString.style.color = Colors.range;
+                this.numberString.style.color = COLORS.range;
                 break;
             case 'glow-white':
                 this.borderWhite.style.visibility = "visible";
                 this.glowWhite.style.visibility = "visible";
-                this.numberString.style.color = Colors.white;
+                this.numberString.style.color = COLORS.white;
                 break;
         }
     }
 
     setCostIndicator(number) {
         this.numberString.innerText = number;
+    }
+
+    raiseTile() {
+        this.borderContainer.dataset.position = "0 0.2 0";
+    }
+
+    sinkTile() {
+        this.borderContainer.dataset.position = "0 0.15 0";
     }
 }
 
