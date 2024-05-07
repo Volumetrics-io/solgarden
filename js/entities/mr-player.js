@@ -73,9 +73,9 @@ class MRPlayer extends MREntity {
     }
 
     playIdleAnimation() {
-        mixer._actions[this.idleAnimAction].enabled = true;
-        mixer._actions[this.runAnimAction].enabled = false;
-        mixer._actions[this.idleAnimAction].reset().play();
+        this.el.mixer._actions[this.idleAnimAction].enabled = true;
+        this.el.mixer._actions[this.runAnimAction].enabled = false;
+        this.el.mixer._actions[this.idleAnimAction].reset().play();
         
         // console.log(action);
         // action.reset().play();
@@ -88,10 +88,10 @@ class MRPlayer extends MREntity {
     }
 
     playCombatAnimation() {
-        mixer._actions[this.runAnimAction].enabled = true;
-        mixer._actions[this.idleAnimAction].enabled = false;
-        mixer._actions[this.runAnimAction].reset().play();
-        
+        this.el.mixer._actions[this.runAnimAction].enabled = true;
+        this.el.mixer._actions[this.idleAnimAction].enabled = false;
+        this.el.mixer._actions[this.runAnimAction].reset().play();
+
         // this.el.components.set("animation", {
         //     clip: 2,
         //     action: "play",
