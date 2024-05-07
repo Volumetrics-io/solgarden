@@ -83,7 +83,7 @@ class MRUI extends MREntity {
                 transparent: true,
                 opacity: 1
             }));
-            
+
         // position the object
         this.healthBar.position.z = -0.5;
         this.container.object3D.add(this.healthBar);
@@ -248,6 +248,8 @@ class MRUI extends MREntity {
         });
         if (State.meleeName) {
             this.meleeAttackValueEl.innerText = State.meleeAttack;
+        } else {
+            this.meleeAttackValueEl.innerText = "";
         }
 
         this.rangeWeapons.forEach((weapon, i) => {
@@ -259,6 +261,8 @@ class MRUI extends MREntity {
         });
         if (State.rangeName) {
             this.rangeAttackValueEl.innerText = State.rangeAttack;
+        } else {
+            this.rangeAttackValueEl.innerText = '';
         }
 
         // TODO: ew

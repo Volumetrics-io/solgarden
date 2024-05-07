@@ -46,6 +46,10 @@
             scale: var(--scale);
         }
 
+        #ui {
+            scale: var(--scale);
+        }
+
         /* mr-text {
             min-width: 100vw;
         } */
@@ -53,6 +57,13 @@
         .wall-text {
             font-size: calc(10px / var(--scale));
             width: calc(2000px / var(--scale));
+        }
+
+        #end-turn-button {
+            font-size: calc(13px / var(--scale));
+            width: calc(720px / var(--scale));
+            height: calc(720px / var(--scale));
+            border-radius: calc(5px / var(--scale));
         }
     </style>
 </head>
@@ -64,27 +75,39 @@
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
-        <mr-entity class='game' data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+        <mr-entity class='game' data-comp-game="autoEndTurn: false; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+
 
             <mr-ui id="interface"></mr-ui>
             <mr-damage-tile id="damage-tile"></mr-damage-tile>
 
+            <!-- The wall behind the first room -->
             <mr-div id='start-wall' data-rotation='0 270 0'>
-
-                <mr-model class="solgarden" src='./assets/ui-models/wall.glb'>
-                </mr-model>
-
+                <mr-model class="solgarden" src='./assets/ui-models/wall.glb'></mr-model>
                 <mr-div data-position='0 2 0.55'>
-                    <mr-text  id='disposed-robots' class='wall-text' data-position='-1.5 -0.4 0'>loading</mr-text>
+                    <mr-text id='disposed-robots' class='wall-text' data-position='-1.5 -0.4 0'>loading</mr-text>
                     <mr-text id='farthest-room' class='wall-text' data-position='-1.5 -0.6 0'>loading</mr-text>
                 </mr-div>
-
             </mr-div>
-            <!-- <mr-start-wall id='start-wall'>
-                <mr-model style="scale: 1" src='./assets/models/door1.glb'></mr-model>
-                <mr-model class="solgarden" src='./assets/models/solgarden.glb' data-rotation='0 270 0' data-position='0 0 0'></mr-model>
-                <mr-model class="solgarden" src='./assets/models/solgarden.glb' data-rotation='0 270 0' data-position='-0.42 1.7 -1.7'></mr-model>
-            </mr-start-wall> -->
+
+            <!-- The floating UI in front of the board -->
+            <mr-div id='ui' data-rotation='270 -30 270'>
+                <mr-model id="hp-progress"
+                        src='./assets/ui-models/UI_bar1-red.glb'
+                        data-position='-0.8 0.2 0.1'
+                        data-rotation='90 0 0'></mr-model>
+
+                <mr-model id="range-progress"
+                        src='./assets/ui-models/UI_bar1-green.glb'
+                        data-position='-0.8 -0.2 0.1'
+                        data-rotation='90 0 0'></mr-model>
+
+                <!-- <mr-model class="ui-countertop" src='./assets/ui-models/ui-plane.glb'></mr-model> -->
+                <mr-button id='end-turn-button' data-position='2.5 0 0.1'>End</mr-button>
+                <mr-div data-position='-2.5 0 0.1' data-rotation=''>
+                    <mr-model src='assets/models/weapon-stick1-UI.glb'></model>
+                </mr-div>
+            </mr-div>
 
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->

@@ -2,18 +2,25 @@ class GameSystem extends MRSystem {
     constructor() {
         super()
         this.gameIsStarted = false;
-        this.cycle = 0;
+        this.cycle = localStorage.getItem('maxCycle') ?? 0;;
 
         // container to store board object references
         this.container = document.createElement("mr-div");
-        this.ui = document.querySelector("#interface");
+        this.interface = document.querySelector("#interface");
         this.dmgTile = document.querySelector("#damage-tile");
 
         // UI elements
-        this.endTurnButton = document.createElement("mr-button");
+        // this.endTurnButton = document.createElement("mr-button");
+        this.endTurnButton = document.querySelector("#end-turn-button");
         this.startWall = document.querySelector("#start-wall");
         this.disposedRobotsLabel = document.querySelector("#disposed-robots");
         this.farthestRoomLabel = document.querySelector("#farthest-room");
+
+        this.hpProgress = document.querySelector('#hp-progress');
+        this.rangeProgress = document.querySelector('#range-progress');
+
+        this.ui = document.querySelector("#ui");
+
 
         Object.assign(State, {
             maxHealth: 20,
@@ -323,7 +330,7 @@ class GameSystem extends MRSystem {
                                 State.action -= cost;
                                 const steps = this.board.movePlayer(x, y);
                                 State.isInteractive = false;
-                                State.staticUntil = this.timer + steps * 0.3;
+                                State.staticUntil = this.timer + steps * 0.4;
                             } else {
                                 Sounds.play('nopeSound');
                             }
@@ -450,6 +457,7 @@ class GameSystem extends MRSystem {
         console.log('you ded');
 
         this.cycle++;
+        localStorage.setItem('maxCycle', this.cycle);
         Object.assign(State, DefaultState);
 
         // TODO: display level and cycle count in the UI
@@ -694,32 +702,42 @@ class GameSystem extends MRSystem {
 
                 // position the interface alongside the board
                 const offX = (this.board.colCount / 2 + 0.5) * this.scale;
-                this.ui.update(this.timer);
+                this.interface.update(this.timer);
+                this.interface.dataset.position = `-${offX} ${this.tableOffset - 0.1} 0`;
+
                 this.ui.dataset.position = `-${offX} ${this.tableOffset} 0`;
 
                 // The start wall
-                // Doesn't show before the first death
-                const currentCycle = this.cycle;
-                const currentRoom = State.level;
-                const maxCycle = localStorage.getItem('maxCycle') ?? currentCycle;
-                const maxRoom = localStorage.getItem('maxRoom') ?? currentRoom;
+                const maxRoom = localStorage.getItem('maxRoom') ?? State.level;
+
                 if (State.level == 1) {
                     this.startWall.style.visibility = 'visible';
-                    this.disposedRobotsLabel.innerText = `Disposed robots: ${maxCycle}`;
+                    this.disposedRobotsLabel.innerText = `Disposed robots: ${this.cycle}`;
                     this.farthestRoomLabel.innerText = `Farthest room: ${maxRoom}`;
 
-                    if (currentCycle > parseInt(maxCycle)) {
-                        localStorage.setItem('maxCycle', currentCycle);
-                    }
-
-                    if (currentRoom > parseInt(maxRoom)) {
-                        localStorage.setItem('maxRoom', currentRoom);
+                    if (State.level > parseInt(maxRoom)) {
+                        localStorage.setItem('maxRoom', State.level);
                     }
                 } else {
                     this.startWall.style.visibility = 'hidden';
 
                 }
                 this.startWall.dataset.position = `${offX} ${this.tableOffset} 0`;
+
+                // The new UI
+                const healthRatio = State.health / State.maxHealth;
+                this.hpProgress.object3D.traverse(object => {
+                    if (object.isMesh && object.morphTargetInfluences) {
+                        object.morphTargetInfluences[0] = healthRatio;
+                    }
+                })
+
+                const rangeRatio = State.range / State.maxRange;
+                this.rangeProgress.object3D.traverse(object => {
+                    if (object.isMesh && object.morphTargetInfluences) {
+                        object.morphTargetInfluences[0] = rangeRatio;
+                    }
+                })
 
                 State.needsUpdate = false;
 
@@ -781,30 +799,20 @@ class GameSystem extends MRSystem {
         // Game settings
         this.settings = this.root.components.get('game');
         this.autoEndTurn = this.settings.autoEndTurn ?? false;
-        // this.scale = this.settings.scale ?? 0.05;
         this.tableOffset = this.settings.tableOffset ?? 0;
 
+        // Scale from CSS
         this.scale = mrjsUtils.css.getVarFromRoot('--scale') ?? 0.05;
 
         this.container.style.scale = this.scale;
         this.container.dataset.position = `0 ${this.tableOffset} 0`;
 
-        this.ui.style.scale = this.scale;
-        this.ui.dataset.rotation = `0 0 30`;
-
-        // console.log(mrjsUtils.css.getVarFromRoot('--accent'));
-        // console.log(mrjsUtils.css.getVarFromRoot('--scale'));
-
-        // this.startWall.style.scale = this.scale;
-        // this.ui.dataset.rotation = `0 0 30`;
+        // TODO: to delete at some point
+        // when DOM based UI is in place
+        this.interface.style.scale = this.scale;
+        this.interface.dataset.rotation = `0 0 30`;
 
         this.dmgTile.style.scale = this.scale;
-
-        this.endTurnButton.className = 'end-turn';
-        this.endTurnButton.innerText = "End";
-        this.endTurnButton.dataset.position = "0 0.08 2";
-        this.endTurnButton.dataset.rotation = "270 0 270";
-        this.ui.appendChild(this.endTurnButton);
 
         this.endTurnButton.addEventListener('click', () => {
             if (State.isInteractive) {
