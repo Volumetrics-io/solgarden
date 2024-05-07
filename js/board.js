@@ -928,7 +928,7 @@ class Board {
                     // If either melee or range weapon is hovered
                     if(State.displayRange > 0) {
                         if (rawDist <= State.displayRange) {
-                            el.tileColor('health');
+                            el.tileColor('movement');
                         }
                     }
 

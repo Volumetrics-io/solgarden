@@ -613,7 +613,7 @@ class GameSystem extends MRSystem {
         // End turn button
         if (State.isInteractive) {
             if (State.action == 0) {
-                this.endTurnButton.style.backgroundColor = COLORS.health;
+                this.endTurnButton.style.backgroundColor = COLORS.movement;
             } else {
                 this.endTurnButton.style.backgroundColor = COLORS.white;
             }
@@ -753,7 +753,7 @@ class GameSystem extends MRSystem {
 
         this.container.style.scale = this.scale;
         this.container.dataset.position = `0 ${this.tableOffset} 0`;
-        
+
         this.dmgTile.style.scale = this.scale;
 
         this.endTurnButton.addEventListener('click', () => {

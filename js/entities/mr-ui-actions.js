@@ -44,7 +44,7 @@ class MRUIActions extends MREntity {
 
                 // recolor the ball if there are not enough action points
                 if (State.projectedCost > State.action) {
-                    actionBall.material.color.setStyle(COLORS.health)
+                    actionBall.material.color.setStyle(COLORS.neutral)
                 }
             } else {
                 actionBall.visible = false;

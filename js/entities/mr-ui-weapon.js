@@ -53,7 +53,7 @@ class MRUIWeapon extends MREntity {
 
         this.tileSelected.src = './assets/ui-models/borderObject-white.glb';
         this.tileNeutral.src = './assets/ui-models/borderObject-neutral.glb';
-        this.tileHover.src = './assets/ui-models/borderObject-health.glb';
+        this.tileHover.src = './assets/ui-models/borderObject-movement.glb';
 
         this.tileSelected.style.visibility = 'hidden';
         this.tileNeutral.style.visibility = 'hidden';

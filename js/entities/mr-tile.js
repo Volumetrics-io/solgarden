@@ -12,6 +12,7 @@ class MRTile extends MREntity {
         this.borderHealth = document.createElement("mr-model");
         this.borderNeutral = document.createElement("mr-model");
         this.borderRange = document.createElement("mr-model");
+        this.borderMovement = document.createElement("mr-model");
 
         this.glowWhite = document.createElement("mr-model");
 
@@ -60,6 +61,10 @@ class MRTile extends MREntity {
         this.borderRange.src = '/assets/ui-models//borderObject-range.glb';
         this.borderRange.style.visibility = "hidden";
 
+        this.borderContainer.appendChild(this.borderMovement);
+        this.borderMovement.src = '/assets/ui-models//borderObject-movement.glb';
+        this.borderMovement.style.visibility = "hidden";
+
         this.borderContainer.appendChild(this.glowWhite);
         this.glowWhite.src = '/assets/ui-models//tileHighlight1.glb';
         this.glowWhite.style.visibility = "hidden";
@@ -97,6 +102,7 @@ class MRTile extends MREntity {
         this.borderHealth.style.visibility = "hidden";
         this.borderNeutral.style.visibility = "hidden";
         this.borderRange.style.visibility = "hidden";
+        this.borderMovement.style.visibility = "hidden";
 
         this.glowWhite.style.visibility = "hidden";
 
@@ -125,6 +131,10 @@ class MRTile extends MREntity {
             case 'range':
                 this.borderRange.style.visibility = "visible";
                 this.numberString.style.color = COLORS.range;
+                break;
+            case 'movement':
+                this.borderMovement.style.visibility = "visible";
+                this.numberString.style.color = COLORS.movement;
                 break;
             case 'glow-white':
                 this.borderWhite.style.visibility = "visible";
