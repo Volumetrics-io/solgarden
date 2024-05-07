@@ -55,3 +55,5 @@ class SoundController {
     }
 
 }
+
+const Sounds = new SoundController();

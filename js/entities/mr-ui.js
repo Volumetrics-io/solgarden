@@ -63,7 +63,7 @@ class MRUI extends MREntity {
             let actionBall = new THREE.Mesh(
                 ballGeo,
                 new THREE.MeshPhongMaterial({
-                    color: Colors.movement,
+                    color: COLORS.movement,
                     transparent: true,
                     opacity: 1
                 }));
@@ -79,11 +79,11 @@ class MRUI extends MREntity {
         this.healthBar = new THREE.Mesh(
             healthBarGeo,
             new THREE.MeshPhongMaterial({
-                color: Colors.health,
+                color: COLORS.health,
                 transparent: true,
                 opacity: 1
             }));
-            
+
         // position the object
         this.healthBar.position.z = -0.5;
         this.container.object3D.add(this.healthBar);
@@ -108,7 +108,7 @@ class MRUI extends MREntity {
         this.rangeBar = new THREE.Mesh(
             rangeBarGeo,
             new THREE.MeshPhongMaterial({
-                color: Colors.range,
+                color: COLORS.range,
                 transparent: true,
                 opacity: 1
             }));
@@ -176,7 +176,7 @@ class MRUI extends MREntity {
         this.meleeSelection = new THREE.Mesh(
             new THREE.BoxGeometry(0.8, 0.2, 0.8),
             new THREE.MeshPhongMaterial({
-                color: Colors.objects,
+                color: COLORS.objects,
                 transparent: true,
                 opacity: 0.5
             }));
@@ -201,7 +201,7 @@ class MRUI extends MREntity {
         this.rangeSelection = new THREE.Mesh(
             new THREE.BoxGeometry(0.8, 0.2, 0.8),
             new THREE.MeshPhongMaterial({
-                color: Colors.objects,
+                color: COLORS.objects,
                 transparent: true,
                 opacity: 0.5
             }));
@@ -213,18 +213,18 @@ class MRUI extends MREntity {
             if (i < State.maxAction) {
                 actionBall.visible = true;
                 if (i < State.action) {
-                    actionBall.material.color.setStyle(Colors.movement)
+                    actionBall.material.color.setStyle(COLORS.movement)
                     actionBall.material.opacity = 1;
                 } else {
-                    actionBall.material.color.setStyle(Colors.neutral)
+                    actionBall.material.color.setStyle(COLORS.neutral)
                     actionBall.material.opacity = 0.25;
                 }
 
                 // recolor the ball if it's a projected cost
                 if (i < State.projectedCost) {
-                    actionBall.material.color.setStyle(Colors.hover)
+                    actionBall.material.color.setStyle(COLORS.hover)
                 } else if (State.projectedCost == Infinity) {
-                    actionBall.material.color.setStyle(Colors.neutral)
+                    actionBall.material.color.setStyle(COLORS.neutral)
                 }
             } else {
                 actionBall.visible = false;
@@ -263,8 +263,8 @@ class MRUI extends MREntity {
 
         // TODO: ew
         if (State.isInteractive) {
-            this.meleeSelection.material.color.setStyle(Colors.objects);
-            this.rangeSelection.material.color.setStyle(Colors.objects);
+            this.meleeSelection.material.color.setStyle(COLORS.objects);
+            this.rangeSelection.material.color.setStyle(COLORS.objects);
 
             if (State.selectedWeapon == 'melee' && State.meleeName) {
                 this.meleeSelection.material.opacity = 0.5;
@@ -277,8 +277,8 @@ class MRUI extends MREntity {
                 this.rangeSelection.material.opacity = 0;
             }
         } else {
-            this.meleeSelection.material.color.setStyle(Colors.neutral);
-            this.rangeSelection.material.color.setStyle(Colors.neutral);
+            this.meleeSelection.material.color.setStyle(COLORS.neutral);
+            this.rangeSelection.material.color.setStyle(COLORS.neutral);
 
             if (State.selectedWeapon == 'melee' && State.meleeName) {
                 this.meleeSelection.material.opacity = 0.5;

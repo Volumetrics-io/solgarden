@@ -66,7 +66,7 @@
     </mr-app>
 
     <script>
-        const DefaultState = {
+        const DEFAULT_STATE = {
             isDebug: false,
             isInteractive: true,
             staticUntil: 0,
@@ -86,9 +86,9 @@
             isPlayerTurn: true,
         }
 
-        const State = structuredClone(DefaultState);
+        const State = structuredClone(DEFAULT_STATE);
 
-        const Colors = {
+        const COLORS = {
             movement: "#00ffff",
             objects: "#ff7a00",
             neutral: "#888",
@@ -100,26 +100,26 @@
             white: '#ffffff'
         }
 
-        const EnemySubtypes = [
+        const ENEMY_SUBTYPES = [
             'static',
             'homing',
             'aimless',
         ];
 
-        const EnemyModels = {
+        const ENEMY_MODELS = {
             static: "assets/models/enemy-static1.glb",
             homing: "assets/models/enemy-floater1.glb",
             aimless: "assets/models/enemy-horse1.glb",
         }
 
-        const WeaponModels = {
+        const WEAPON_MODELS = {
             twig: "assets/models/weapon-stick1-pickup.glb",
             shortsword: "assets/models/weapon-shortSword1-pickup.glb",
             slingshot: "assets/models/weapon-slingshot1-pickup.glb",
             bow: "assets/models/weapon-bow1-pickup.glb",
         }
 
-        const SpawnRoomParams = () => {
+        const GenerateSpawnRoomParams = () => {
             return {
                 floorCount: 1,
                 rowCount: 6,
@@ -139,7 +139,7 @@
             }
         }
 
-        const BatteryRoomParams = () => {
+        const GenerateBatteryRoomParams = () => {
             return {
                 floorCount: 1,
                 rowCount: 8,
@@ -236,9 +236,6 @@
 
     <!-- Classes -->
     <script src="/js/sound-controller.js"></script>
-    <script>
-        const Sounds = new SoundController();
-    </script>
     <script src="/js/pathfinder.js"></script>
     <script src="/js/board.js"></script>
 

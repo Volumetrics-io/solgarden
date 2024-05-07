@@ -24,13 +24,13 @@ class MRDamageTile extends MREntity {
             padding: "5px 10px",
             width: "auto",
             borderRadius: "5px",
-            backgroundColor: Colors.health,
+            backgroundColor: COLORS.health,
             visibility: 'hidden'
         });
         this.boxMesh = new THREE.Mesh(
             new THREE.BoxGeometry(0.8, 0.8, 0.1),
             new THREE.MeshPhongMaterial({
-                color: Colors.health,
+                color: COLORS.health,
             }));
         this.damageContainer.object3D.add(this.boxMesh);
         this.damageContainer.dataset.rotation = '270 0 270';
