@@ -54,23 +54,40 @@
             min-width: 100vw;
         } */
 
+        .hud-text {
+            color: #ffffff;
+            font-size: calc(10px / var(--scale));
+            /* width: calc(2000px / var(--scale)); */
+        }
+
+        #hp-label, #range-label {
+            width: calc(400px / var(--scale));
+            height: calc(200px / var(--scale));
+        }
+
         .wall-text {
+            color: #333;
             font-size: calc(10px / var(--scale));
             width: calc(2000px / var(--scale));
         }
 
+        .progress-bar {
+            scale: 0.75;
+        }
+
         #end-turn-button {
             font-size: calc(13px / var(--scale));
-            width: calc(720px / var(--scale));
-            height: calc(720px / var(--scale));
-            border-radius: calc(5px / var(--scale));
+            width: calc(800px / var(--scale));
+            height: calc(800px / var(--scale));
+            border-radius: calc(3px / var(--scale));
         }
     </style>
 </head>
 
 <body>
 
-    <mr-app orbital="true" stats="true">
+    <!-- <mr-app orbital="true" stats="true" debug='true'> -->
+        <mr-app orbital="true" stats="true">
 
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
@@ -92,21 +109,35 @@
 
             <!-- The floating UI in front of the board -->
             <mr-div id='ui' data-rotation='270 -30 270'>
-                <mr-model id="hp-progress"
-                        src='./assets/ui-models/UI_bar1-red.glb'
-                        data-position='-0.8 0.2 0.1'
-                        data-rotation='90 0 0'></mr-model>
 
-                <mr-model id="range-progress"
+                <!-- The HP bar and label -->
+                <mr-div data-position='0 0.3 0'>
+                    <mr-text id='hp-label' class='hud-text' data-position='-0.25 0 0'>99</mr-text>
+                    <mr-model id="hp-progress" class="progress-bar"
+                            src='./assets/ui-models/UI_bar1-red.glb'
+                            data-rotation='90 0 0'></mr-model>
+                </mr-div>
+
+                <!-- The range bar and label -->
+                <mr-div data-position='0 0 0'>
+                    <mr-text id='range-label' class='hud-text' data-position='-0.25 0 0'>99</mr-text>
+                    <mr-model id="range-progress" class="progress-bar"
+                            src='./assets/ui-models/UI_bar1-green.glb'
+                            data-rotation='90 0 0'></mr-model>
+                </mr-div>
+
+
+                <!-- <mr-text id='range-label' class='hud-text' data-position='-0.05 0.1 0'>99</mr-text>
+                <mr-model id="range-progress" class="progress-bar"
                         src='./assets/ui-models/UI_bar1-green.glb'
-                        data-position='-0.8 -0.2 0.1'
-                        data-rotation='90 0 0'></mr-model>
+                        data-position='-0.75 0 0'
+                        data-rotation='90 0 0'></mr-model> -->
 
                 <!-- <mr-model class="ui-countertop" src='./assets/ui-models/ui-plane.glb'></mr-model> -->
-                <mr-button id='end-turn-button' data-position='2.5 0 0.1'>End</mr-button>
-                <mr-div data-position='-2.5 0 0.1' data-rotation=''>
-                    <mr-model src='assets/models/weapon-stick1-UI.glb'></model>
-                </mr-div>
+                <mr-button id='end-turn-button' data-position='2.6 0 0'>End</mr-button>
+
+                <mr-ui-melee id='ui-melee' data-rotation='270 180 180' data-position='-2.5 0 0'></mr-ui-melee>
+                <mr-ui-range id='ui-range' data-rotation='270 180 180' data-position='-1.5 0 0'></mr-ui-melee>
             </mr-div>
 
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
@@ -136,6 +167,24 @@
             action: 4,
             projectedCost: 0,
             hasKey: false,
+
+            // TODO: Proposal for today
+            weapons: [
+                {
+                    type: 'melee',
+                    subtype: 'twig',
+                    range: 1,
+                    crits: 0.1
+                },
+                {
+                    type: 'range',
+                    subtype: 'bow',
+                    range: 3,
+                    crits: 0.05
+                }
+            ],
+            selectedWeapon: 0,
+
             meleeName: '',
             meleeAttack: 0,
             meleeRange: 1,
@@ -350,6 +399,8 @@
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
     <script src="/js/entities/mr-damage-tile.js"></script>
+    <script src="/js/entities/mr-ui-melee.js"></script>
+    <script src="/js/entities/mr-ui-range.js"></script>
     <!-- <script src="/js/entities/mr-start-wall.js"></script> -->
 
 </body>

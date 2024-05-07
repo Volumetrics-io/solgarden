@@ -17,7 +17,13 @@ class GameSystem extends MRSystem {
         this.farthestRoomLabel = document.querySelector("#farthest-room");
 
         this.hpProgress = document.querySelector('#hp-progress');
+        this.hpLabel = document.querySelector('#hp-label');
+
         this.rangeProgress = document.querySelector('#range-progress');
+        this.rangeLabel = document.querySelector('#range-label');
+
+        this.uiMelee = document.querySelector('#ui-melee');
+        this.uiRange = document.querySelector('#ui-range');
 
         this.ui = document.querySelector("#ui");
 
@@ -724,21 +730,27 @@ class GameSystem extends MRSystem {
                 }
                 this.startWall.dataset.position = `${offX} ${this.tableOffset} 0`;
 
-                // The new UI
+                // New UI HEALTH
                 const healthRatio = State.health / State.maxHealth;
                 this.hpProgress.object3D.traverse(object => {
                     if (object.isMesh && object.morphTargetInfluences) {
                         object.morphTargetInfluences[0] = healthRatio;
                     }
                 })
+                this.hpLabel.innerText = "⊕ " + Math.ceil(State.health);
 
+                // New UI RANGW
                 const rangeRatio = State.range / State.maxRange;
                 this.rangeProgress.object3D.traverse(object => {
                     if (object.isMesh && object.morphTargetInfluences) {
                         object.morphTargetInfluences[0] = rangeRatio;
                     }
                 })
+                this.rangeLabel.innerText = "⚡ " + Math.ceil(State.range);
 
+                // New UI
+                this.uiMelee.update(this.timer);
+                this.uiRange.update(this.timer);
                 State.needsUpdate = false;
 
                 // If the player is at the door with the key
