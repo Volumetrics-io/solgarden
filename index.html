@@ -14,6 +14,10 @@
             font-style: normal;
         }
 
+        :root {
+            --scale: 0.06;
+        }
+
         html,
         body {
             background-color: #0a0a0a;
@@ -36,6 +40,19 @@
             flex-direction: row;
             gap: 20px;
         }
+
+        #start-wall {
+            scale: var(--scale);
+        }
+
+        /* mr-text {
+            min-width: 100vw;
+        } */
+
+        .wall-text {
+            font-size: calc(10px / var(--scale));
+            width: calc(2000px / var(--scale));
+        }
     </style>
 </head>
 
@@ -46,10 +63,27 @@
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
-        <mr-entity data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+        <mr-entity class='game' data-comp-game="autoEndTurn: false; scale: 0.06; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
 
             <mr-ui id="interface"></mr-ui>
             <mr-damage-tile id="damage-tile"></mr-damage-tile>
+
+            <mr-div id='start-wall' data-rotation='0 270 0'>
+
+                <mr-model class="solgarden" src='./assets/ui-models/wall.glb'>
+                </mr-model>
+
+                <mr-div data-position='0 2 0.55'>
+                    <mr-text  id='disposed-robots' class='wall-text' data-position='-1.5 -0.4 0'>Disposed robots: 0</mr-text>
+                    <mr-text id='farthest-room' class='wall-text' data-position='-1.5 -0.6 0'>Farthest room: 0</mr-text>
+                </mr-div>
+
+            </mr-div>
+            <!-- <mr-start-wall id='start-wall'>
+                <mr-model style="scale: 1" src='./assets/models/door1.glb'></mr-model>
+                <mr-model class="solgarden" src='./assets/models/solgarden.glb' data-rotation='0 270 0' data-position='0 0 0'></mr-model>
+                <mr-model class="solgarden" src='./assets/models/solgarden.glb' data-rotation='0 270 0' data-position='-0.42 1.7 -1.7'></mr-model>
+            </mr-start-wall> -->
 
             <mr-entity id="chess-sound" data-comp-audio="src: ./assets/audio/chess.mp3; loop: false; state: stop;"></mr-entity>
             <!-- <mr-entity id="door-sound" data-comp-audio="src: ./assets/audio/door-hinge.mp3; loop: false; state: stop;"></mr-entity> -->
@@ -62,6 +96,8 @@
             <mr-entity id="fridge-sound" data-comp-audio="src: ./assets/audio/fridge.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="plains-sound" data-comp-audio="src: ./assets/audio/farm.mp3; loop: true; state: stop;"></mr-entity>
             <mr-entity id="desert-sound" data-comp-audio="src: ./assets/audio/badlands.mp3; loop: true; state: stop;"></mr-entity>
+            <mr-entity id="night-forest" data-comp-audio="src: ./assets/audio/night-forest.mp3; loop: true; state: stop;"></mr-entity>
+
         </mr-entity>
     </mr-app>
 
@@ -197,6 +233,35 @@
             }
         }
 
+        const Biomes = [{
+                // plains
+                name: "plains",
+                path: "assets/biomes/plains/",
+                // audio: "/assets/audio/farm.mp3",
+                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
+                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
+                block: ["rock001.glb"]
+            },
+            {
+                // desert
+                name: "desert",
+                path: "assets/biomes/deserts/",
+                // audio: "/assets/audio/badlands.mp3",
+                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
+                props: ["plant_05_to_test.glb"],
+                block: ["rockdesert001.glb", "rockdesert002.glb"]
+            },
+            {
+                // forest
+                name: "forest",
+                path: "assets/biomes/forest/",
+                // audio: "/assets/audio/badlands.mp3",
+                tiles: ["tileforest001.glb"],
+                props: ["plant_06-fern1.glb", "plant_07-mushrooms1.glb"],
+                block: ["pine1.glb", "rockforest001.glb", "stump1.glb"]
+            }
+        ]
+
         // Various animation curves / timing functions
         // Not all of them are used in this project
         const Animator = {
@@ -261,6 +326,7 @@
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
     <script src="/js/entities/mr-damage-tile.js"></script>
+    <!-- <script src="/js/entities/mr-start-wall.js"></script> -->
 
 </body>
 

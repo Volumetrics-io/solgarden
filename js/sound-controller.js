@@ -12,6 +12,7 @@ class SoundController {
             battery: document.querySelector('#fridge-sound'),
             plains: document.querySelector('#plains-sound'),
             desert: document.querySelector('#desert-sound'),
+            forest: document.querySelector('#night-forest'),
         }
 
         this.initialize();

@@ -4,7 +4,6 @@ class MRChest extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
-
         this.poof = document.createElement("mr-model");
     }
 
@@ -36,7 +35,8 @@ class MRChest extends MREntity {
             action: "stop",
             loop: false,
             clampWhenFinished: true,
-        })
+        });
+        this.poof.style.pointerEvents = 'none';
     }
 
     open() {
@@ -50,6 +50,7 @@ class MRChest extends MREntity {
             this.isOpened = true;
 
             this.el.style.scale = 0.8;
+
             this.poof.components.set('animation', {
                 action: "play"
             })

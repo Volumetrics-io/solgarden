@@ -17,26 +17,7 @@ class Board {
         this.isQuake = false;
 
         // TODO: biome soundtrack sound be here
-        this.biomes = [{
-                // plains
-                name: "plains",
-                path: "assets/biomes/plains/",
-                // audio: "/assets/audio/farm.mp3",
-                tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
-                props: ["plant_01.glb", "plant_02.glb", "plant_03.glb", "plant_04.glb", "plant_05.glb"],
-                block: ["rock001.glb"]
-            },
-            {
-                // desert
-                name: "desert",
-                path: "assets/biomes/deserts/",
-                // audio: "/assets/audio/badlands.mp3",
-                tiles: ["tiledesert001.glb", "tiledesert002.glb", "tiledesert003.glb"],
-                props: ["plant_05_to_test.glb"],
-                block: ["rockdesert001.glb", "rockdesert002.glb"]
-            }
-        ]
-        this.biome = params.biome ?? this.biomes[params.biomeId] ?? this.biomes[Math.floor(Math.random() * this.biomes.length)];
+        this.biome = params.biome ?? Biomes[params.biomeId] ?? Biomes[Math.floor(Math.random() * Biomes.length)];
 
         // read the params, or generate a random geometry for the room
         this.floorCount = params.floorCount ?? Math.floor(Math.random() * (this.maxFlrCount - this.minFlrCount) + this.minFlrCount);

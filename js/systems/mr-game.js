@@ -9,6 +9,7 @@ class GameSystem extends MRSystem {
         this.ui = document.querySelector("#interface");
         this.dmgTile = document.querySelector("#damage-tile");
         this.endTurnButton = document.createElement("mr-button");
+        this.startWall = document.querySelector("#start-wall");
 
         Object.assign(State, {
             maxHealth: 20,
@@ -169,6 +170,15 @@ class GameSystem extends MRSystem {
                     this.board.playerPos.x,
                     this.board.playerPos.y, 1.2, 10, 0.5);
             }
+
+            // Z for whatever (to reuse)
+            if (event.key === "z") {
+                event.preventDefault();
+                const ppos = this.board.playerPos;
+                const player = this.board.entityMap[ppos.x][ppos.y];
+                player.el.playCombatAnimation();
+            }
+
 
             // N for eNemy
             if (event.key === 'n') {
@@ -334,7 +344,7 @@ class GameSystem extends MRSystem {
                                     this.container.removeChild(entity.el);
                                     this.board.removeEntityAt(x, y);
                                     State.needsUpdate = true;
-                                }, 2000)
+                                }, 600)
                             }
 
                             // enemies
@@ -669,11 +679,7 @@ class GameSystem extends MRSystem {
 
             if (State.needsUpdate || this.board.isQuake) {
 
-                if (State.isDebug) {
-                    console.log('updated at', this.timer);
-                }
-
-                this.ui.update(this.timer);
+                if (State.isDebug) console.log('updated at', this.timer);
                 this.projectRoom();
 
                 // position the floating damage tile at its position
@@ -684,9 +690,17 @@ class GameSystem extends MRSystem {
 
                 // position the interface alongside the board
                 const offX = (this.board.colCount / 2 + 0.5) * this.scale;
+                this.ui.update(this.timer);
                 this.ui.dataset.position = `-${offX} ${this.tableOffset} 0`;
 
-                this.needsUpdate = false;
+                // if(State.level == 0) {
+                // this.startWall.update(this.timer);
+
+
+
+                this.startWall.dataset.position = `${offX} ${this.tableOffset} 0`;
+                // }
+
                 State.needsUpdate = false;
 
                 // If the player is at the door with the key
@@ -716,12 +730,10 @@ class GameSystem extends MRSystem {
                             // Dot is charging
                             State.range += 0.1;
                             gaugeEl.updateLevel(State.range / State.maxRange);
-                            this.needsUpdate = true;
                             State.needsUpdate = true;
                         } else {
                             // Dot is charged
                             State.range = State.maxRange;
-                            this.needsUpdate = false;
                             State.needsUpdate = false;
                         }
                     } else {
@@ -746,16 +758,25 @@ class GameSystem extends MRSystem {
         this.root = entity;
         this.root.appendChild(this.container);
 
+        // Game settings
         this.settings = this.root.components.get('game');
         this.autoEndTurn = this.settings.autoEndTurn ?? false;
-        this.scale = this.settings.scale ?? 0.05;
+        // this.scale = this.settings.scale ?? 0.05;
         this.tableOffset = this.settings.tableOffset ?? 0;
+
+        this.scale = mrjsUtils.css.getVarFromRoot('--scale') ?? 0.05;
 
         this.container.style.scale = this.scale;
         this.container.dataset.position = `0 ${this.tableOffset} 0`;
 
         this.ui.style.scale = this.scale;
         this.ui.dataset.rotation = `0 0 30`;
+
+        // console.log(mrjsUtils.css.getVarFromRoot('--accent'));
+        // console.log(mrjsUtils.css.getVarFromRoot('--scale'));
+
+        // this.startWall.style.scale = this.scale;
+        // this.ui.dataset.rotation = `0 0 30`;
 
         this.dmgTile.style.scale = this.scale;
 
