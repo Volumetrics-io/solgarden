@@ -200,26 +200,14 @@
             aimless: "assets/models/enemy-horse1.glb",
         }
 
-        const WEAPON_MODELS = {
-            twig: "assets/models/weapon-stick1-pickup.glb",
-            shortsword: "assets/models/weapon-shortSword1-pickup.glb",
-            slingshot: "assets/models/weapon-slingshot1-pickup.glb",
-            bow: "assets/models/weapon-bow1-pickup.glb",
-        }
-
-        // TODO: Replace all the weapons lookup to this constant
-        // WEAPONS[0] are the melee weapons
-        // WEAPONS[1] are the range weapons
         const WEAPONS = [
             [{
-                    // type: "melee",
                     subtype: 'twig',
                     gameModel: "assets/models/weapon-stick1-pickup.glb",
                     uiModel: "assets/models/weapon-stick1-UI.glb",
                     range: 1
                 },
                 {
-                    // type: "melee",
                     subtype: 'shortsword',
                     gameModel: "assets/models/weapon-shortSword1-pickup.glb",
                     uiModel: "assets/models/weapon-shortSword1-UI.glb",
@@ -227,14 +215,12 @@
                 },
             ],
             [{
-                    // type: "range",
                     subtype: 'slingshot',
                     gameModel: "assets/models/weapon-slingshot1-pickup.glb",
                     uiModel: "assets/models/weapon-slingshot1-UI.glb",
                     range: 2
                 },
                 {
-                    // type: "range",
                     subtype: 'bow',
                     gameModel: "assets/models/weapon-bow1-pickup.glb",
                     uiModel: "assets/models/weapon-bow1-UI.glb",
@@ -262,7 +248,6 @@
                 }
             }
         }
-
 
         const generateBatteryRoomParams = () => {
             return {
@@ -322,7 +307,6 @@
             }
         }
 
-
         const BIOMES = [{
                 // plains
                 name: "plains",
@@ -367,7 +351,6 @@
     <script src="/js/systems/mr-game.js"></script>
 
     <!-- Mrjs Entities -->
-    <!-- <script src="/js/entities/mr-ui.js"></script> -->
     <script src="/js/entities/mr-battery.js"></script>
     <script src="/js/entities/mr-chest.js"></script>
     <script src="/js/entities/mr-door.js"></script>
@@ -382,13 +365,8 @@
     <script src="/js/entities/mr-tile.js"></script>
     <script src="/js/entities/mr-weapon.js"></script>
     <script src="/js/entities/mr-damage-tile.js"></script>
-
-    <!-- <script src="/js/entities/mr-ui-melee.js"></script> -->
-    <!-- <script src="/js/entities/mr-ui-range.js"></script> -->
     <script src="/js/entities/mr-ui-weapon.js"></script>
     <script src="/js/entities/mr-ui-actions.js"></script>
-    <!-- <script src="/js/entities/mr-start-wall.js"></script> -->
-
 
 </body>
 
