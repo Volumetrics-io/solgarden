@@ -19,13 +19,13 @@ class MRPlayer extends MREntity {
             }
             let mixer = this.el.mixer;
 
-            mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30)); // 0
-            mixer._actions[0].enabled = true; // set the idle animation to be the one running
-            this.idleAnimAction = 0;
+            this.idleAction = mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30));
+            this.idleAction.setLoop(THREE.LoopRepeat);
+            this.idleAction.enabled = true; // set the idle animation to be the one running
 
-            mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)); // 1
-            mixer._actions[1].enabled = false; // turn of the run animation for now
-            this.runAnimAction = 1;
+            this.runAction = mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)); // 1
+            this.runAction.setLoop(THREE.LoopRepeat);
+            this.runAction.enabled = false; // turn of the run animation for now
 
             console.log('mixer:', mixer, 'animations', animations);
 
@@ -73,9 +73,9 @@ class MRPlayer extends MREntity {
     }
 
     playIdleAnimation() {
-        this.el.mixer._actions[this.idleAnimAction].enabled = true;
-        this.el.mixer._actions[this.runAnimAction].enabled = false;
-        this.el.mixer._actions[this.idleAnimAction].play();
+        this.idleAction.enabled = true;
+        this.runAction.enabled = false;
+        this.idleAction.reset().play();
         
         // console.log(action);
         // action.reset().play();
@@ -88,9 +88,9 @@ class MRPlayer extends MREntity {
     }
 
     playCombatAnimation() {
-        this.el.mixer._actions[this.runAnimAction].enabled = true;
-        this.el.mixer._actions[this.idleAnimAction].enabled = false;
-        this.el.mixer._actions[this.runAnimAction].play();
+        this.runAction.enabled = true;
+        this.idleAction.enabled = false;
+        this.runAction.reset().play();
 
         // this.el.components.set("animation", {
         //     clip: 2,
