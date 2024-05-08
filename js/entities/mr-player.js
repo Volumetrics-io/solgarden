@@ -39,7 +39,7 @@ class MRPlayer extends MREntity {
             console.log('attack anim clip is:', attackAnimationClip);
             this.attackAnimationAction = mixer.clipAction(attackAnimationClip);
             this.attackAnimationAction.setLoop(THREE.LoopRepeat);
-            this.attackAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
+            this.attackAnimationAction.clampWhenFinished = false; // Ensure the animation stops at the last frame when paused
             this.attackAnimationAction.enabled = false;
 
             console.log('mixer:', mixer, 'animations', animations);
