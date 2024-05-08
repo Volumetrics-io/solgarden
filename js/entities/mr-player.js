@@ -19,13 +19,26 @@ class MRPlayer extends MREntity {
             }
             let mixer = this.el.mixer;
 
-            this.idleAction = mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30));
-            this.idleAction.setLoop(THREE.LoopRepeat);
-            this.idleAction.enabled = true; // set the idle animation to be the one running
+            // this.idleAction = mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30));
+            // this.idleAction.setLoop(THREE.LoopRepeat);
+            // this.idleAction.enabled = true; // set the idle animation to be the one running
 
-            this.runAction = mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)); // 1
-            this.runAction.setLoop(THREE.LoopRepeat);
-            this.runAction.enabled = false; // turn of the run animation for now
+            // this.runAction = mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)); // 1
+            // this.runAction.setLoop(THREE.LoopRepeat);
+            // this.runAction.enabled = false; // turn of the run animation for now
+
+            // Find the 'idle' animation clip in the animations array
+            const idleAnimationClip = animations.find(clip => clip.name === 'idle');
+            this.idleAnimationAction = mixer.clipAction(idleAnimationClip);
+            this.idleAnimationAction.setLoop(THREE.LoopRepeat);
+            this.idleAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
+            this.idleAnimationAction.enabled = true;
+
+            const attackAnimationClip = animations.find(clip => clip.name === 'attack-melee');
+            this.attackAnimationAction = mixer.clipAction(attackAnimationClip);
+            this.attackAnimationAction.setLoop(THREE.LoopRepeat);
+            this.attackAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
+            this.attackAnimationAction.enabled = true;
 
             console.log('mixer:', mixer, 'animations', animations);
 
@@ -73,9 +86,9 @@ class MRPlayer extends MREntity {
     }
 
     playIdleAnimation() {
-        this.idleAction.enabled = true;
-        this.runAction.enabled = false;
-        this.idleAction.reset().play();
+        this.idleAnimationAction.enabled = true;
+        this.attackAnimationAction.enabled = false;
+        this.idleAnimationAction.reset().play();
         
         // console.log(action);
         // action.reset().play();
@@ -88,9 +101,9 @@ class MRPlayer extends MREntity {
     }
 
     playCombatAnimation() {
-        this.runAction.enabled = true;
-        this.idleAction.enabled = false;
-        this.runAction.reset().play();
+        this.attackAnimationAction.enabled = true;
+        this.idleAnimationAction.enabled = false;
+        this.attackAnimationAction.reset().play();
 
         // this.el.components.set("animation", {
         //     clip: 2,
