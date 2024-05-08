@@ -15,7 +15,7 @@
         }
 
         :root {
-            --scale: 0.06;
+            --scale: 0.08;
         }
 
         html,
@@ -53,7 +53,7 @@
 
         .hud-text {
             color: #ffffff;
-            font-size: calc(10px / var(--scale));
+            font-size: calc(13px / var(--scale));
         }
 
         #hp-label,
@@ -65,7 +65,7 @@
 
         .wall-text {
             color: #333;
-            font-size: calc(10px / var(--scale));
+            font-size: calc(13px / var(--scale));
             width: calc(2000px / var(--scale));
         }
 
@@ -74,21 +74,23 @@
         }
 
         #end-turn-button {
-            font-size: calc(13px / var(--scale));
+            font-size: calc(15px / var(--scale));
             width: calc(800px / var(--scale));
             height: calc(800px / var(--scale));
             border-radius: calc(3px / var(--scale));
+            padding: calc(30px / var(--scale));
         }
     </style>
 </head>
 
 <body>
-    <mr-app orbital="true" stats="true" debug='false'>
+    <!-- <mr-app orbital="true" stats="true" debug='false'> -->
+    <mr-app orbital="true">
 
         <mr-light color="#fff4b8" intensity="0.8" data-position="-0.25 1 -0.25"></mr-light>
         <mr-light color="#a4f1ff" intensity="0.5" data-position="0.5 0.1 0.5"></mr-light>
 
-        <mr-entity class='game' data-comp-game="autoEndTurn: false; tableOffset: 0.02" data-comp-anchor="type: plane; label: table">
+        <mr-entity class='game' data-comp-game="autoEndTurn: false; tableOffset: 0.05" data-comp-anchor="type: plane; label: table">
 
             <mr-damage-tile id="damage-tile"></mr-damage-tile>
 
