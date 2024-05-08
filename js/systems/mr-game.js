@@ -6,7 +6,6 @@ class GameSystem extends MRSystem {
 
         // container to store board object references
         this.container = document.createElement("mr-div");
-        // this.interface = document.querySelector("#interface");
         this.dmgTile = document.querySelector("#damage-tile");
 
         // UI elements
@@ -109,15 +108,12 @@ class GameSystem extends MRSystem {
             // C for Chest
             if (event.key === 'c') {
                 event.preventDefault();
-
                 const chest = document.createElement("mr-chest");
                 this.container.appendChild(chest);
-
-                const pos = this.board.addToMap({
+                this.board.addToMap({
                     el: chest,
                     type: 'chest',
-                }, this.board.entityMap);
-                console.log('Chest dropped at ', pos);
+                });
                 State.needsUpdate = true;
             }
 
@@ -175,7 +171,7 @@ class GameSystem extends MRSystem {
 
                 enemy.el.dataset.subtype = enemy.subtype;
                 this.container.appendChild(enemy.el);
-                this.board.addToMap(enemy, this.board.entityMap);
+                this.board.addToMap(enemy);
                 State.needsUpdate = true;
             }
 
@@ -597,7 +593,7 @@ class GameSystem extends MRSystem {
     }
 
     projectRoom() {
-        this.board.calcDistFromPlayer();
+        this.board.updateDistances();
         this.board.updateFloor(this.timer);
         this.board.projectEverything(this.timer);
 

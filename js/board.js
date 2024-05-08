@@ -143,7 +143,10 @@ class Board {
             type: 'door'
         }
 
-        if (this.biome.name == 'battery') State.hasKey = true;
+        if (this.biome.name == 'battery') {
+            State.hasKey = true;
+            this.doorEl.open();
+        }
 
         // lore
         // 10% of the time
@@ -167,14 +170,13 @@ class Board {
             const attack = Math.floor(Math.random() * 2 + State.level / 8);
 
             el.dataset.subtype = subtype;
-            const enemy = {
+            this.addToMap({
                 el: el,
                 type: 'enemy',
                 subtype: subtype,
                 hp: hp,
                 attack: attack
-            };
-            this.addToMap(enemy, this.entityMap);
+            });
 
             if (State.isDebug) console.log(enemy);
         }
@@ -198,11 +200,10 @@ class Board {
             const el = document.createElement("mr-prop");
             el.dataset.tileset = this.biome.block;
             el.dataset.tilepath = this.biome.path;
-            const prop = {
+            this.addToMap({
                 el: el,
                 type: 'prop'
-            }
-            this.addToMap(prop, this.entityMap);
+            });
         }
 
         // chests
@@ -212,7 +213,7 @@ class Board {
             this.addToMap({
                 el: randomChest,
                 type: 'chest'
-            }, this.entityMap);
+            });
         }
 
         // Health drop in the battery room
@@ -221,7 +222,6 @@ class Board {
             for (let i = 0; i < rand; i++) {
                 const loot = document.createElement("mr-loot");
                 loot.dataset.effect = "health";
-
                 this.addToLootMap({
                     el: loot,
                     type: 'loot',
@@ -260,7 +260,7 @@ class Board {
             });
         });
 
-        this.calcDistFromPlayer();
+        this.updateDistances();
 
         if (State.isDebug) {
             printArray("this.heightMap", this.heightMap);
@@ -283,102 +283,66 @@ class Board {
         this.quakeFrequence = frequence;
     }
 
-    addToMap(entity, map) {
+    addToMap(entity) {
         let inserted = false;
-        let pos;
 
         while (!inserted) {
-            let randRow;
-            let randCol = Math.floor(Math.random() * this.colCount);
+            let row = Math.floor(Math.random() * (this.rowCount - 2) + 1);
+            let col = Math.floor(Math.random() * this.colCount);
             let distanceToDoor = Infinity;
 
-            if (entity.type == "player") {
-                randRow = 0;
+            // make a copy of the entity map
+            // this temporary array is used to determine
+            // if there would still be a solution if we
+            // add the element at the random position.
+            let tempMap = this.entityMap.map(function(arr) {
+                return arr.slice();
+            });
 
-            } else {
-                randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1);
+            // add the entity to the array copy
+            tempMap[row][col] = entity;
 
-                // make a copy of the entity map
-                // this temporary array is used to determine
-                // if there would still be a solution if we
-                // add the element at the random position.
-                let tempMap = map.map(function(arr) {
-                    return arr.slice();
-                });
+            // calc distances with the entity
+            // and see if there is a possible solution
+            let dist = this.calcDist(State.ppos.y, State.ppos.x, tempMap);
+            distanceToDoor = dist[State.dpos.x][State.dpos.y];
 
-                // add the entity to the array copy
-                tempMap[randRow][randCol] = entity;
+            if (this.entityMap[row][col] === 0 &&
+                this.lootMap[row][col] === 0 &&
+                distanceToDoor != Infinity) {
 
-                // calc distances with the entity
-                // and see if there is a possible solution
-                let dist = this.calcDist(State.ppos.y, State.ppos.x, tempMap);
-                distanceToDoor = dist[State.dpos.x][State.dpos.y];
-            }
-
-            if (entity.type == "player" ||
-                (map[randRow][randCol] === 0 &&
-                    this.lootMap[randRow][randCol] === 0 &&
-                    distanceToDoor != Infinity)) {
-                map[randRow][randCol] = entity;
+                this.entityMap[row][col] = entity;
                 inserted = true;
-                pos = {
-                    x: randRow,
-                    y: randCol
-                }
             }
         }
-
-        return pos
     }
 
     addToPropMap(entity) {
         let inserted = false;
-        let pos;
-
         while (!inserted) {
-            let randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1)
-            let randCol = Math.floor(Math.random() * this.colCount);
+            let row = Math.floor(Math.random() * (this.rowCount - 2) + 1)
+            let col = Math.floor(Math.random() * this.colCount);
 
-            if (this.propMap[randRow][randCol] === 0) {
-                this.propMap[randRow][randCol] = entity;
+            if (this.propMap[row][col] === 0) {
+                this.propMap[row][col] = entity;
                 inserted = true;
-                pos = {
-                    x: randRow,
-                    y: randCol
-                }
             }
         }
-
-        return pos
     }
 
     addToLootMap(entity) {
         let inserted = false;
-        let pos;
-
         while (!inserted) {
-            let randCol = Math.floor(Math.random() * this.colCount);
+            let row = Math.floor(Math.random() * (this.rowCount - 2) + 1);
+            let col = Math.floor(Math.random() * this.colCount);
 
-            let randRow;
-            if (entity.type == "door") {
-                randRow = this.rowCount - 1;
-            } else {
-                randRow = Math.floor(Math.random() * (this.rowCount - 2) + 1);
-            }
+            if (this.entityMap[row][col] === 0 &&
+                this.lootMap[row][col] === 0) {
 
-            if (this.entityMap[randRow][randCol] === 0 &&
-                this.lootMap[randRow][randCol] === 0) {
-
-                this.lootMap[randRow][randCol] = entity;
+                this.lootMap[row][col] = entity;
                 inserted = true;
-                pos = {
-                    x: randRow,
-                    y: randCol
-                }
             }
         }
-
-        return pos
     }
 
     moveEntity(x1, y1, x2, y2) {
@@ -644,11 +608,7 @@ class Board {
         dmgTile.showDamage(damage, color);
     }
 
-    // openDoor() {
-    //     this.doorEl.open();
-    // }
-
-    calcDistFromPlayer() {
+    updateDistances() {
         this.distances = this.calcDist(State.ppos.y, State.ppos.x, this.entityMap);
     }
 

@@ -5,6 +5,7 @@ class MRDoor extends MREntity {
 
         this.el = document.createElement("mr-model");
         this.ui = document.createElement("mr-model");
+        this.isOpened = false;
     }
 
     connected() {
@@ -50,25 +51,28 @@ class MRDoor extends MREntity {
     }
 
     open() {
-        this.ui.components.set('animation', {
-            action: "play",
-        })
-
-        setTimeout(() => {
-            this.components.set('audio', {
-                action: "play"
-            })
-
-        }, 1200);
-
-        setTimeout(() => {
-            this.el.components.set('animation', {
+        if (!this.isOpened) {
+            this.ui.components.set('animation', {
                 action: "play",
             })
 
-        }, 1000);
-    }
+            setTimeout(() => {
+                this.components.set('audio', {
+                    action: "play"
+                })
 
+            }, 1200);
+
+            setTimeout(() => {
+                this.el.components.set('animation', {
+                    action: "play",
+                })
+
+            }, 1000);
+
+            this.isOpened = true;
+        }
+    }
 }
 
 customElements.define('mr-door', MRDoor);
