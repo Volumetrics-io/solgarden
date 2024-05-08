@@ -6,6 +6,7 @@ class MRPlayer extends MREntity {
         this.el = document.createElement("mr-model");
         this.el.src = "assets/models/dot-test.glb";
         this.el.style.pointerEvents = 'none';
+        this.el.object3D.name = "---DOTCHAR---";
 
         this.light = document.createElement("mr-light");
 
