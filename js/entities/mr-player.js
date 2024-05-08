@@ -9,20 +9,20 @@ class MRPlayer extends MREntity {
         this.swooshSound = document.createElement("mr-entity");
         this.bowReleaseSound = document.createElement("mr-entity");
 
-        this.el.onLoad = () => {
-            // let mixer = this.el.mixer;
-            let animations = this.el.animations;
-
-            this.el.mixer = new THREE.AnimationMixer(this.el.object3D);
-            this.el.mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30)).setDuration(1).play(); //0
-            this.el.mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)).setDuration(1).play(); //1
-            this.el.mixer._actions[0].enabled = true;
-            this.el.mixer._actions[1].enabled = false;
-
-            console.log(this.el.mixer, animations);
-
-            this.playIdleAnimation();
-        }
+        // this.el.onLoad = () => {
+        //     // let mixer = this.el.mixer;
+        //     let animations = this.el.animations;
+        //
+        //     this.el.mixer = new THREE.AnimationMixer(this.el.object3D);
+        //     this.el.mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'idle', 0, 30)).setDuration(1).play(); //0
+        //     this.el.mixer.clipAction(THREE.AnimationUtils.subclip(animations[0], 'run', 60, 75)).setDuration(1).play(); //1
+        //     this.el.mixer._actions[0].enabled = true;
+        //     this.el.mixer._actions[1].enabled = false;
+        //
+        //     console.log(this.el.mixer, animations);
+        //
+        //     this.playIdleAnimation();
+        // }
     }
 
     connected() {
@@ -61,7 +61,7 @@ class MRPlayer extends MREntity {
 
         this.appendChild(this.light);
         this.light.setAttribute('color', "#ffffff");
-        this.light.setAttribute('intensity', 0.03);
+        this.light.setAttribute('intensity', 0.02);
         this.light.dataset.position = `0 0.6 0.3`;
     }
 
