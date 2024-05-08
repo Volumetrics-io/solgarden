@@ -29,16 +29,18 @@ class MRPlayer extends MREntity {
 
             // Find the 'idle' animation clip in the animations array
             const idleAnimationClip = animations.find(clip => clip.name === 'idle');
+            console.log('idle anim clip is:', idleAnimationClip);
             this.idleAnimationAction = mixer.clipAction(idleAnimationClip);
             this.idleAnimationAction.setLoop(THREE.LoopRepeat);
             this.idleAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
             this.idleAnimationAction.enabled = true;
 
             const attackAnimationClip = animations.find(clip => clip.name === 'attack-melee');
+            console.log('attack anim clip is:', attackAnimationClip);
             this.attackAnimationAction = mixer.clipAction(attackAnimationClip);
             this.attackAnimationAction.setLoop(THREE.LoopRepeat);
             this.attackAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
-            this.attackAnimationAction.enabled = true;
+            this.attackAnimationAction.enabled = false;
 
             console.log('mixer:', mixer, 'animations', animations);
 
