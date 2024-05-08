@@ -31,16 +31,16 @@ class MRPlayer extends MREntity {
             const idleAnimationClip = animations.find(clip => clip.name === 'idle');
             console.log('idle anim clip is:', idleAnimationClip);
             this.idleAnimationAction = mixer.clipAction(idleAnimationClip);
-            this.idleAnimationAction.setLoop(THREE.LoopRepeat);
+            this.idleAnimationAction.setLoop(THREE.LoopRepeat, Infinity);
             this.idleAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
-            this.idleAnimationAction.enabled = true;
+            // this.idleAnimationAction.enabled = true;
 
             const attackAnimationClip = animations.find(clip => clip.name === 'attack-melee');
             console.log('attack anim clip is:', attackAnimationClip);
             this.attackAnimationAction = mixer.clipAction(attackAnimationClip);
-            this.attackAnimationAction.setLoop(THREE.LoopRepeat);
-            this.attackAnimationAction.clampWhenFinished = false; // Ensure the animation stops at the last frame when paused
-            this.attackAnimationAction.enabled = false;
+            this.attackAnimationAction.setLoop(THREE.LoopRepeat, Infinity);
+            this.attackAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
+            // this.attackAnimationAction.enabled = false;
 
             console.log('mixer:', mixer, 'animations', animations);
 
@@ -89,6 +89,7 @@ class MRPlayer extends MREntity {
     }
 
     playIdleAnimation() {
+        console.log('PLAYING IDLE ANIMATION');
         this.idleAnimationAction.enabled = true;
         this.attackAnimationAction.enabled = false;
         this.idleAnimationAction.reset().play();
@@ -104,6 +105,7 @@ class MRPlayer extends MREntity {
     }
 
     playCombatAnimation() {
+        console.log('PLAYING COMBAT ANIMATION');
         this.attackAnimationAction.enabled = true;
         this.idleAnimationAction.enabled = false;
         this.attackAnimationAction.reset().play();
