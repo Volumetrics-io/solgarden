@@ -112,20 +112,38 @@ class Board {
             this.tileMap.push(row);
         }
 
-        // player
+        // Set the location of the player and the door
+        if (State.level == 0) {
+            State.ppos = {
+                x: 1,
+                y: 1,
+            }
+            State.dpos = {
+                x: 5,
+                y: 0,
+            }
+        } else {
+            State.ppos = {
+                x: 0,
+                y: Math.floor(Math.random() * this.colCount),
+            }
+            State.dpos = {
+                x: this.rowCount - 1,
+                y: Math.floor(Math.random() * this.colCount),
+            }
+        }
         this.playerEl = document.createElement("mr-player");
-        this.playerPos = this.addToMap({
+        this.entityMap[State.ppos.x][State.ppos.y] = {
             el: this.playerEl,
             type: 'player'
-        }, this.entityMap);
-
-        // door
-        const door = document.createElement("mr-door");
-        if (this.biome.name == 'battery') door.dataset.hasKey = true;
-        this.doorPos = this.addToLootMap({
-            el: door,
+        }
+        this.doorEl = document.createElement("mr-door");
+        this.lootMap[State.dpos.x][State.dpos.y] = {
+            el: this.doorEl,
             type: 'door'
-        })
+        }
+
+        if (this.biome.name == 'battery') State.hasKey = true;
 
         // lore
         // 10% of the time
@@ -185,31 +203,6 @@ class Board {
                 type: 'prop'
             }
             this.addToMap(prop, this.entityMap);
-        }
-
-
-        // This is the spawn room
-        if (State.level == 0) {
-
-            // weapon
-            const twig = document.createElement("mr-weapon");
-            twig.dataset.model = "twig"
-
-            this.addToLootMap({
-                el: twig,
-                type: 'weapon',
-                weaponID: 0,
-                subtype: 'twig',
-                attack: 1,
-                range: WEAPONS[0][0].range
-            });
-
-            // key
-            const key = document.createElement("mr-key");
-            this.addToLootMap({
-                el: key,
-                type: 'key'
-            });
         }
 
         // chests
@@ -318,8 +311,8 @@ class Board {
 
                 // calc distances with the entity
                 // and see if there is a possible solution
-                let dist = this.calcDist(this.playerPos.y, this.playerPos.x, tempMap);
-                distanceToDoor = dist[this.doorPos.x][this.doorPos.y];
+                let dist = this.calcDist(State.ppos.y, State.ppos.x, tempMap);
+                distanceToDoor = dist[State.dpos.x][State.dpos.y];
             }
 
             if (entity.type == "player" ||
@@ -423,12 +416,11 @@ class Board {
 
         // remove origin and target from copy
         // otherwise the pathfinding can't work
-        const ppos = this.playerPos;
-        blockmap[ppos.x][ppos.y] = 0;
+        blockmap[State.ppos.x][State.ppos.y] = 0;
         blockmap[x][y] = 0;
 
         const pf = new PathFinder(blockmap);
-        const path = pf.findPath([ppos.x, ppos.y], [x, y]);
+        const path = pf.findPath([State.ppos.x, State.ppos.y], [x, y]);
 
         // the next move queue
         this.nextMoveQueue = [];
@@ -449,8 +441,8 @@ class Board {
             const x = move[0];
             const y = move[1];
 
-            const deltaX = this.playerPos.x - x;
-            const deltaY = this.playerPos.y - y;
+            const deltaX = State.ppos.x - x;
+            const deltaY = State.ppos.y - y;
 
             // Orient the player model based on move
             if (deltaX == -1) {
@@ -463,9 +455,9 @@ class Board {
                 this.playerEl.dataset.rotation = `0 270 0`;
             }
 
-            this.moveEntity(this.playerPos.x, this.playerPos.y, x, y);
-            this.playerPos.x = x;
-            this.playerPos.y = y;
+            this.moveEntity(State.ppos.x, State.ppos.y, x, y);
+            State.ppos.x = x;
+            State.ppos.y = y;
 
             if (this.lootMap[x][y] != 0) {
                 this.lootEntity(x, y);
@@ -598,7 +590,7 @@ class Board {
         switch (entity.type) {
             case "key":
                 State.hasKey = true;
-                this.openDoor();
+                this.doorEl.open();
                 this.container.removeChild(entity.el);
                 this.removeLootAt(x, y);
                 // TODO: switch to a key sound
@@ -606,7 +598,7 @@ class Board {
                 break;
 
             case "weapon":
-                if(entity.attack > State.weapons[entity.weaponID].attack) {
+                if (entity.attack > State.weapons[entity.weaponID].attack) {
                     State.weapons[entity.weaponID].attack = entity.attack;
                     State.weapons[entity.weaponID].subtype = entity.subtype;
                     State.weapons[entity.weaponID].range = entity.range;
@@ -652,14 +644,12 @@ class Board {
         dmgTile.showDamage(damage, color);
     }
 
-    openDoor() {
-        const x = this.doorPos.x;
-        const y = this.doorPos.y;
-        this.lootMap[x][y].el.open();
-    }
+    // openDoor() {
+    //     this.doorEl.open();
+    // }
 
     calcDistFromPlayer() {
-        this.distances = this.calcDist(this.playerPos.y, this.playerPos.x, this.entityMap);
+        this.distances = this.calcDist(State.ppos.y, State.ppos.x, this.entityMap);
     }
 
     calcDist(x, y, blockmap) {
@@ -864,7 +854,7 @@ class Board {
         if (this.isQuake && this.quakeHasStarted) {
 
             if (timer - this.quakeTimerStart > this.quakeDuration) {
-                if(State.isDebug) console.log("quake is over")
+                if (State.isDebug) console.log("quake is over")
                 this.isQuake = false;
             }
         }
@@ -881,7 +871,6 @@ class Board {
                 if (State.isPlayerTurn && State.isInteractive) {
                     const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
-                    const ppos = this.playerPos;
 
                     // is the tile reachable by walking (pathfinder distance)
                     const isReachable = (
@@ -890,7 +879,7 @@ class Board {
                         dist > 0);
 
                     //  combat related distances are Euclidean
-                    const rawDist = distBetween(x, y, ppos.x, ppos.y);
+                    const rawDist = distBetween(x, y, State.ppos.x, State.ppos.y);
 
                     if (!entity || entity.type == "chest") {
                         if (isReachable) {
@@ -926,7 +915,7 @@ class Board {
                     }
 
                     // If either melee or range weapon is hovered
-                    if(State.displayRange > 0) {
+                    if (State.displayRange > 0) {
                         if (rawDist <= State.displayRange) {
                             el.tileColor('movement');
                         }
@@ -1026,8 +1015,7 @@ class Board {
             projectedCost = this.distances[x][y];
 
         } else if (entity.type == 'enemy') {
-            const ppos = this.playerPos;
-            const dist = distBetween(x, y, ppos.x, ppos.y);
+            const dist = distBetween(x, y, State.ppos.x, State.ppos.y);
 
             if (State.selectedWeapon == 'melee' && dist <= State.meleeRange) {
                 projectedCost = 1;

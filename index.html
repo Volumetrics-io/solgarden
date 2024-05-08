@@ -157,6 +157,14 @@
             action: 4,
             projectedCost: 0,
             displayRange: 0,
+            ppos: {
+                x: 1,
+                y: 1
+            },
+            dpos: {
+                x: 0,
+                y: 5,
+            },
             weapons: [{
                     subtype: 'twig',
                     attack: .5,
@@ -240,12 +248,49 @@
                 isChest: false,
                 biome: {
                     name: 'spawn',
-                    path: "assets/biomes/purple/",
+                    path: "assets/biomes/spawn/",
                     audio: "",
-                    tiles: ["tilegrasspurple001.glb"],
+                    tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
                     props: [],
                     block: [],
-                }
+                },
+                entityMap: [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ],
+                propMap: [
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-battery-iii"),
+                        type: 'battery'
+                    }, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ],
+                lootMap: [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-weapon"),
+                        type: 'weapon',
+                        weaponID: 0,
+                        subtype: 'twig',
+                        attack: 1,
+                        range: WEAPONS[0][0].range
+                    }, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, {
+                        el: document.createElement("mr-key"),
+                        type: 'key'
+                    }, 0, 0],
+                ]
             }
         }
 
