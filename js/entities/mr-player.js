@@ -53,7 +53,6 @@ class MRPlayer extends MREntity {
         this.appendChild(this.el);
         this.add(this.el);
         
-
         //character
         // const gltfLoader = new GLTFLoader();
         // gltfLoader.load('./character.glb', function(gltf) {
@@ -94,6 +93,7 @@ class MRPlayer extends MREntity {
         this.idleAnimationAction.enabled = true;
         this.attackAnimationAction.enabled = false;
         this.idleAnimationAction.reset().play();
+        console.log('this.idleAnimationAction.isRunning()', this.idleAnimationAction.isRunning());
         
         // console.log(action);
         // action.reset().play();
@@ -110,6 +110,7 @@ class MRPlayer extends MREntity {
         this.attackAnimationAction.enabled = true;
         this.idleAnimationAction.enabled = false;
         this.attackAnimationAction.reset().play();
+        console.log('this.attackAnimationAction.isRunning()', this.attackAnimationAction.isRunning());
 
         // this.el.components.set("animation", {
         //     clip: 2,
