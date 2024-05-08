@@ -741,6 +741,7 @@ class GameSystem extends MRSystem {
             this.board.projectAnimatedEntities(this.timer);
 
             // current player model animation:
+            const ppos = this.board.playerPos;
             const player = this.board.entityMap[ppos.x][ppos.y];
             mrjsUtils.model.currentRunningAnimationClip(player.el);
         }
