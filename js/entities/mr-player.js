@@ -50,6 +50,7 @@ class MRPlayer extends MREntity {
 
     connected() {
         this.appendChild(this.el);
+        this.add(this.el);
         
 
         //character
