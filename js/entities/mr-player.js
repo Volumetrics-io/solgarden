@@ -21,19 +21,18 @@ class MRPlayer extends MREntity {
             // we want to trip the frames that we know are not needed.
 
             const _getAnimationIndex = (name) => {
-                let targetAnimationIndex = -1;
-                animations.forEach(function(animation, index) {
-                    if (animation.name === targetAnimationName) {
-                        targetAnimationIndex = index;
+                let targetIndex = -1;
+                this.el.animations.forEach(function(animation, index) {
+                    if (animation.name === name) {
+                        targetIndex = index;
                         return;
                     }
                 });
-
-                if (targetAnimationIndex === -1) {
-                    console.error('Animation with name ' + targetAnimationName + ' not found.');
+                if (targetIndex === -1) {
+                    console.error('Animation with name ' + name + ' not found.');
                     return;
                 }
-                return targetAnimationIndex;
+                return targetIndex;
             }
 
             // trim idle clip frames
