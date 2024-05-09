@@ -257,12 +257,33 @@
                     block: [],
                 },
                 entityMap: [
+                    [0, 0, {
+                        el: document.createElement("mr-spawn-i"),
+                        type: 'prop'
+                    }, 0],
                     [0, 0, 0, 0],
                     [0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0],
+                    [0, 0, {
+                        el: document.createElement("mr-spawn-ii"),
+                        type: 'prop'
+                    }, {
+                        el: document.createElement("mr-entity"),
+                        type: 'prop'
+                    }],
+                    [0, 0, {
+                        el: document.createElement("mr-entity"),
+                        type: 'prop'
+                    }, {
+                        el: document.createElement("mr-entity"),
+                        type: 'prop'
+                    }],
+                    [0, 0, {
+                        el: document.createElement("mr-entity"),
+                        type: 'prop'
+                    }, {
+                        el: document.createElement("mr-entity"),
+                        type: 'prop'
+                    }],
                 ],
                 propMap: [
                     [0, 0, 0, 0],
@@ -399,6 +420,7 @@
 
     <!-- Mrjs Entities -->
     <script src="/js/entities/mr-battery.js"></script>
+    <script src="/js/entities/mr-spawn.js"></script>
     <script src="/js/entities/mr-chest.js"></script>
     <script src="/js/entities/mr-door.js"></script>
     <script src="/js/entities/mr-enemy.js"></script>
