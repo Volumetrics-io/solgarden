@@ -7,7 +7,7 @@ class MRWeapon extends MREntity {
 
     connected() {
         this.appendChild(this.el);
-        const subtype = this.dataset.model ?? "shortsword";
+        const subtype = this.dataset.model ?? "twig";
 
         WEAPONS.forEach((type, i) => {
             type.forEach((weapon, i) => {

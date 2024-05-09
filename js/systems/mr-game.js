@@ -6,7 +6,6 @@ class GameSystem extends MRSystem {
 
         // container to store board object references
         this.container = document.createElement("mr-div");
-        // this.interface = document.querySelector("#interface");
         this.dmgTile = document.querySelector("#damage-tile");
 
         // UI elements
@@ -87,8 +86,7 @@ class GameSystem extends MRSystem {
             // W for Weapon
             if (event.key === 'w') {
                 event.preventDefault();
-                const ppos = this.board.playerPos;
-                this.board.dropWeaponAt(ppos.x, ppos.y);
+                this.board.dropWeaponAt(State.ppos.x, State.ppos.y);
                 State.needsUpdate = true;
             }
 
@@ -110,15 +108,12 @@ class GameSystem extends MRSystem {
             // C for Chest
             if (event.key === 'c') {
                 event.preventDefault();
-
                 const chest = document.createElement("mr-chest");
                 this.container.appendChild(chest);
-
-                const pos = this.board.addToMap({
+                this.board.addToMap({
                     el: chest,
                     type: 'chest',
-                }, this.board.entityMap);
-                console.log('Chest dropped at ', pos);
+                });
                 State.needsUpdate = true;
             }
 
@@ -132,7 +127,7 @@ class GameSystem extends MRSystem {
             // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
-                this.board.projectileTo(this.board.playerPos, this.board.doorPos);
+                this.board.projectileTo(State.ppos, State.dpos);
                 State.needsUpdate = true;
             }
 
@@ -140,28 +135,24 @@ class GameSystem extends MRSystem {
             if (event.key === 'o') {
                 event.preventDefault();
                 State.hasKey = true;
-                this.board.openDoor();
+                // this.board.openDoor();
+                this.board.doorEl.open();
             }
 
             // Q for Quake
             if (event.key === 'q') {
                 event.preventDefault();
-                this.board.startQuakeAt(
-                    this.board.playerPos.x,
-                    this.board.playerPos.y, 4, 15, 2);
+                this.board.startQuakeAt(State.ppos.x, State.ppos.y, 4, 15, 2);
             }
             if (event.key === 'a') {
                 event.preventDefault();
-                this.board.startQuakeAt(
-                    this.board.playerPos.x,
-                    this.board.playerPos.y, 1.2, 10, 0.5);
+                this.board.startQuakeAt(State.ppos.x, State.ppos.y, 1.2, 10, 0.5);
             }
 
             // Z for whatever (to reuse)
             if (event.key === "z") {
                 event.preventDefault();
-                const ppos = this.board.playerPos;
-                const player = this.board.entityMap[ppos.x][ppos.y];
+                const player = this.board.entityMap[State.ppos.x][State.ppos.y];
                 player.el.playCombatAnimation();
             }
 
@@ -180,7 +171,7 @@ class GameSystem extends MRSystem {
 
                 enemy.el.dataset.subtype = enemy.subtype;
                 this.container.appendChild(enemy.el);
-                this.board.addToMap(enemy, this.board.entityMap);
+                this.board.addToMap(enemy);
                 State.needsUpdate = true;
             }
 
@@ -329,8 +320,7 @@ class GameSystem extends MRSystem {
 
                             // enemies
                             if (entity.type == "enemy") {
-                                const ppos = this.board.playerPos;
-                                const dist = distBetween(x, y, ppos.x, ppos.y);
+                                const dist = distBetween(x, y, State.ppos.x, State.ppos.y);
                                 const weapon = State.weapons[State.selectedWeaponID];
                                 const range = weapon.range;
 
@@ -428,8 +418,8 @@ class GameSystem extends MRSystem {
             const subtype = entity.subtype;
             const r = entry.r;
             const c = entry.c;
-            const x = this.board.playerPos.x;
-            const y = this.board.playerPos.y;
+            const x = State.ppos.x;
+            const y = State.ppos.y;
 
             let deltaX;
             let deltaY;
@@ -530,8 +520,6 @@ class GameSystem extends MRSystem {
     }
 
     attackPlayer(attacker, r, c) {
-        const pos = this.board.playerPos;
-
         switch (attacker.subtype) {
             case "aimless":
                 attacker.el.playSwoosh();
@@ -544,14 +532,14 @@ class GameSystem extends MRSystem {
                 this.board.projectileTo({
                     x: r,
                     y: c
-                }, pos);
+                }, State.ppos);
                 break;
             default:
                 console.error('this enemy type is not handled')
         }
 
-        this.board.showDamageAt(pos.x, pos.y, attacker.attack, COLORS.hover);
-        this.board.startQuakeAt(pos.x, pos.y, 1, 10, 0.5);
+        this.board.showDamageAt(State.ppos.x, State.ppos.y, attacker.attack, COLORS.hover);
+        this.board.startQuakeAt(State.ppos.x, State.ppos.y, 1, 10, 0.5);
 
         State.health -= attacker.attack;
         State.needsUpdate = true;
@@ -567,15 +555,14 @@ class GameSystem extends MRSystem {
         State.isInteractive = false;
         State.staticUntil = this.timer + 1;
 
-        const ppos = this.board.playerPos;
-        const player = this.board.entityMap[ppos.x][ppos.y];
+        const player = this.board.entityMap[State.ppos.x][State.ppos.y];
         const weapon = State.weapons[State.selectedWeaponID];
 
         if (State.selectedWeaponID == 0) { // melee
             player.el.playSwoosh();
             player.el.playCombatAnimation();
         } else { // range
-            this.board.projectileTo(this.board.playerPos, {
+            this.board.projectileTo(State.ppos, {
                 x: r,
                 y: c
             });
@@ -609,7 +596,7 @@ class GameSystem extends MRSystem {
     }
 
     projectRoom() {
-        this.board.calcDistFromPlayer();
+        this.board.updateDistances();
         this.board.updateFloor(this.timer);
         this.board.projectEverything(this.timer);
 
@@ -628,7 +615,6 @@ class GameSystem extends MRSystem {
     update(deltaTime, frame) {
         if (this.gameIsStarted) {
             this.timer += deltaTime;
-            const pos = this.board.playerPos;
 
             if (State.needsUpdate || this.board.isQuake) {
 
@@ -688,7 +674,7 @@ class GameSystem extends MRSystem {
                 State.needsUpdate = false;
 
                 // If the player is at the door with the key
-                if (this.board.lootMap[pos.x][pos.y].type == 'door' &&
+                if (this.board.lootMap[State.ppos.x][State.ppos.y].type == 'door' &&
                     State.hasKey) {
 
                     State.isPlayerTurn = true;
@@ -713,7 +699,7 @@ class GameSystem extends MRSystem {
                     const padEl = this.board.tileMap[4][1].el;
 
                     // Dot stands on the pad
-                    if (pos.x == 4 && pos.y == 1) {
+                    if (State.ppos.x == 4 && State.ppos.y == 1) {
                         if (State.range < State.maxRange) {
                             // Dot is charging
                             State.range += 0.1;

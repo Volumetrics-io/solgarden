@@ -37,7 +37,7 @@ class MRPlayer extends MREntity {
 
         this.appendChild(this.light);
         this.light.setAttribute('color', "#ffffff");
-        this.light.setAttribute('intensity', 0.03);
+        this.light.setAttribute('intensity', 0.02);
         this.light.dataset.position = `0 0.6 0.3`;
     }
 
