@@ -31,16 +31,16 @@ class MRPlayer extends MREntity {
             // Find the 'idle' animation clip in the animations array
             const idleAnimationClip = animations.find(clip => clip.name === 'idle');
             console.log('idle anim clip is:', idleAnimationClip);
-            this.idleAnimationAction = mixer.clipAction(idleAnimationClip);
-            this.idleAnimationAction.setLoop(THREE.LoopRepeat, Infinity);
-            this.idleAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
+            // this.idleAnimationAction = mixer.clipAction(idleAnimationClip);
+            // this.idleAnimationAction.setLoop(THREE.LoopRepeat, Infinity);
+            // this.idleAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
             // this.idleAnimationAction.enabled = true;
 
             const attackAnimationClip = animations.find(clip => clip.name === 'attack-melee');
             console.log('attack anim clip is:', attackAnimationClip);
-            this.attackAnimationAction = mixer.clipAction(attackAnimationClip);
-            this.attackAnimationAction.setLoop(THREE.LoopRepeat, Infinity);
-            this.attackAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
+            // this.attackAnimationAction = mixer.clipAction(attackAnimationClip);
+            // this.attackAnimationAction.setLoop(THREE.LoopRepeat, Infinity);
+            // this.attackAnimationAction.clampWhenFinished = true; // Ensure the animation stops at the last frame when paused
             // this.attackAnimationAction.enabled = false;
 
             console.log('mixer:', mixer, 'animations', animations);
@@ -90,34 +90,34 @@ class MRPlayer extends MREntity {
 
     playIdleAnimation() {
         console.log('PLAYING IDLE ANIMATION');
-        this.idleAnimationAction.enabled = true;
-        this.attackAnimationAction.enabled = false;
-        this.idleAnimationAction.reset().play();
-        console.log('this.idleAnimationAction.isRunning()', this.idleAnimationAction.isRunning());
+        // this.idleAnimationAction.enabled = true;
+        // this.attackAnimationAction.enabled = false;
+        // this.idleAnimationAction.reset().play();
+        // console.log('this.idleAnimationAction.isRunning()', this.idleAnimationAction.isRunning());
         
         // console.log(action);
         // action.reset().play();
 
-        // this.el.components.set("animation", {
-        //     clip: 0,
-        //     action: "play",
-        //     loop: true,
-        // });
+        this.el.components.set("animation", {
+            clip: 'idle',
+            action: "play",
+            loop: true,
+        });
     }
 
     playCombatAnimation() {
         console.log('PLAYING COMBAT ANIMATION');
-        this.attackAnimationAction.enabled = true;
-        this.idleAnimationAction.enabled = false;
-        this.attackAnimationAction.reset().play();
-        console.log('this.attackAnimationAction.isRunning()', this.attackAnimationAction.isRunning());
+        // this.attackAnimationAction.enabled = true;
+        // this.idleAnimationAction.enabled = false;
+        // this.attackAnimationAction.reset().play();
+        // console.log('this.attackAnimationAction.isRunning()', this.attackAnimationAction.isRunning());
 
-        // this.el.components.set("animation", {
-        //     clip: 2,
-        //     action: "play",
-        //     loop: false,
-        //     // clampWhenFinished: true
-        // });
+        this.el.components.set("animation", {
+            clip: 'attack-melee',
+            action: "play",
+            loop: false,
+            clampWhenFinished: true
+        });
     }
 
     playSwoosh() {
