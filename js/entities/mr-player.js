@@ -21,7 +21,7 @@ class MRPlayer extends MREntity {
             // we want to trip the frames that we know are not needed.
 
             const _getAnimationIndex = (name) => {
-                var targetAnimationIndex = -1;
+                let targetAnimationIndex = -1;
                 animations.forEach(function(animation, index) {
                     if (animation.name === targetAnimationName) {
                         targetAnimationIndex = index;
@@ -37,14 +37,16 @@ class MRPlayer extends MREntity {
             }
 
             // trim idle clip frames
-            let originalAnimationClip = entity.animations[_getAnimationIndex('idle')];
+            let animIndex = _getAnimationIndex('idle');
+            let originalAnimationClip = entity.animations[animIndex];
             let subclip = AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 30);
-            entity.animations[animationIndex] = subclip;
+            entity.animations[animIndex] = subclip;
 
             // trim attack-melee clip frames
+            animIndex = _getAnimationIndex('idle');
             originalAnimationClip = entity.animations[_getAnimationIndex('attack-melee')];
             subclip = AnimationUtils.subclip(originalAnimationClip, 'attack-melee', 61, 75);
-            entity.animations[animationIndex] = subclip;
+            entity.animations[animIndex] = subclip;
 
             /* --- Play the default animation --- */
 
