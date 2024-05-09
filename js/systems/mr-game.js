@@ -388,8 +388,6 @@ class GameSystem extends MRSystem {
         Sounds.play('analogSound');
 
         if (State.isDebug) console.log("Combat queue", this.combatQueue);
-
-
     }
 
     endGame() {
@@ -567,7 +565,6 @@ class GameSystem extends MRSystem {
                 y: c
             });
             player.el.playBowRelease();
-            player.el.playIdleAnimation();
         }
 
         let damage;
@@ -725,11 +722,6 @@ class GameSystem extends MRSystem {
             }
 
             this.board.projectAnimatedEntities(this.timer);
-
-            // current player model animation:
-            const ppos = this.board.playerPos;
-            const player = this.board.entityMap[ppos.x][ppos.y];
-            mrjsUtils.model.currentRunningAnimationClip(player.el);
         }
     }
 
