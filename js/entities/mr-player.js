@@ -39,13 +39,13 @@ class MRPlayer extends MREntity {
             let animIndex = _getAnimationIndex('idle');
             let originalAnimationClip = this.el.animations[animIndex];
             let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 30);
-            entity.animations[animIndex] = subclip;
+            this.el.animations[animIndex] = subclip;
 
             // trim attack-melee clip frames
             animIndex = _getAnimationIndex('attack-melee');
             originalAnimationClip = this.el.animations[animIndex];
             subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'attack-melee', 61, 75);
-            entity.animations[animIndex] = subclip;
+            this.el.animations[animIndex] = subclip;
 
             /* --- Play the default animation --- */
 
