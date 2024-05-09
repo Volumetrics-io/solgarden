@@ -13,6 +13,41 @@ class MRPlayer extends MREntity {
         this.bowReleaseSound = document.createElement("mr-entity");
 
         this.el.onLoad = () => {
+            console.log(entity.animations);
+
+            /* --- Cleanup animation clips for player --- */
+
+            // Since the animations we're using take up all the frames,
+            // we want to trip the frames that we know are not needed.
+
+            const _getAnimationIndex = (name) => {
+                var targetAnimationIndex = -1;
+                animations.forEach(function(animation, index) {
+                    if (animation.name === targetAnimationName) {
+                        targetAnimationIndex = index;
+                        return;
+                    }
+                });
+
+                if (targetAnimationIndex === -1) {
+                    console.error('Animation with name ' + targetAnimationName + ' not found.');
+                    return;
+                }
+                return targetAnimationIndex;
+            }
+
+            // trim idle clip frames
+            let originalAnimationClip = entity.animations[_getAnimationIndex('idle')];
+            let subclip = AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 30);
+            entity.animations[animationIndex] = subclip;
+
+            // trim attack-melee clip frames
+            originalAnimationClip = entity.animations[_getAnimationIndex('attack-melee')];
+            subclip = AnimationUtils.subclip(originalAnimationClip, 'attack-melee', 61, 75);
+            entity.animations[animationIndex] = subclip;
+
+            /* --- Play the default animation --- */
+
             this.playIdleAnimation();
         }
     }
