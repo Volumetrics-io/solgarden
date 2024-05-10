@@ -721,8 +721,6 @@ class GameSystem extends MRSystem {
 
                 // Dot is in the spawn room
                 if (this.board.biome.name == 'spawn') {
-                    // the gauge that fills at it charges
-                    // const gaugeEl = this.board.entityMap[4][2].el;
 
                     // the charging pad on the floor,
                     // that Dot stands on.
@@ -733,16 +731,13 @@ class GameSystem extends MRSystem {
                         if (State.range < State.maxRange) {
                             // Dot is charging
                             State.range += 0.1;
-                            // gaugeEl.updateLevel(State.range / State.maxRange);
-                            State.needsUpdate = true;
+
                         } else {
                             // Dot is charged
                             State.range = State.maxRange;
-                            State.needsUpdate = false;
+                            // State.needsUpdate = false;
                         }
-                    } else {
-                        // gaugeEl.updateLevel(0);
-
+                        State.needsUpdate = true;
                     }
                 }
             }
