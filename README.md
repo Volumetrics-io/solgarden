@@ -1,2 +1,2 @@
 # solgarden
-A game build in MRjs
+A game built in MRjs
