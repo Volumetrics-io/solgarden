@@ -38,7 +38,7 @@ class MRPlayer extends MREntity {
             // trim idle clip frames
             let animIndex = _getAnimationIndex('idle');
             let originalAnimationClip = this.el.animations[animIndex];
-            let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle_Armature.001', 1, 60);
+            let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 60);
             this.el.animations[animIndex] = subclip;
 
             console.log('subclip:idle:', subclip);
@@ -47,7 +47,7 @@ class MRPlayer extends MREntity {
             let animIndex1 = _getAnimationIndex('attack-melee');
             let originalAnimationClip1 = this.el.animations[animIndex1];
             console.log('attack-melee:', originalAnimationClip1);
-            let subclip1 = THREE.AnimationUtils.subclip(originalAnimationClip1, 'attack-melee_Armature', 1, 75);
+            let subclip1 = THREE.AnimationUtils.subclip(originalAnimationClip1, 'attack-melee', 1, 75);
             this.el.animations[animIndex1] = subclip1;
 
             console.log('subclip:attack-melee:', subclip1);
