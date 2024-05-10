@@ -150,14 +150,16 @@ class Board {
 
         // lore
         // 10% of the time
-        if (this.isLore && Math.random() < 0.1) {
-            const el = document.createElement("mr-lore");
-            const lore = {
-                el: el,
-                type: 'lore',
-            };
-            this.addToLootMap(lore);
-        }
+
+        // TODO: convert lore in action upgrade
+        // if (this.isLore && Math.random() < 0.1) {
+        //     const el = document.createElement("mr-lore");
+        //     const lore = {
+        //         el: el,
+        //         type: 'lore',
+        //     };
+        //     this.addToLootMap(lore);
+        // }
 
         // enemies
         for (let i = 0; i < this.enemyCount; i++) {
@@ -398,6 +400,20 @@ class Board {
         return this.nextMoveQueue.length;
     }
 
+    orientsTowards(element, deltaX, deltaY) {
+
+        // Orient the player model based on move
+        if (deltaX < 0) {
+            element.dataset.rotation = `0 0 0`;
+        } else if (deltaX > 0) {
+            element.dataset.rotation = `0 180 0`;
+        } else if (deltaY < 0) {
+            element.dataset.rotation = `0 90 0`;
+        } else if (deltaY > 0) {
+            element.dataset.rotation = `0 270 0`;
+        }
+    }
+
     movementQueue() {
         // if the queue is not empty, grab the next move.
         if (this.nextMoveQueue.length > 0) {
@@ -407,17 +423,7 @@ class Board {
 
             const deltaX = State.ppos.x - x;
             const deltaY = State.ppos.y - y;
-
-            // Orient the player model based on move
-            if (deltaX == -1) {
-                this.playerEl.dataset.rotation = `0 0 0`;
-            } else if (deltaX == 1) {
-                this.playerEl.dataset.rotation = `0 180 0`;
-            } else if (deltaY == -1) {
-                this.playerEl.dataset.rotation = `0 90 0`;
-            } else if (deltaY == 1) {
-                this.playerEl.dataset.rotation = `0 270 0`;
-            }
+            this.orientsTowards(this.playerEl, deltaX, deltaY);
 
             this.moveEntity(State.ppos.x, State.ppos.y, x, y);
             State.ppos.x = x;
@@ -457,6 +463,9 @@ class Board {
             subtype: weapon.subtype,
             attack: 1 + Math.ceil(State.level / 5),
             range: weapon.range,
+            crits: weapon.crits,
+            ammoType: weapon.ammoType,
+            cost: weapon.cost,
         };
 
         this.needsUpdate = true;
@@ -479,64 +488,59 @@ class Board {
             }
         }
 
-        if (this.lootMap[x][y] == 0) {
-            let loot;
-            if (enemyCount == 0 && State.hasKey) {
-                // last enemy and key already
-                // a chest might drop
-                if (Math.random() < 0.5) {
-                    const chest = document.createElement("mr-chest");
-                    this.container.appendChild(chest);
-                    this.entityMap[x][y] = {
-                        el: chest,
-                        type: 'chest'
-                    };
-                } else {
-                    // Otherwise drop something random
-                    const loot = document.createElement("mr-loot");
-                    this.container.appendChild(loot);
+        // Drop the loot
+        let element, type;
+        if (enemyCount == 0 && State.hasKey) {
 
-                    this.lootMap[x][y] = {
-                        el: loot,
-                        type: 'loot',
-                    };
-                }
-
-            } else if (enemyCount == 0 && !State.hasKey && !isAlreadyKey) {
-
-                // last enemy and no key in inventory or on the board
-                // the key must drop
-                const key = document.createElement("mr-key");
-                this.container.appendChild(key);
-                this.entityMap[x][y] = 0;
-                this.lootMap[x][y] = {
-                    el: key,
-                    type: 'key'
-                };
-
-            } else if (enemyCount > 0 && !State.hasKey && !isAlreadyKey &&
-                Math.random() > 0.5) {
-
-                // not the last enemy and no key. Key could drop
-                // but only if there is not already one on the board
-                const key = document.createElement("mr-key");
-                this.container.appendChild(key);
-                this.entityMap[x][y] = 0;
-                this.lootMap[x][y] = {
-                    el: key,
-                    type: 'key'
-                };
-
-            } else {
-
-                // Otherwise drop something random
-                const loot = document.createElement("mr-loot");
-                this.container.appendChild(loot);
-                this.lootMap[x][y] = {
-                    el: loot,
-                    type: 'loot',
-                };
+            // Last enemy but already have the key?
+            // 30% chances to drop a chest
+            if (Math.random() < 0.3) {
+                const chest = document.createElement("mr-chest");
+                this.container.appendChild(chest);
+                this.addToMap({
+                    el: chest,
+                    type: 'chest',
+                });
             }
+
+            element = document.createElement("mr-loot");
+            type = "loot";
+
+        } else if (enemyCount == 0 && !State.hasKey && !isAlreadyKey) {
+
+            // last enemy and no key in inventory or on the board
+            // the key must drop
+            element = document.createElement("mr-key");
+            type = "key";
+
+        } else if (enemyCount > 0 && !State.hasKey && !isAlreadyKey &&
+            Math.random() > 0.5) {
+
+            // not the last enemy and no key. Key could drop
+            // but only if there is not already one on the board
+            element = document.createElement("mr-key");
+            type = "key";
+
+        } else {
+
+            // Otherwise drop something random
+            element = document.createElement("mr-loot");
+            type = "loot";
+        }
+
+        this.container.appendChild(element);
+        this.entityMap[x][y] = 0;
+
+        const loot = {
+            el: element,
+            type: type
+        };
+
+        // if the cell is already used, drop the loot somewhere else
+        if (this.lootMap[x][y] == 0) {
+            this.lootMap[x][y] = loot;
+        } else {
+            this.addToLootMap(loot);
         }
 
         // TODO: this is where we can add the poof animation
@@ -567,6 +571,8 @@ class Board {
                     State.weapons[entity.weaponID].subtype = entity.subtype;
                     State.weapons[entity.weaponID].range = entity.range;
                     State.weapons[entity.weaponID].crits = entity.crits;
+                    State.weapons[entity.weaponID].ammoType = entity.ammoType;
+                    State.weapons[entity.weaponID].cost = entity.cost;
                 }
 
                 this.container.removeChild(entity.el);
@@ -736,7 +742,7 @@ class Board {
 
             } else if (entity.type == "projectile") {
                 // projectiles
-                distF = h * 2;
+                distF = h * entity.animation.arc + 0.5;
 
                 // projectiles move linearly
                 // so we use t instead of p for the progress
@@ -779,27 +785,59 @@ class Board {
         );
     }
 
-    projectileTo(startPos, endPos) {
+    projectileTo(startPos, endPos, type) {
+
+        // console.log(type);
 
         const particle = document.createElement("mr-projectile");
-        particle.dataset.foo = "bar";
+        particle.dataset.type = type;
         this.container.appendChild(particle);
 
-        this.effectList.push({
-            el: particle,
-            type: 'projectile',
-            r: startPos.x,
-            c: startPos.y,
-            animation: {
-                type: 'move',
-                speed: 2,
-                started: false,
-                x: startPos.x,
-                y: startPos.y,
-                distX: endPos.x - startPos.x,
-                distY: endPos.y - startPos.y
-            }
-        })
+        var dx = endPos.x - startPos.x;
+        var dy = endPos.y - startPos.y;
+
+        // Calculate the rotation angle
+        var angleRadians = Math.atan2(dy, dx);
+        var angleDegrees = angleRadians * 180 / Math.PI;
+        particle.dataset.rotation = `0 ${angleDegrees} 0`;
+
+        if (type == 'arrow') {
+            this.effectList.push({
+                el: particle,
+                type: 'projectile',
+                r: startPos.x,
+                c: startPos.y,
+                animation: {
+                    type: 'move',
+                    speed: 4,
+                    arc: 0.5,
+                    started: false,
+                    x: startPos.x,
+                    y: startPos.y,
+                    distX: endPos.x - startPos.x,
+                    distY: endPos.y - startPos.y
+                }
+            })
+        } else {
+            this.effectList.push({
+                el: particle,
+                type: 'projectile',
+                r: startPos.x,
+                c: startPos.y,
+                animation: {
+                    type: 'move',
+                    speed: 2,
+                    arc: 3,
+                    started: false,
+                    x: startPos.x,
+                    y: startPos.y,
+                    distX: endPos.x - startPos.x,
+                    distY: endPos.y - startPos.y
+                }
+            })
+        }
+
+
     }
 
     updateFloor(timer) {
@@ -877,7 +915,7 @@ class Board {
                     // If either melee or range weapon is hovered
                     if (State.displayRange > 0) {
                         if (rawDist <= State.displayRange) {
-                            el.tileColor('movement');
+                            el.tileColor('health');
                         }
                     }
 
@@ -967,7 +1005,6 @@ class Board {
 
     getCostFor(x, y) {
         let projectedCost = 0;
-
         const entity = this.entityMap[x][y];
 
         if (!entity.type) {
@@ -975,15 +1012,11 @@ class Board {
             projectedCost = this.distances[x][y];
 
         } else if (entity.type == 'enemy') {
+            // the tile is enemy, so the cost is weapon-based
             const dist = distBetween(x, y, State.ppos.x, State.ppos.y);
-
-            if (State.selectedWeapon == 'melee' && dist <= State.meleeRange) {
-                projectedCost = 1;
-            } else if (State.selectedWeapon == 'range' && dist <= State.rangeRange) {
-                projectedCost = 3;
-            }
+            const weapon = State.weapons[State.selectedWeaponID];
+            projectedCost = weapon.cost;
         }
-
         return projectedCost;
     }
 
