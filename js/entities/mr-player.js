@@ -36,12 +36,12 @@ class MRPlayer extends MREntity {
             }
 
             // trim idle clip frames
-            // let animIndex = _getAnimationIndex('idle');
-            // let originalAnimationClip = this.el.animations[animIndex];
-            // let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 60);
-            // this.el.animations[animIndex] = subclip;
+            let animIndex = _getAnimationIndex('idle');
+            let originalAnimationClip = this.el.animations[animIndex];
+            let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 30);
+            this.el.animations[animIndex] = subclip;
 
-            // console.log('subclip:idle:', subclip);
+            console.log('subclip:idle:', subclip);
 
             // trim attack-melee clip frames
             let animIndex = _getAnimationIndex('attack-melee');
@@ -86,8 +86,8 @@ class MRPlayer extends MREntity {
         this.el.components.set("animation", {
             clip: 'idle',
             action: "play",
-            // loop: true,
-            looMode: "pingpong",
+            loop: true,
+            // loopMode: "pingpong",
         });
     }
 
