@@ -46,6 +46,7 @@ class MRPlayer extends MREntity {
             // trim attack-melee clip frames
             let animIndex1 = _getAnimationIndex('attack-melee');
             let originalAnimationClip1 = this.el.animations[animIndex1];
+            console.log('attack-melee:', originalAnimationClip1);
             let subclip1 = THREE.AnimationUtils.subclip(originalAnimationClip1, 'attack-melee', 1, 15);
             this.el.animations[animIndex1] = subclip1;
 
