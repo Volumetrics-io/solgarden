@@ -13,10 +13,10 @@ class MREnemy extends MREntity {
     }
 
     connected() {
-
         this.appendChild(this.el);
         this.el.dataset.compAnimation = "clip: 0; action: play;";
-        this.el.dataset.rotation = `0 0 0`
+
+        // TODO: random starting rotation
         this.el.style.pointerEvents = 'none';
 
         const subtype = this.dataset.subtype ?? "aimless";

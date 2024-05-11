@@ -22,6 +22,7 @@
         body {
             background-color: #0a0a0a;
             font-family: 'JetBrains';
+            overflow: hidden;
         }
 
         .end-turn {
@@ -154,7 +155,7 @@
             staticUntil: 0,
             hasKey: false,
             level: 0,
-            health: 10,
+            health: 20,
             range: 15,
             action: 4,
             projectedCost: 0,
@@ -171,13 +172,16 @@
                     subtype: '',
                     attack: 0,
                     range: 0,
-                    crits: 0
+                    crits: 0,
+                    cost: 0
                 },
                 {
                     subtype: '',
                     attack: 0,
                     range: 0,
-                    crits: 0
+                    crits: 0,
+                    cost: 0,
+                    ammoType: 'stone',
                 }
             ],
             selectedWeaponID: 0,
@@ -215,26 +219,38 @@
                     subtype: 'twig',
                     gameModel: "assets/models/weapon-stick1-pickup.glb",
                     uiModel: "assets/models/weapon-stick1-UI.glb",
-                    range: 1
+                    ammoType: '',
+                    range: 1,
+                    crits: 0,
+                    cost: 1,
                 },
                 {
                     subtype: 'shortsword',
                     gameModel: "assets/models/weapon-shortSword1-pickup.glb",
                     uiModel: "assets/models/weapon-shortSword1-UI.glb",
-                    range: 1.5
+                    ammoType: '',
+                    range: 1.5,
+                    crits: 0.1,
+                    cost: 1,
                 },
             ],
             [{
                     subtype: 'slingshot',
                     gameModel: "assets/models/weapon-slingshot1-pickup.glb",
                     uiModel: "assets/models/weapon-slingshot1-UI.glb",
-                    range: 2
+                    ammoType: 'stone',
+                    range: 2,
+                    crits: 0.1,
+                    cost: 3,
                 },
                 {
                     subtype: 'bow',
                     gameModel: "assets/models/weapon-bow1-pickup.glb",
                     uiModel: "assets/models/weapon-bow1-UI.glb",
-                    range: 3
+                    ammoType: 'arrow',
+                    range: 3,
+                    crits: 0.2,
+                    cost: 3,
                 },
             ]
         ]
@@ -254,7 +270,7 @@
                     audio: "",
                     tiles: ["tilegrass001.glb", "tilegrass002.glb", "tilegrass003.glb"],
                     props: [],
-                    block: [],
+                    block: ["rock001.glb"],
                 },
                 entityMap: [
                     [0, 0, {
@@ -262,7 +278,10 @@
                         type: 'prop'
                     }, 0],
                     [0, 0, 0, 0],
-                    [0, 0, 0, 0],
+                    [{
+                        el: document.createElement("mr-spawn-rock"),
+                        type: 'prop'
+                    }, 0, 0, 0],
                     [0, 0, {
                         el: document.createElement("mr-spawn-ii"),
                         type: 'prop'
@@ -306,7 +325,10 @@
                         weaponID: 0,
                         subtype: 'twig',
                         attack: 1,
-                        range: WEAPONS[0][0].range
+                        range: WEAPONS[0][0].range,
+                        crits: WEAPONS[0][0].crits,
+                        ammoType: WEAPONS[0][0].ammoType,
+                        cost: WEAPONS[0][0].cost,
                     }, 0, 0],
                     [0, 0, 0, 0],
                     [0, {

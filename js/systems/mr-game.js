@@ -127,7 +127,11 @@ class GameSystem extends MRSystem {
             // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
-                this.board.projectileTo(State.ppos, State.dpos);
+                if(Math.random() < 0.5) {
+                    this.board.projectileTo(State.ppos, State.dpos, 'arrow');
+                } else {
+                    this.board.projectileTo(State.ppos, State.dpos, 'stone');
+                }
                 State.needsUpdate = true;
             }
 
@@ -165,7 +169,7 @@ class GameSystem extends MRSystem {
                     el: document.createElement("mr-enemy"),
                     type: 'enemy',
                     subtype: ENEMY_SUBTYPES[rand],
-                    hp: 20,
+                    hp: 1,
                     attack: 0
                 };
 
@@ -325,6 +329,7 @@ class GameSystem extends MRSystem {
                                 const range = weapon.range;
 
                                 if (dist <= range && cost <= State.action) {
+                                    console.log(cost);
                                     State.action -= cost;
                                     this.attack(entity, x, y);
                                 } else {
@@ -482,19 +487,10 @@ class GameSystem extends MRSystem {
                 this.board.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
-            if (deltaX == -1) {
-                entity.el.dataset.rotation = `0 0 0`;
-            } else if (deltaX == 1) {
-                entity.el.dataset.rotation = `0 180 0`;
-            } else if (deltaY == -1) {
-                entity.el.dataset.rotation = `0 90 0`;
-            } else if (deltaY == 1) {
-                entity.el.dataset.rotation = `0 270 0`;
-            }
+            this.board.orientsTowards(entity.el, deltaX, deltaY);
 
             // after moving, attack if in range
             // TODO: different attacks based on enemy subtype
-
             if (distBetween(r, c, x, y) <= 2) {
                 setTimeout(() => {
                     this.attackPlayer(entity, r, c);
@@ -530,11 +526,16 @@ class GameSystem extends MRSystem {
                 this.board.projectileTo({
                     x: r,
                     y: c
-                }, State.ppos);
+                }, State.ppos, 'stone');
                 break;
             default:
                 console.error('this enemy type is not handled')
         }
+
+        // orient the player
+        const deltaX = r - State.ppos.x;
+        const deltaY = c - State.ppos.y;
+        this.board.orientsTowards(attacker.el, deltaX, deltaY);
 
         this.board.showDamageAt(State.ppos.x, State.ppos.y, attacker.attack, COLORS.hover);
         this.board.startQuakeAt(State.ppos.x, State.ppos.y, 1, 10, 0.5);
@@ -556,6 +557,11 @@ class GameSystem extends MRSystem {
         const player = this.board.entityMap[State.ppos.x][State.ppos.y];
         const weapon = State.weapons[State.selectedWeaponID];
 
+        // orient the player
+        const deltaX = State.ppos.x - r;
+        const deltaY = State.ppos.y - c;
+        this.board.orientsTowards(this.board.playerEl, deltaX, deltaY);
+
         if (State.selectedWeaponID == 0) { // melee
             player.el.playSwoosh();
             player.el.playCombatAnimation();
@@ -563,7 +569,7 @@ class GameSystem extends MRSystem {
             this.board.projectileTo(State.ppos, {
                 x: r,
                 y: c
-            });
+            }, State.weapons[1].ammoType);
             player.el.playBowRelease();
         }
 
@@ -600,7 +606,7 @@ class GameSystem extends MRSystem {
         // End turn button
         if (State.isInteractive) {
             if (State.action == 0) {
-                this.endTurnButton.style.backgroundColor = COLORS.movement;
+                this.endTurnButton.style.backgroundColor = COLORS.health;
             } else {
                 this.endTurnButton.style.backgroundColor = COLORS.white;
             }
@@ -710,6 +716,28 @@ class GameSystem extends MRSystem {
                     } else {
                         gaugeEl.updateLevel(0);
 
+                    }
+                }
+
+                // Dot is in the spawn room
+                if (this.board.biome.name == 'spawn') {
+
+                    // the charging pad on the floor,
+                    // that Dot stands on.
+                    const padEl = this.board.tileMap[1][1].el;
+
+                    // Dot stands on the pad
+                    if (State.ppos.x == 1 && State.ppos.y == 1) {
+                        if (State.range < State.maxRange) {
+                            // Dot is charging
+                            State.range += 0.1;
+
+                        } else {
+                            // Dot is charged
+                            State.range = State.maxRange;
+                            // State.needsUpdate = false;
+                        }
+                        State.needsUpdate = true;
                     }
                 }
             }
