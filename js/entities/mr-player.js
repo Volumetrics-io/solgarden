@@ -20,37 +20,69 @@ class MRPlayer extends MREntity {
             // Since the animations we're using take up all the frames,
             // we want to trip the frames that we know are not needed.
 
-            const _getAnimationIndex = (name) => {
-                let targetIndex = -1;
-                this.el.animations.forEach(function(animation, index) {
-                    if (animation.name === name) {
-                        targetIndex = index;
-                        return;
-                    }
-                });
-                if (targetIndex === -1) {
-                    console.error('Animation with name ' + name + ' not found.');
+            const _updateClipsFor = (name, startFrame, endFrame) => {
+                // Find the original clip
+                const index = this.el.animations.findIndex((clip) => clip.name === name);
+                if (index === -1) {
+                    console.warn('Clip not found by name:', name);
                     return;
                 }
-                return targetIndex;
+                const originalClip = this.el.animations[index];
+
+                // Assume 24 frames per second, adjust according to your animation data
+                const fps = 24;
+                const newClip = THREE.AnimationUtils.subclip(
+                    originalClip,
+                    originalClip.name + '_sub',
+                    comp.startFrame,
+                    comp.endFrame,
+                    fps
+                );
+
+                // Replace the original clip with the new subclip in the animations array
+                console.log('newClip is:', newClip);
+                this.el.animations[index] = newClip;
             }
 
-            // trim idle clip frames
-            let animIndex = _getAnimationIndex('idle');
-            let originalAnimationClip = this.el.animations[animIndex];
-            let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 60);
-            this.el.animations[animIndex] = subclip;
 
-            console.log('subclip:idle:', subclip);
+            // const _getAnimationIndex = (name) => {
+            //     let targetIndex = -1;
+            //     this.el.animations.forEach(function(animation, index) {
+            //         if (animation.name === name) {
+            //             targetIndex = index;
+            //             return;
+            //         }
+            //     });
+            //     if (targetIndex === -1) {
+            //         console.error('Animation with name ' + name + ' not found.');
+            //         return;
+            //     }
+            //     return targetIndex;
+            // }
+
+            // trim idle clip frames
+            // let animIndex = _getAnimationIndex('idle');
+            // let originalAnimationClip = this.el.animations[animIndex];
+            // let subclip = THREE.AnimationUtils.subclip(originalAnimationClip, 'idle', 1, 60);
+            // this.el.animations[animIndex] = subclip;
+
+            console.log('subclip:idle');
+            _updateClipsFor('idle', 1, 60);
+
+            // console.log('subclip:idle:', subclip);
 
             // trim attack-melee clip frames
-            let animIndex1 = _getAnimationIndex('attack-melee');
-            let originalAnimationClip1 = this.el.animations[animIndex1];
-            console.log('attack-melee:', originalAnimationClip1);
-            let subclip1 = THREE.AnimationUtils.subclip(originalAnimationClip1, 'attack-melee', 1, 75);
-            this.el.animations[animIndex1] = subclip1;
+            // let animIndex1 = _getAnimationIndex('attack-melee');
+            // let originalAnimationClip1 = this.el.animations[animIndex1];
+            // console.log('attack-melee:', originalAnimationClip1);
+            // let subclip1 = THREE.AnimationUtils.subclip(originalAnimationClip1, 'attack-melee', 1, 75);
+            // this.el.animations[animIndex1] = subclip1;
 
-            console.log('subclip:attack-melee:', subclip1);
+            // console.log('subclip:attack-melee:', subclip1);
+
+            console.log('subclip:attack-melee');
+            _updateClipsFor('attack-melee', 61, 75);
+
             console.log(this.el.animations);
 
             /* --- Play the default animation --- */
