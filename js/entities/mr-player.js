@@ -13,8 +13,7 @@ class MRPlayer extends MREntity {
         this.bowReleaseSound = document.createElement("mr-entity");
 
         this.el.onLoad = () => {
-            console.log(this.el.animations);
-
+            
             /* --- Cleanup animation clips for player --- */
 
             // Since the animations we're using take up all the frames,
