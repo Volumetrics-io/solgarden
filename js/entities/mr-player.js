@@ -83,6 +83,7 @@ class MRPlayer extends MREntity {
             console.log('subclip:attack-melee');
             _updateClipsFor('attack-melee', 61, 75);
 
+            console.log('no _sub part');
             console.log(this.el.animations);
 
             /* --- Play the default animation --- */
