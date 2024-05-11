@@ -34,8 +34,8 @@ class MRPlayer extends MREntity {
                 const newClip = THREE.AnimationUtils.subclip(
                     originalClip,
                     originalClip.name + '_sub',
-                    comp.startFrame,
-                    comp.endFrame,
+                    startFrame,
+                    endFrame,
                     fps
                 );
 
