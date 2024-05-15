@@ -4,7 +4,7 @@ class MRPlayer extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
-        this.el.src = "assets/models/dot-test.glb";
+        this.el.src = "assets/models/dot_unarmed.glb";
         this.el.style.pointerEvents = 'none';
 
         this.light = document.createElement("mr-light");
@@ -13,7 +13,7 @@ class MRPlayer extends MREntity {
         this.bowReleaseSound = document.createElement("mr-entity");
 
         this.el.onLoad = () => {
-            
+
             /* --- Cleanup animation clips for player --- */
 
             // Since the animations we're using take up all the frames,
