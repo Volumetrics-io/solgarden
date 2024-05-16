@@ -91,7 +91,7 @@ const updateClipsFor = (name, startFrame, endFrame) => {
     console.log('within updateClipsFor, this is:', this);
 
     // Find the original clip
-    const index = this.animations.findIndex((clip) => clip.name === name);
+    const index = this.el.animations.findIndex((clip) => clip.name === name);
     if (index === -1) {
         console.warn('Clip not found by name:', name);
         return;

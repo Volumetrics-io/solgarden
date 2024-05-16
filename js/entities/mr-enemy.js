@@ -16,7 +16,10 @@ class MREnemy extends MREntity {
             // Bind our utils function to the current context here
             // so we can use the information more easily.
 
-            const boundUpdateClipsFor = updateClipsFor.bind(this);
+            const boundUpdateClipsFor = updateClipsFor.bind(this.el);
+            console.log('within the onload function: this, this.el');
+            console.log(this);
+            console.log(this.el);
 
             // Cleanup animation clips for enemy
 
