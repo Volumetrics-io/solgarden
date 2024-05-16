@@ -48,7 +48,7 @@ class MREnemy extends MREntity {
         this.el.style.pointerEvents = 'none';
 
         this.subtype = this.dataset.subtype ?? "aimless";
-        this.el.src = ENEMY_MODELS[subtype];
+        this.el.src = ENEMY_MODELS[this.subtype];
 
         await super.connected();
 
