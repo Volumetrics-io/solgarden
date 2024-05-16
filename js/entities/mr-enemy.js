@@ -21,13 +21,13 @@ class MREnemy extends MREntity {
             // Cleanup animation clips for enemy
 
             switch (this.subtype) {
-            case: 'static':
+            case 'static':
                 console.log('do something');
                 break;
-            case: 'homing':
+            case 'homing':
                 console.log('do something');
                 break;
-            case: 'aimless':
+            case 'aimless':
             default: 
                 boundUpdateClipsFor('idle', 1, 30);
                 boundUpdateClipsFor('attack', 31, 45);
