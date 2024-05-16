@@ -16,8 +16,8 @@ class MRPlayer extends MREntity {
 
             // Cleanup animation clips for enemy
 
-            _updateClipsFor('idle', 1, 60).bind(this);
-            _updateClipsFor('attack-melee', 61, 75).bind(this);
+            updateClipsFor('idle', 1, 60).bind(this);
+            updateClipsFor('attack-melee', 61, 75).bind(this);
 
             // Play necessary animations
 
