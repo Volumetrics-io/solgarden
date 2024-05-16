@@ -27,6 +27,8 @@ class MRPlayer extends MREntity {
 
             const boundUpdateClipsFor = updateClipsFor.bind(this.el);
 
+            console.log('function after binding:', boundUpdateClipsFor);
+
             // Cleanup animation clips for enemy
 
             boundUpdateClipsFor('idle', 1, 60);

@@ -24,6 +24,8 @@ class MREnemy extends MREntity {
             console.log(this);
             console.log(this.el);
 
+            console.log('function after binding:', boundUpdateClipsFor);
+
             // Cleanup animation clips for enemy
 
             boundUpdateClipsFor('idle', 1, 30);
