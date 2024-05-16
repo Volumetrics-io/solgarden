@@ -27,14 +27,14 @@ class MRLoot extends MREntity {
 
     applyEffect() {
         if (this.effect == 'health' &&
-            State.health < State.maxHealth) {
-            const healthDiff = State.maxHealth - State.health;
-            State.health += Math.ceil(healthDiff / 3);
+            STATE.health < STATE.maxHealth) {
+            const healthDiff = STATE.maxHealth - STATE.health;
+            STATE.health += Math.ceil(healthDiff / 3);
         }
         if (this.effect == 'range' &&
-            State.range < State.maxRange) {
-            const rangeDiff = State.maxRange - State.range;
-            State.range += Math.ceil(rangeDiff / 3);
+            STATE.range < STATE.maxRange) {
+            const rangeDiff = STATE.maxRange - STATE.range;
+            STATE.range += Math.ceil(rangeDiff / 3);
         }
     }
 
