@@ -20,10 +20,20 @@ class MREnemy extends MREntity {
 
             // Cleanup animation clips for enemy
 
-            boundUpdateClipsFor('idle', 1, 30);
-            boundUpdateClipsFor('attack', 31, 45);
-            boundUpdateClipsFor('crit', 46, 60);
-            boundUpdateClipsFor('damage', 61, 75);
+            switch (this.subtype) {
+            case: 'static':
+                console.log('do something');
+                break;
+            case: 'homing':
+                console.log('do something');
+                break;
+            case: 'aimless':
+            default: 
+                boundUpdateClipsFor('idle', 1, 30);
+                boundUpdateClipsFor('attack', 31, 45);
+                boundUpdateClipsFor('crit', 46, 60);
+                boundUpdateClipsFor('damage', 61, 75);
+            }
 
             // Play necessary animations
 
@@ -37,7 +47,7 @@ class MREnemy extends MREntity {
 
         this.el.style.pointerEvents = 'none';
 
-        const subtype = this.dataset.subtype ?? "aimless";
+        this.subtype = this.dataset.subtype ?? "aimless";
         this.el.src = ENEMY_MODELS[subtype];
 
         await super.connected();

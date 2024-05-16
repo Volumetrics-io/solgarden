@@ -24,6 +24,7 @@ class MRPlayer extends MREntity {
             boundUpdateClipsFor('idle', 1, 30);
             boundUpdateClipsFor('death', 31, 80);
             boundUpdateClipsFor('teleport', 81, 110);
+            
             // Play necessary animations
 
             this.playIdleAnimation();
