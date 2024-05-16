@@ -12,7 +12,15 @@ class MRPlayer extends MREntity {
         this.swooshSound = document.createElement("mr-entity");
         this.bowReleaseSound = document.createElement("mr-entity");
 
+        console.log('in constructor of player:');
+        console.log(this);
+        console.log(this.el);
+
         this.el.onLoad = () => {
+
+            console.log('within the onload function of player: this, this.el');
+            console.log(this);
+            console.log(this.el);
 
             // Bind our utils function to the current context here
             // so we can use the information more easily.
