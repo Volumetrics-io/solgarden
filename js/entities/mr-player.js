@@ -32,7 +32,7 @@ class MRPlayer extends MREntity {
             // Cleanup animation clips for enemy
 
             boundUpdateClipsFor('idle', 1, 60);
-            boundUpdateClipsFor('attack-melee', 61, 75);
+            boundUpdateClipsFor('attack', 61, 75);
 
             // Play necessary animations
 
