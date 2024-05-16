@@ -88,13 +88,14 @@ const Animator = {
 // Since the animations we're using take up all the frames,
 // we want to skip the frames that we know are not needed.
 const updateClipsFor = (name, startFrame, endFrame) => {
+
     // Find the original clip
     const index = this.el.animations.findIndex((clip) => clip.name === name);
     if (index === -1) {
         console.warn('Clip not found by name:', name);
         return;
     }
-    const originalClip = this.el.animations[index];
+    const originalClip = this.animations[index];
 
     // Assume 24 frames per second, adjust according to your animation data
     const fps = 24;
@@ -107,5 +108,5 @@ const updateClipsFor = (name, startFrame, endFrame) => {
     );
 
     // Replace the original clip with the new subclip in the animations array
-    this.el.animations[index] = newClip;
+    this.animations[index] = newClip;
 }
