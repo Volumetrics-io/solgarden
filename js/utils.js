@@ -81,15 +81,13 @@ const Animator = {
     }
 };
 
-//////
-// ---- Animation
-/////
+///////////////////////////////
+// ---- Animation Funcs ---- //
+///////////////////////////////
 
 // Since the animations we're using take up all the frames,
 // we want to skip the frames that we know are not needed.
 function updateClipsFor(name, startFrame, endFrame) {
-    console.log('within updateClipsFor, this is:', this);
-
     // Find the original clip
     const index = this.animations.findIndex((clip) => clip.name === name);
     if (index === -1) {
