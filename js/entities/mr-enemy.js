@@ -13,38 +13,14 @@ class MREnemy extends MREntity {
 
         this.el.onLoad = () => {
 
-            /* --- Cleanup animation clips for player --- */
+            // Cleanup animation clips for enemy
 
-            // Since the animations we're using take up all the frames,
-            // we want to skip the frames that we know are not needed.
+            updateClipsFor('idle', 1, 30).bind(this);
+            updateClipsFor('attack', 31, 45).bind(this);
+            updateClipsFor('crit', 46, 60).bind(this);
+            updateClipsFor('damage', 61, 75).bind(this);
 
-            const _updateClipsFor = (name, startFrame, endFrame) => {
-                // Find the original clip
-                const index = this.el.animations.findIndex((clip) => clip.name === name);
-                if (index === -1) {
-                    console.warn('Clip not found by name:', name);
-                    return;
-                }
-                const originalClip = this.el.animations[index];
-
-                // Assume 24 frames per second, adjust according to your animation data
-                const fps = 24;
-                const newClip = THREE.AnimationUtils.subclip(
-                    originalClip,
-                    originalClip.name,
-                    startFrame,
-                    endFrame,
-                    fps
-                );
-
-                // Replace the original clip with the new subclip in the animations array
-                this.el.animations[index] = newClip;
-            }
-
-            _updateClipsFor('idle', 1, 30);
-            _updateClipsFor('attack', 31, 45);
-            _updateClipsFor('crit', 46, 60);
-            _updateClipsFor('damage', 61, 75);
+            // Play necessary animations
 
             this.playIdleAnimation();
         }
