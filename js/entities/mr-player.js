@@ -17,7 +17,7 @@ class MRPlayer extends MREntity {
             // Bind our utils function to the current context here
             // so we can use the information more easily.
 
-            const boundUpdateClipsFor = updateClipsFor.bind(this);
+            const boundUpdateClipsFor = updateClipsFor.bind(this.el);
 
             // Cleanup animation clips for enemy
 
