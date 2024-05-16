@@ -83,7 +83,7 @@ class Board {
         // like poofs, projectiles, etc.
         this.effectList = [];
 
-        if (STATE.isDebug) {
+        if (State.isDebug) {
             console.log(`Floor: ${this.floorCount}`);
             console.log(`Rows: ${this.rowCount}`);
             console.log(`Cols: ${this.colCount}`);
@@ -113,38 +113,38 @@ class Board {
         }
 
         // Set the location of the player and the door
-        if (STATE.level == 0) {
-            STATE.ppos = {
+        if (State.level == 0) {
+            State.ppos = {
                 x: 1,
                 y: 1,
             }
-            STATE.dpos = {
+            State.dpos = {
                 x: 5,
                 y: 0,
             }
         } else {
-            STATE.ppos = {
+            State.ppos = {
                 x: 0,
                 y: Math.floor(Math.random() * this.colCount),
             }
-            STATE.dpos = {
+            State.dpos = {
                 x: this.rowCount - 1,
                 y: Math.floor(Math.random() * this.colCount),
             }
         }
         this.playerEl = document.createElement("mr-player");
-        this.entityMap[STATE.ppos.x][STATE.ppos.y] = {
+        this.entityMap[State.ppos.x][State.ppos.y] = {
             el: this.playerEl,
             type: 'player'
         }
         this.doorEl = document.createElement("mr-door");
-        this.lootMap[STATE.dpos.x][STATE.dpos.y] = {
+        this.lootMap[State.dpos.x][State.dpos.y] = {
             el: this.doorEl,
             type: 'door'
         }
 
         if (this.biome.name == 'battery') {
-            STATE.hasKey = true;
+            State.hasKey = true;
             this.doorEl.open();
         }
 
@@ -168,8 +168,8 @@ class Board {
             const subtype = ENEMY_SUBTYPES[rand];
 
             const el = document.createElement("mr-enemy");
-            const hp = STATE.level / 4 + Math.random() * STATE.level / 4;
-            const attack = Math.floor(Math.random() * 2 + STATE.level / 8);
+            const hp = State.level / 4 + Math.random() * State.level / 4;
+            const attack = Math.floor(Math.random() * 2 + State.level / 8);
 
             el.dataset.subtype = subtype;
             this.addToMap({
@@ -180,7 +180,7 @@ class Board {
                 attack: attack
             });
 
-            if (STATE.isDebug) console.log(enemy);
+            if (State.isDebug) console.log(enemy);
         }
 
         // props
@@ -264,7 +264,7 @@ class Board {
 
         this.updateDistances();
 
-        if (STATE.isDebug) {
+        if (State.isDebug) {
             printArray("this.heightMap", this.heightMap);
             printArray("this.entityMap", this.entityMap);
             printArray("this.lootMap", this.lootMap);
@@ -306,8 +306,8 @@ class Board {
 
             // calc distances with the entity
             // and see if there is a possible solution
-            let dist = this.calcDist(STATE.ppos.y, STATE.ppos.x, tempMap);
-            distanceToDoor = dist[STATE.dpos.x][STATE.dpos.y];
+            let dist = this.calcDist(State.ppos.y, State.ppos.x, tempMap);
+            distanceToDoor = dist[State.dpos.x][State.dpos.y];
 
             if (this.entityMap[row][col] === 0 &&
                 this.lootMap[row][col] === 0 &&
@@ -382,11 +382,11 @@ class Board {
 
         // remove origin and target from copy
         // otherwise the pathfinding can't work
-        blockmap[STATE.ppos.x][STATE.ppos.y] = 0;
+        blockmap[State.ppos.x][State.ppos.y] = 0;
         blockmap[x][y] = 0;
 
         const pf = new PathFinder(blockmap);
-        const path = pf.findPath([STATE.ppos.x, STATE.ppos.y], [x, y]);
+        const path = pf.findPath([State.ppos.x, State.ppos.y], [x, y]);
 
         // the next move queue
         this.nextMoveQueue = [];
@@ -421,13 +421,13 @@ class Board {
             const x = move[0];
             const y = move[1];
 
-            const deltaX = STATE.ppos.x - x;
-            const deltaY = STATE.ppos.y - y;
+            const deltaX = State.ppos.x - x;
+            const deltaY = State.ppos.y - y;
             this.orientsTowards(this.playerEl, deltaX, deltaY);
 
-            this.moveEntity(STATE.ppos.x, STATE.ppos.y, x, y);
-            STATE.ppos.x = x;
-            STATE.ppos.y = y;
+            this.moveEntity(State.ppos.x, State.ppos.y, x, y);
+            State.ppos.x = x;
+            State.ppos.y = y;
 
             if (this.lootMap[x][y] != 0) {
                 this.lootEntity(x, y);
@@ -461,7 +461,7 @@ class Board {
             type: 'weapon',
             weaponID: randType,
             subtype: weapon.subtype,
-            attack: 1 + Math.ceil(STATE.level / 5),
+            attack: 1 + Math.ceil(State.level / 5),
             range: weapon.range,
             crits: weapon.crits,
             ammoType: weapon.ammoType,
@@ -490,7 +490,7 @@ class Board {
 
         // Drop the loot
         let element, type;
-        if (enemyCount == 0 && STATE.hasKey) {
+        if (enemyCount == 0 && State.hasKey) {
 
             // Last enemy but already have the key?
             // 30% chances to drop a chest
@@ -506,14 +506,14 @@ class Board {
             element = document.createElement("mr-loot");
             type = "loot";
 
-        } else if (enemyCount == 0 && !STATE.hasKey && !isAlreadyKey) {
+        } else if (enemyCount == 0 && !State.hasKey && !isAlreadyKey) {
 
             // last enemy and no key in inventory or on the board
             // the key must drop
             element = document.createElement("mr-key");
             type = "key";
 
-        } else if (enemyCount > 0 && !STATE.hasKey && !isAlreadyKey &&
+        } else if (enemyCount > 0 && !State.hasKey && !isAlreadyKey &&
             Math.random() > 0.5) {
 
             // not the last enemy and no key. Key could drop
@@ -553,11 +553,11 @@ class Board {
     lootEntity(x, y) {
         const entity = this.lootMap[x][y];
 
-        if (STATE.isDebug) console.log(entity);
+        if (State.isDebug) console.log(entity);
 
         switch (entity.type) {
             case "key":
-                STATE.hasKey = true;
+                State.hasKey = true;
                 this.doorEl.open();
                 this.container.removeChild(entity.el);
                 this.removeLootAt(x, y);
@@ -566,13 +566,13 @@ class Board {
                 break;
 
             case "weapon":
-                if (entity.attack > STATE.weapons[entity.weaponID].attack) {
-                    STATE.weapons[entity.weaponID].attack = entity.attack;
-                    STATE.weapons[entity.weaponID].subtype = entity.subtype;
-                    STATE.weapons[entity.weaponID].range = entity.range;
-                    STATE.weapons[entity.weaponID].crits = entity.crits;
-                    STATE.weapons[entity.weaponID].ammoType = entity.ammoType;
-                    STATE.weapons[entity.weaponID].cost = entity.cost;
+                if (entity.attack > State.weapons[entity.weaponID].attack) {
+                    State.weapons[entity.weaponID].attack = entity.attack;
+                    State.weapons[entity.weaponID].subtype = entity.subtype;
+                    State.weapons[entity.weaponID].range = entity.range;
+                    State.weapons[entity.weaponID].crits = entity.crits;
+                    State.weapons[entity.weaponID].ammoType = entity.ammoType;
+                    State.weapons[entity.weaponID].cost = entity.cost;
                 }
 
                 this.container.removeChild(entity.el);
@@ -615,7 +615,7 @@ class Board {
     }
 
     updateDistances() {
-        this.distances = this.calcDist(STATE.ppos.y, STATE.ppos.x, this.entityMap);
+        this.distances = this.calcDist(State.ppos.y, State.ppos.x, this.entityMap);
     }
 
     calcDist(x, y, blockmap) {
@@ -852,7 +852,7 @@ class Board {
         if (this.isQuake && this.quakeHasStarted) {
 
             if (timer - this.quakeTimerStart > this.quakeDuration) {
-                if (STATE.isDebug) console.log("quake is over")
+                if (State.isDebug) console.log("quake is over")
                 this.isQuake = false;
             }
         }
@@ -866,18 +866,18 @@ class Board {
 
                 this.project(tile, x, y, timer);
 
-                if (STATE.isPlayerTurn && STATE.isInteractive) {
+                if (State.isPlayerTurn && State.isInteractive) {
                     const dist = this.distances[x][y];
                     const entity = this.getEntityAt(x, y);
 
                     // is the tile reachable by walking (pathfinder distance)
                     const isReachable = (
                         dist != Infinity &&
-                        dist <= STATE.action &&
+                        dist <= State.action &&
                         dist > 0);
 
                     //  combat related distances are Euclidean
-                    const rawDist = distBetween(x, y, STATE.ppos.x, STATE.ppos.y);
+                    const rawDist = distBetween(x, y, State.ppos.x, State.ppos.y);
 
                     if (!entity || entity.type == "chest") {
                         if (isReachable) {
@@ -897,7 +897,7 @@ class Board {
 
                     } else if (entity.type == "enemy") {
                         // if the enemy is in attack range
-                        const weapon = STATE.weapons[STATE.selectedWeaponID];
+                        const weapon = State.weapons[State.selectedWeaponID];
                         if (rawDist <= weapon.range) {
                             el.tileColor('health');
                             el.setCostIndicator("×");
@@ -913,8 +913,8 @@ class Board {
                     }
 
                     // If either melee or range weapon is hovered
-                    if (STATE.displayRange > 0) {
-                        if (rawDist <= STATE.displayRange) {
+                    if (State.displayRange > 0) {
+                        if (rawDist <= State.displayRange) {
                             el.tileColor('health');
                         }
                     }
@@ -1013,8 +1013,8 @@ class Board {
 
         } else if (entity.type == 'enemy') {
             // the tile is enemy, so the cost is weapon-based
-            const dist = distBetween(x, y, STATE.ppos.x, STATE.ppos.y);
-            const weapon = STATE.weapons[STATE.selectedWeaponID];
+            const dist = distBetween(x, y, State.ppos.x, State.ppos.y);
+            const weapon = State.weapons[State.selectedWeaponID];
             projectedCost = weapon.cost;
         }
         return projectedCost;

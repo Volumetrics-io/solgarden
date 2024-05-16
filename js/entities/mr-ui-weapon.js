@@ -24,26 +24,26 @@ class MRUIWeapon extends MREntity {
         });
 
         this.addEventListener('touchend', () => {
-            if (STATE.isInteractive && STATE.weapons[this.type].attack > 0) {
+            if (State.isInteractive && State.weapons[this.type].attack > 0) {
                 this.isHovered = false;
-                STATE.selectedWeaponID = this.type;
-                STATE.needsUpdate = true;
+                State.selectedWeaponID = this.type;
+                State.needsUpdate = true;
             }
         })
 
         this.addEventListener('mouseover', () => {
-            if (STATE.isInteractive && STATE.weapons[this.type].range > 0) {
+            if (State.isInteractive && State.weapons[this.type].range > 0) {
                 this.isHovered = true;
-                STATE.displayRange = STATE.weapons[this.type].range;
-                STATE.needsUpdate = true;
+                State.displayRange = State.weapons[this.type].range;
+                State.needsUpdate = true;
             }
         })
 
         this.addEventListener('mouseout', () => {
-            if (STATE.isInteractive) {
+            if (State.isInteractive) {
                 this.isHovered = false;
-                STATE.displayRange = 0;
-                STATE.needsUpdate = true;
+                State.displayRange = 0;
+                State.needsUpdate = true;
             }
         });
 
@@ -68,15 +68,15 @@ class MRUIWeapon extends MREntity {
     update(timer) {
 
         this.weapons.forEach((weapon, i) => {
-            if (weapon.subtype == STATE.weapons[this.type].subtype) {
+            if (weapon.subtype == State.weapons[this.type].subtype) {
                 weapon.el.style.visibility = "visible";
             } else {
                 weapon.el.style.visibility = "hidden";
             }
         });
 
-        if (STATE.weapons[this.type].attack > 0) {
-            this.label.innerText = STATE.weapons[this.type].attack;
+        if (State.weapons[this.type].attack > 0) {
+            this.label.innerText = State.weapons[this.type].attack;
         } else {
             this.label.innerText = "";
         }
@@ -85,10 +85,10 @@ class MRUIWeapon extends MREntity {
         this.tileNeutral.style.visibility = 'hidden';
         this.tileHover.style.visibility = 'hidden';
 
-        if (STATE.isInteractive) {
+        if (State.isInteractive) {
             if (this.isHovered) {
                 this.tileHover.style.visibility = 'visible';
-            } else if (STATE.selectedWeaponID == this.type) {
+            } else if (State.selectedWeaponID == this.type) {
                 this.tileSelected.style.visibility = 'visible';
             } else {
                 this.tileNeutral.style.visibility = 'visible';
