@@ -12,28 +12,18 @@ class MRPlayer extends MREntity {
         this.swooshSound = document.createElement("mr-entity");
         this.bowReleaseSound = document.createElement("mr-entity");
 
-        console.log('in constructor of player:');
-        console.log(this);
-        console.log(this.el);
-
         this.el.onLoad = () => {
-
-            console.log('within the onload function of player: this, this.el');
-            console.log(this);
-            console.log(this.el);
 
             // Bind our utils function to the current context here
             // so we can use the information more easily.
 
             const boundUpdateClipsFor = updateClipsFor.bind(this.el);
 
-            console.log('function after binding:', boundUpdateClipsFor);
+            // Cleanup animation clips for player
 
-            // Cleanup animation clips for enemy
-
-            boundUpdateClipsFor('idle', 1, 60);
-            boundUpdateClipsFor('attack', 61, 75);
-
+            boundUpdateClipsFor('idle', 1, 30);
+            boundUpdateClipsFor('death', 31, 80);
+            boundUpdateClipsFor('teleport', 81, 110);
             // Play necessary animations
 
             this.playIdleAnimation();

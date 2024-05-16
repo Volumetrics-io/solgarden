@@ -11,20 +11,12 @@ class MREnemy extends MREntity {
 
         this.poof = document.createElement("mr-model");
 
-        console.log('in constructor of enemy:');
-        console.log(this);
-        console.log(this.el);
         this.el.onLoad = () => {
 
             // Bind our utils function to the current context here
             // so we can use the information more easily.
 
             const boundUpdateClipsFor = updateClipsFor.bind(this.el);
-            console.log('within the onload function of enemy: this, this.el');
-            console.log(this);
-            console.log(this.el);
-
-            console.log('function after binding:', boundUpdateClipsFor);
 
             // Cleanup animation clips for enemy
 
