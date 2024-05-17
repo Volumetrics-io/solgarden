@@ -25,9 +25,9 @@ class MRUIActions extends MREntity {
 
     update(timer) {
         this.actionBalls.forEach((actionBall, i) => {
-            if (i < State.maxAction) {
+            if (i < STATE.maxAction) {
                 actionBall.visible = true;
-                if (i < State.action) {
+                if (i < STATE.action) {
                     actionBall.material.color.setStyle(COLORS.white)
                     actionBall.material.opacity = 1;
                 } else {
@@ -36,14 +36,14 @@ class MRUIActions extends MREntity {
                 }
 
                 // recolor the ball if it's a projected cost
-                if (i < State.projectedCost) {
+                if (i < STATE.projectedCost) {
                     actionBall.material.color.setStyle(COLORS.movement)
-                } else if (State.projectedCost == Infinity) {
+                } else if (STATE.projectedCost == Infinity) {
                     actionBall.material.color.setStyle(COLORS.neutral)
                 }
 
                 // recolor the ball if there are not enough action points
-                if (State.projectedCost > State.action) {
+                if (STATE.projectedCost > STATE.action) {
                     actionBall.material.color.setStyle(COLORS.neutral)
                 }
             } else {
