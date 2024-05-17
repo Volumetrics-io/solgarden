@@ -400,7 +400,7 @@ class GameSystem extends MRSystem {
 
         this.cycle++;
 <<<<<<< HEAD
-        Object.assign(State, DEFAULT_State);
+        Object.assign(STATE, DEFAULT_STATE);
 =======
         Object.assign(STATE, DEFAULT_STATE);
 >>>>>>> main
