@@ -10,17 +10,47 @@ class MREnemy extends MREntity {
         this.critSound = document.createElement("mr-entity");
 
         this.poof = document.createElement("mr-model");
+
+        this.el.onLoad = () => {
+
+            // Bind our utils function to the current context here
+            // so we can use the information more easily.
+
+            const boundUpdateClipsFor = updateClipsFor.bind(this.el);
+
+            // Cleanup animation clips for enemy
+
+            switch (this.subtype) {
+            case 'static':
+                console.log('do something');
+                break;
+            case 'homing':
+                console.log('do something');
+                break;
+            case 'aimless':
+            default: 
+                boundUpdateClipsFor('idle', 1, 30);
+                boundUpdateClipsFor('attack', 31, 45);
+                boundUpdateClipsFor('crit', 46, 60);
+                boundUpdateClipsFor('damage', 61, 75);
+            }
+
+            // Play necessary animations
+
+            this.playIdleAnimation();
+        }
     }
 
-    connected() {
+    async connected() {
         this.appendChild(this.el);
         this.el.dataset.compAnimation = "clip: 0; action: play;";
 
-        // TODO: random starting rotation
         this.el.style.pointerEvents = 'none';
 
-        const subtype = this.dataset.subtype ?? "aimless";
-        this.el.src = ENEMY_MODELS[subtype];
+        this.subtype = this.dataset.subtype ?? "aimless";
+        this.el.src = ENEMY_MODELS[this.subtype];
+
+        await super.connected();
 
         // Sound effects
         this.appendChild(this.swooshSound);
@@ -50,6 +80,23 @@ class MREnemy extends MREntity {
             action: "stop",
             loop: false,
         })
+    }
+
+    playIdleAnimation() {
+        this.el.components.set("animation", {
+            clip: 'idle',
+            action: "play",
+            loop: true,
+        });
+    }
+
+    playCombatAnimation() {
+        this.el.components.set("animation", {
+            clip: 'attack',
+            action: "play",
+            loop: false,
+            clampWhenFinished: true
+        });
     }
 
     playPoof() {

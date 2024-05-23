@@ -4,7 +4,7 @@ class MRPlayer extends MREntity {
         super()
 
         this.el = document.createElement("mr-model");
-        this.el.src = "assets/models/dot-test.glb";
+        this.el.src = "assets/models/dot_unarmed.glb";
         this.el.style.pointerEvents = 'none';
 
         this.light = document.createElement("mr-light");
@@ -13,39 +13,19 @@ class MRPlayer extends MREntity {
         this.bowReleaseSound = document.createElement("mr-entity");
 
         this.el.onLoad = () => {
+
+            // Bind our utils function to the current context here
+            // so we can use the information more easily.
+
+            const boundUpdateClipsFor = updateClipsFor.bind(this.el);
+
+            // Cleanup animation clips for player
+
+            boundUpdateClipsFor('idle', 1, 30);
+            boundUpdateClipsFor('death', 31, 80);
+            boundUpdateClipsFor('teleport', 81, 110);
             
-            /* --- Cleanup animation clips for player --- */
-
-            // Since the animations we're using take up all the frames,
-            // we want to skip the frames that we know are not needed.
-
-            const _updateClipsFor = (name, startFrame, endFrame) => {
-                // Find the original clip
-                const index = this.el.animations.findIndex((clip) => clip.name === name);
-                if (index === -1) {
-                    console.warn('Clip not found by name:', name);
-                    return;
-                }
-                const originalClip = this.el.animations[index];
-
-                // Assume 24 frames per second, adjust according to your animation data
-                const fps = 24;
-                const newClip = THREE.AnimationUtils.subclip(
-                    originalClip,
-                    originalClip.name,
-                    startFrame,
-                    endFrame,
-                    fps
-                );
-
-                // Replace the original clip with the new subclip in the animations array
-                this.el.animations[index] = newClip;
-            }
-
-            _updateClipsFor('idle', 1, 60);
-            _updateClipsFor('attack-melee', 61, 75);
-
-            /* --- Play the default animation --- */
+            // Play necessary animations
 
             this.playIdleAnimation();
         }

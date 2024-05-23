@@ -399,7 +399,11 @@ class GameSystem extends MRSystem {
         console.log('you ded');
 
         this.cycle++;
+<<<<<<< HEAD
         Object.assign(STATE, DEFAULT_STATE);
+=======
+        Object.assign(STATE, DEFAULT_STATE);
+>>>>>>> main
 
         // TODO: display level and cycle count in the UI
         // TODO: store max cycle level in the localStorage?
