@@ -127,7 +127,7 @@ class GameSystem extends MRSystem {
             // P for projectiles
             if (event.key === 'p') {
                 event.preventDefault();
-                if(Math.random() < 0.5) {
+                if (Math.random() < 0.5) {
                     this.board.projectileTo(STATE.ppos, STATE.dpos, 'arrow');
                 } else {
                     this.board.projectileTo(STATE.ppos, STATE.dpos, 'stone');
@@ -156,8 +156,9 @@ class GameSystem extends MRSystem {
             // Z for whatever (to reuse)
             if (event.key === "z") {
                 event.preventDefault();
-                const player = this.board.entityMap[STATE.ppos.x][STATE.ppos.y];
-                player.el.playCombatAnimation();
+                // const player = this.board.entityMap[STATE.ppos.x][STATE.ppos.y];
+                // player.el.playCombatAnimation();
+                this.board.playerEl.playCombatAnimation();
             }
 
             // N for eNemy
@@ -451,8 +452,8 @@ class GameSystem extends MRSystem {
                     const rand = Math.floor(Math.random() * Moves.length);
                     const next = Moves[rand];
 
-                    deltaX = next[0];
-                    deltaY = next[1];
+                    deltaX = - next[0];
+                    deltaY = - next[1];
 
                     this.board.moveEntity(r, c, r + next[0], c + next[1]);
                 }
@@ -487,6 +488,7 @@ class GameSystem extends MRSystem {
                 this.board.moveEntity(r, c, nextMove[0], nextMove[1]);
             }
 
+            // console.log(subtype, deltaX, deltaY);
             this.board.orientsTowards(entity.el, deltaX, deltaY);
 
             // after moving, attack if in range
@@ -666,6 +668,9 @@ class GameSystem extends MRSystem {
                         object.morphTargetInfluences[0] = rangeRatio;
                     }
                 })
+
+                // Update the player with the right weapon
+                this.board.playerEl.update();
 
                 // Update all the UI
                 this.hpLabel.innerText = "⊕ " + Math.ceil(STATE.health);

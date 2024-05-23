@@ -22,13 +22,21 @@ class MREnemy extends MREntity {
 
             switch (this.subtype) {
             case 'static':
-                console.log('do something');
+                boundUpdateClipsFor('idle', 1, 30);
+                boundUpdateClipsFor('attack', 31, 45);
+                boundUpdateClipsFor('crit', 46, 60);
+                boundUpdateClipsFor('damage', 61, 75);
+                // console.log('do something');
                 break;
             case 'homing':
-                console.log('do something');
+                boundUpdateClipsFor('idle', 1, 30);
+                boundUpdateClipsFor('attack', 31, 45);
+                boundUpdateClipsFor('crit', 46, 60);
+                boundUpdateClipsFor('damage', 61, 75);
+                // console.log('do something');
                 break;
             case 'aimless':
-            default: 
+            default:
                 boundUpdateClipsFor('idle', 1, 30);
                 boundUpdateClipsFor('attack', 31, 45);
                 boundUpdateClipsFor('crit', 46, 60);
@@ -43,6 +51,7 @@ class MREnemy extends MREntity {
 
     async connected() {
         this.appendChild(this.el);
+        this.dataset.rotation = `0 180 0`;
         this.el.dataset.compAnimation = "clip: 0; action: play;";
 
         this.el.style.pointerEvents = 'none';

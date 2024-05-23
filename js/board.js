@@ -578,7 +578,11 @@ class Board {
                 this.container.removeChild(entity.el);
                 this.removeLootAt(x, y);
                 // TODO: switch to a blade sound
-                Sounds.play('analogSound')
+                Sounds.play('analogSound');
+
+                // Update the player with the right weapon
+                this.playerEl.update();
+
                 break;
 
             case "lore":
