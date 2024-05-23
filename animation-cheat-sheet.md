@@ -15,3 +15,11 @@
 - idle (1-30)
 - death (31-80)
 - teleport (81-110)
+
+
+## Other Animations
+
+## Charging Pad
+- (solarstation1-3.glb)
+- off (1-5)
+- charge (6-35)
